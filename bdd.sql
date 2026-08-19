@@ -1,0 +1,6 @@
+CREATE TABLE prestamo (
+    ID INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    fecha_limite VARCHAR(200) NOT NULL,
+    fecha_prestamo VARCHAR(200) NOT NULL,
+    id_prestamo VARCHAR(200) NOT NULL
+);-
