@@ -3,14 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.config import engine, Base, get_db
-from app.models import Alumno, Autor, Editorial, Libro, Notebook, Prestamo, Usuario
+from app.models import Autor, Editorial, Libro, Notebook, Prestamo, Socio, Usuario
 from app.schemas import (
-    AlumnoCreate, AlumnoUpdate, AlumnoResponse,
     AutorCreate, AutorUpdate, AutorResponse,
     EditorialCreate, EditorialUpdate, EditorialResponse,
     LibroCreate, LibroUpdate, LibroResponse,
     NotebookCreate, NotebookUpdate, NotebookResponse,
     PrestamoCreate, PrestamoUpdate, PrestamoResponse,
+    SocioCreate, SocioUpdate, SocioResponse,
     UsuarioCreate, UsuarioUpdate, UsuarioResponse,
 )
 
@@ -30,50 +30,50 @@ def root():
     return {"message": "SIP-Escuela API funcionando"}
 
 
-# ── Alumnos ─────────────────────────────────────────────
+# ── Socios ──────────────────────────────────────────────
 
-@app.get("/api/alumnos/", response_model=list[AlumnoResponse])
-def listar_alumnos(db: Session = Depends(get_db)):
-    return db.query(Alumno).all()
-
-
-@app.get("/api/alumnos/{alumno_id}", response_model=AlumnoResponse)
-def obtener_alumno(alumno_id: int, db: Session = Depends(get_db)):
-    alumno = db.query(Alumno).filter(Alumno.id == alumno_id).first()
-    if not alumno:
-        raise HTTPException(status_code=404, detail="Alumno no encontrado")
-    return alumno
+@app.get("/api/socios/", response_model=list[SocioResponse])
+def listar_socios(db: Session = Depends(get_db)):
+    return db.query(Socio).all()
 
 
-@app.post("/api/alumnos/", response_model=AlumnoResponse, status_code=201)
-def crear_alumno(data: AlumnoCreate, db: Session = Depends(get_db)):
-    alumno = Alumno(**data.model_dump())
-    db.add(alumno)
+@app.get("/api/socios/{socio_id}", response_model=SocioResponse)
+def obtener_socio(socio_id: int, db: Session = Depends(get_db)):
+    socio = db.query(Socio).filter(Socio.id == socio_id).first()
+    if not socio:
+        raise HTTPException(status_code=404, detail="Socio no encontrado")
+    return socio
+
+
+@app.post("/api/socios/", response_model=SocioResponse, status_code=201)
+def crear_socio(data: SocioCreate, db: Session = Depends(get_db)):
+    socio = Socio(**data.model_dump())
+    db.add(socio)
     db.commit()
-    db.refresh(alumno)
-    return alumno
+    db.refresh(socio)
+    return socio
 
 
-@app.put("/api/alumnos/{alumno_id}", response_model=AlumnoResponse)
-def actualizar_alumno(alumno_id: int, data: AlumnoUpdate, db: Session = Depends(get_db)):
-    alumno = db.query(Alumno).filter(Alumno.id == alumno_id).first()
-    if not alumno:
-        raise HTTPException(status_code=404, detail="Alumno no encontrado")
+@app.put("/api/socios/{socio_id}", response_model=SocioResponse)
+def actualizar_socio(socio_id: int, data: SocioUpdate, db: Session = Depends(get_db)):
+    socio = db.query(Socio).filter(Socio.id == socio_id).first()
+    if not socio:
+        raise HTTPException(status_code=404, detail="Socio no encontrado")
     for key, value in data.model_dump(exclude_unset=True).items():
-        setattr(alumno, key, value)
+        setattr(socio, key, value)
     db.commit()
-    db.refresh(alumno)
-    return alumno
+    db.refresh(socio)
+    return socio
 
 
-@app.delete("/api/alumnos/{alumno_id}")
-def eliminar_alumno(alumno_id: int, db: Session = Depends(get_db)):
-    alumno = db.query(Alumno).filter(Alumno.id == alumno_id).first()
-    if not alumno:
-        raise HTTPException(status_code=404, detail="Alumno no encontrado")
-    db.delete(alumno)
+@app.delete("/api/socios/{socio_id}")
+def eliminar_socio(socio_id: int, db: Session = Depends(get_db)):
+    socio = db.query(Socio).filter(Socio.id == socio_id).first()
+    if not socio:
+        raise HTTPException(status_code=404, detail="Socio no encontrado")
+    db.delete(socio)
     db.commit()
-    return {"detail": "Alumno eliminado"}
+    return {"detail": "Socio eliminado"}
 
 
 # ── Autores ─────────────────────────────────────────────

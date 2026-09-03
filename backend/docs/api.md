@@ -2,7 +2,7 @@
 
 ## Qué es esto
 
-Una API REST para gestionar una biblioteca escolar: libros, notebooks, préstamos a alumnos, autores, editoriales y usuarios del sistema.
+Una API REST para gestionar una biblioteca escolar: libros, notebooks, préstamos a socios, autores, editoriales y usuarios del sistema.
 
 ## Cómo funciona
 
@@ -43,11 +43,12 @@ def get_db():
 Cada clase = una tabla. Los tipos `Mapped[T]` definen columnas:
 
 ```python
-class Alumno(Base):
-    __tablename__ = "alumnos"
+class Socio(Base):
+    __tablename__ = "socios"
     id: Mapped[int]           # Columna entera, primary key
     nombre: Mapped[str]       # Columna texto, obligatoria
     email: Mapped[str]        # Columna texto, única
+    tipo: Mapped[str]         # docente | alumno | otro
     created_at: Mapped[datetime]  # Se llena solo al crear
     updated_at: Mapped[datetime]  # Se actualiza solo
 
@@ -65,7 +66,7 @@ Libro ──id_editorial──→ Editorial
 Prestamo ──id_libro──→ Libro (nullable)
 Prestamo ──id_notebook──→ Notebook (nullable)
 Prestamo ──id_usuario──→ Usuario
-Prestamo ──id_alumno──→ Alumno
+Prestamo ──id_socio──→ Socio
 ```
 
 Un préstamo puede tener `id_libro` O `id_notebook` (o ambos null si se prestara otra cosa).
@@ -141,11 +142,11 @@ def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| `GET` | `/api/alumnos/` | Lista todos los alumnos |
-| `GET` | `/api/alumnos/{id}` | Obtiene un alumno |
-| `POST` | `/api/alumnos/` | Crea un alumno |
-| `PUT` | `/api/alumnos/{id}` | Actualiza un alumno |
-| `DELETE` | `/api/alumnos/{id}` | Elimina un alumno |
+| `GET` | `/api/socios/` | Lista todos los socios |
+| `GET` | `/api/socios/{id}` | Obtiene un socio |
+| `POST` | `/api/socios/` | Crea un socio |
+| `PUT` | `/api/socios/{id}` | Actualiza un socio |
+| `DELETE` | `/api/socios/{id}` | Elimina un socio |
 | `GET` | `/api/autores/` | Lista todos los autores |
 | `GET` | `/api/autores/{id}` | Obtiene un autor |
 | `POST` | `/api/autores/` | Crea un autor |
@@ -205,7 +206,7 @@ curl -X POST http://localhost:8000/api/prestamos/ \
     "estado": "activo",
     "id_usuario": 1,
     "id_libro": 1,
-    "id_alumno": 1
+    "id_socio": 1
   }'
 ```
 
@@ -220,7 +221,7 @@ curl -X POST http://localhost:8000/api/prestamos/ \
     "estado": "activo",
     "id_usuario": 1,
     "id_notebook": 1,
-    "id_alumno": 1
+    "id_socio": 1
   }'
 ```
 

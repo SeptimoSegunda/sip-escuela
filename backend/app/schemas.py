@@ -3,30 +3,39 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 
-# ── Alumno ──────────────────────────────────────────────
+# ── Socio ───────────────────────────────────────────────
 
-class AlumnoCreate(BaseModel):
+class SocioCreate(BaseModel):
     nombre: str
     apellido: str
     email: EmailStr
-    matricula: str
+    tipo: str
+    matricula: str | None = None
+    anio: str | None = None
+    turno: str | None = None
 
 
-class AlumnoUpdate(BaseModel):
+class SocioUpdate(BaseModel):
     nombre: str | None = None
     apellido: str | None = None
     email: EmailStr | None = None
+    tipo: str | None = None
     matricula: str | None = None
+    anio: str | None = None
+    turno: str | None = None
 
 
-class AlumnoResponse(BaseModel):
+class SocioResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     nombre: str
     apellido: str
     email: str
-    matricula: str
+    tipo: str
+    matricula: str | None
+    anio: str | None
+    turno: str | None
     created_at: datetime
     updated_at: datetime
 
@@ -71,29 +80,29 @@ class EditorialResponse(BaseModel):
 # ── Libro ───────────────────────────────────────────────
 
 class LibroCreate(BaseModel):
-    titulo: str
-    subtitulo: str | None = None
-    autor: str | None = None
-    isbn: str | None = None
-    editorial: str | None = None
-    anio_publicacion: int | None = None
-    cantidad: int = 1
-    libristica: str | None = None
-    numero_de_inventario: str | None = None
-    ubicacion: str | None = None
-    publicacion: str | None = None
+    titulo: str # si
+    subtitulo: str | None = None #si
+    autor: str | None = None #si
+    isbn: str | None = None #si
+    editorial: str | None = None #si
+    anio_publicacion: int | None = None #si
+    cantidad: int = 1 # falta
+    libristica: str | None = None #si
+    numero_de_inventario: str | None = None #si
+    ubicacion: str | None = None #si 
+    publicacion: str | None = None #si pero es año?
     colleccion: str | None = None
-    edicion: str | None = None
-    lugar_publicacion: str | None = None
-    temas: str | None = None
-    numero: str | None = None
-    termino_material: str | None = None
-    clasificacion: str | None = None
-    extension: int | None = None
-    nota_general: str | None = None
-    nota_contenido: str | None = None
-    id_editorial: int | None = None
-    id_autor: int | None = None
+    edicion: str | None = None #si
+    lugar_publicacion: str | None = None #si
+    temas: str | None = None # no front \, se llama temas clave
+    numero: str | None = None # tomo?
+    termino_material: str | None = None #si
+    clasificacion: str | None = None #si
+    extension: int | None = None #si
+    nota_general: str | None = None #si
+    nota_contenido: str | None = None #si
+    id_editorial: int | None = None #si
+    id_autor: int | None = None #si
 
 
 class LibroUpdate(BaseModel):
@@ -184,7 +193,7 @@ class PrestamoCreate(BaseModel):
     id_usuario: int
     id_libro: int | None = None
     id_notebook: int | None = None
-    id_alumno: int
+    id_socio: int
 
 
 class PrestamoUpdate(BaseModel):
@@ -195,7 +204,7 @@ class PrestamoUpdate(BaseModel):
     id_usuario: int | None = None
     id_libro: int | None = None
     id_notebook: int | None = None
-    id_alumno: int | None = None
+    id_socio: int | None = None
 
 
 class PrestamoResponse(BaseModel):
@@ -211,7 +220,7 @@ class PrestamoResponse(BaseModel):
     id_usuario: int
     id_libro: int | None
     id_notebook: int | None
-    id_alumno: int
+    id_socio: int
 
 
 # ── Usuario ─────────────────────────────────────────────

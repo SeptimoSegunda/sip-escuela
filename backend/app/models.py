@@ -6,14 +6,17 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.config import Base
 
 
-class Alumno(Base):
-    __tablename__ = "alumnos"
+class Socio(Base):
+    __tablename__ = "socios"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     nombre: Mapped[str] = mapped_column(String(100), nullable=False)
     apellido: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
-    matricula: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+    tipo: Mapped[str] = mapped_column(String(20), nullable=False)
+    matricula: Mapped[str | None] = mapped_column(String(20))
+    anio: Mapped[str | None] = mapped_column(String(20))
+    turno: Mapped[str | None] = mapped_column(String(50))
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
@@ -100,7 +103,7 @@ class Prestamo(Base):
     id_usuario: Mapped[int] = mapped_column(ForeignKey("usuario.id"), nullable=False)
     id_libro: Mapped[int | None] = mapped_column(ForeignKey("libros.id"))
     id_notebook: Mapped[int | None] = mapped_column(ForeignKey("notebooks.id"))
-    id_alumno: Mapped[int] = mapped_column(ForeignKey("alumnos.id"), nullable=False)
+    id_socio: Mapped[int] = mapped_column(ForeignKey("socios.id"), nullable=False)
 
 
 class Usuario(Base):

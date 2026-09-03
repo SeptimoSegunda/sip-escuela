@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIP - Sistema de Biblioteca</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- 1. ENCABEZADO CON LOGO INTEGRADO Y SELECTOR DE ADMINISTRADOR -->
+    <header class="dashboard-header">
+        <div class="logo-container" id="logoHome">
+            <img src="logo.png" alt="SIP Logo" class="logo-img">
+            <div class="logo-text-group">
+                <span class="logo-text">SIP</span>
+                <span class="logo-subtitle">Sistema de Préstamos Escolares</span>
+            </div>
+        </div>
+
+        <div class="header-admin-control">
+            <div class="admin-selector-wrapper">
+                <span class="admin-selector-label"><i class="fa-solid fa-user-shield"></i> Administrador en
+                    Turno:</span>
+                <div class="admin-pill" id="adminSessionPill"
+                    title="Haz clic para alternar o seleccionar el turno del Administrador">
+                    <span class="admin-avatar manana" id="adminAvatar"><i class="fa-solid fa-sun"></i></span>
+                    <div class="admin-info">
+                        <span class="admin-name" id="currentAdminName">Turno Mañana</span>
+                        <span class="admin-badge-role">Control Total</span>
+                    </div>
+                    <select id="selectCurrentAdmin" class="admin-switch-select"
+                        aria-label="Seleccionar Administrador en Turno">
+                        <option value="Turno Mañana" selected>Administrador - Turno Mañana (07:30 - 13:00)</option>
+                        <option value="Turno Tarde">Administrador - Turno Tarde (13:00 - 18:30)</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down admin-select-icon"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. CONTENEDOR PRINCIPAL -->
+    <div class="dashboard-container">
+
+        <!-- BARRA LATERAL (NAVEGACIÓN) -->
+        <aside class="sidebar">
+            <button class="nav-button active" data-target="viewInicio">
+                <i class="fa-solid fa-house"></i> Inicio
+            </button>
+            <button class="nav-button" data-target="viewCatalogo">
+                <i class="fa-solid fa-book"></i> Catálogo
+            </button>
+            <button class="nav-button" data-target="viewPrestamos">
+                <i class="fa-solid fa-repeat"></i> Préstamos
+            </button>
+            <button class="nav-button" data-target="viewSocios">
+                <i class="fa-solid fa-users"></i> Socios / Alumnos
+            </button>
+            <button class="nav-button" data-target="viewDanos">
+                <i class="fa-solid fa-triangle-exclamation"></i> Registro de Daños
+            </button>
+            <button class="nav-button" data-target="viewAuditoria">
+                <i class="fa-solid fa-clipboard-list"></i> Bitácora / Auditoría
+            </button>
+            <button class="nav-button" data-target="viewReportes">
+                <i class="fa-solid fa-chart-pie"></i> Reportes
+            </button>
+        </aside>
+
+        <!-- CONTENIDO DE VISTAS (PÁGINAS) -->
+        <main class="main-content">
+
+            <!-- PÁGINA 1: INICIO (DASHBOARD) -->
+            <div id="viewInicio" class="view-section active-view">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Panel de Control Principal</h1>
+                        <p>Estado actual de la biblioteca en tiempo real.</p>
+                    </div>
+                    <button class="btn-primary btnAbrirNuevoPrestamo">
+                        <i class="fa-solid fa-plus"></i> Nuevo Préstamo
+                    </button>
+                </section>
+
+                <section class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--salvia">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statEstanteria">0</h3>
+                            <p>Libros en Estantería</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--terracotta">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statPrestamos">0</h3>
+                            <p>Préstamos Activos</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--mustard">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statSocios">0</h3>
+                            <p>Socios Registrados</p>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="dashboard-details-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <!-- Estado de la Colección -->
+                    <div class="report-card">
+                        <h2 class="section-title">Resumen de Inventario</h2>
+                        <div class="inventory-status-container" style="margin-top: 1.5rem;">
+                            <div class="bar-item">
+                                <div class="bar-label"><span>Disponibilidad General</span><span
+                                        id="inventoryPercent">0%</span></div>
+                                <div class="bar-track">
+                                    <div id="inventoryBar" class="bar-fill bar-fill--salvia" style="--bar-width: 0%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                style="margin-top: 1rem; display: flex; justify-content: space-around; text-align: center;">
+                                <div>
+                                    <div id="dashTotalBooks" style="font-size: 1.2rem; font-weight: 700;">0</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Títulos Totales</div>
+                                </div>
+                                <div>
+                                    <div id="dashTotalCopies"
+                                        style="font-size: 1.2rem; font-weight: 700; color: var(--accent-salvia);">0
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Ejemplares Físicos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado de Préstamos -->
+                    <div class="report-card">
+                        <h2 class="section-title">Estado de Préstamos</h2>
+                        <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-base); padding: 0.8rem; border-radius: 8px;">
+                                <span style="font-size: 0.9rem; font-weight: 600;">Préstamos al día</span>
+                                <span id="dashLoansActive" class="badge badge-available">0</span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; background: #FFF5F5; padding: 0.8rem; border-radius: 8px; border-left: 4px solid var(--accent-terracotta);">
+                                <span style="font-size: 0.9rem; font-weight: 600; color: #721C24;">Préstamos
+                                    Morosos</span>
+                                <span id="dashLoansOverdue" class="badge badge-overdue">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PÁGINA 2: CATÁLOGO DE LIBROS -->
+            <div id="viewCatalogo" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Catálogo Completo de Libros</h1>
+                        <p>Inventario general de títulos disponibles y en préstamo.</p>
+                    </div>
+                    <button class="btn-primary" id="btnAgregarNuevoLibro">
+                        <i class="fa-solid fa-plus"></i> Añadir Nuevo Libro
+                    </button>
+                </section>
+
+                <section class="catalog-section">
+                    <div class="section-header" style="flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 class="section-title">Listado del Fondo Editorial</h2>
+                            <span class="section-header__count">Total Títulos: <strong
+                                    id="totalLibrosCount">0</strong></span>
+                        </div>
+                        <div class="search-bar-catalog"
+                            style="background-color: var(--bg-base); border: 1px solid var(--beige-dark); border-radius: 20px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; width: 340px;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                            <input type="text" id="catalogSearchInput"
+                                placeholder="Buscar por título, autor, materia, ISBN o inventario..."
+                                style="border: none; background: transparent; outline: none; color: var(--text-main); width: 100%; font-size: 0.8rem;">
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ISBN / ID</th>
+                                <th>Título y Portada</th>
+                                <th>Autor / Categoría</th>
+                                <th>Ubicación Principal</th>
+                                <th>Copias</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalogTableBody">
+                            <!-- Renderizado dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- PÁGINA 3: HISTORIAL DE PRÉSTAMOS -->
+            <div id="viewPrestamos" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Historial de Préstamos</h1>
+                        <p>Registro continuo de préstamos, entregas y cuenta regresiva de vencimiento.</p>
+                    </div>
+                    <div class="welcome-actions" style="display: flex; gap: 1rem;">
+                        <button class="btn-primary btnAbrirNuevoPrestamo">
+                            <i class="fa-solid fa-plus"></i> Nuevo Préstamo
+                        </button>
+                        <button class="btn-secondary" id="btnDevolucion">
+                            <i class="fa-solid fa-repeat"></i> Registrar Devolución
+                        </button>
+                    </div>
+                </section>
+
+                <section class="recent-loans-section">
+                    <div class="loans-filter-bar"
+                        style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap;">
+                        <button class="btn-filter active" data-filter="all">Todos</button>
+                        <button class="btn-filter" data-filter="prestado">Activos (Prestados)</button>
+                        <button class="btn-filter" data-filter="moroso">Morosos (Demorados)</button>
+                        <button class="btn-filter" data-filter="devuelto">Devueltos</button>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Préstamo</th>
+                                <th>Libro</th>
+                                <th>Socio / Alumno / Prof.</th>
+                                <th>Fecha Préstamo</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado / Cuenta Regresiva</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loansTableBody">
+                            <!-- Renderizado dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- PÁGINA 4: SOCIOS / MANEJO DE USUARIOS -->
+            <div id="viewSocios" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Gestión Integral de Socios</h1>
+                        <p>Administración de estudiantes, docentes y personal habilitado.</p>
+                    </div>
+                    <button class="btn-primary btnAbrirNuevoSocio">
+                        <i class="fa-solid fa-user-plus"></i> Registrar Socio
+                    </button>
+                </section>
+
+                <section class="catalog-section">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Usuario</th>
+                                <th>Apellido y Nombre</th>
+                                <th>Tipo de Socio</th>
+                                <th>Año / Turno</th>
+                                <th>Email</th>
+                                <th>Préstamos Activos</th>
+                                <th>Incidencias / Daños</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sociosTableBody">
+                            <!-- Renderizado dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- PÁGINA: REGISTRO Y CONTROL DE DAÑOS A LIBROS -->
+            <div id="viewDanos" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Control y Registro de Daños a Libros</h1>
+                        <p>Seguimiento de ejemplares deteriorados y registro de usuarios responsables por nivel de daño.
+                        </p>
+                    </div>
+                    <button class="btn-primary" id="btnAbrirModalNuevoDano">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Registrar Daño Manual
+                    </button>
+                </section>
+
+                <section class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--mustard">
+                            <i class="fa-solid fa-file-circle-exclamation"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statDanosTotal">0</h3>
+                            <p>Total Incidencias</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--salvia">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statDanosLeves">0</h3>
+                            <p>Daño Leve</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--terracotta">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statDanosModerados">0</h3>
+                            <p>Daño Moderado</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-card--catastrofico">
+                        <div class="metric-icon metric-icon--catastrofico">
+                            <i class="fa-solid fa-skull-crossbones"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statDanosCatastroficos">0</h3>
+                            <p style="color: #721C24; font-weight: 700;">CATASTRÓFICO!</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="catalog-section">
+                    <div class="section-header" style="flex-wrap: wrap; gap: 1rem;">
+                        <div class="loans-filter-bar" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn-damage-filter active" data-damage-filter="all">Todos los Daños</button>
+                            <button class="btn-damage-filter" data-damage-filter="Daño leve">Daño Leve</button>
+                            <button class="btn-damage-filter" data-damage-filter="Daño moderado">Daño Moderado</button>
+                            <button class="btn-damage-filter btn-filter-catastrofico"
+                                data-damage-filter="CATASTROFICO!">🔴 CATASTRÓFICO!</button>
+                        </div>
+                        <div class="search-bar-catalog"
+                            style="background-color: var(--bg-base); border: 1px solid var(--beige-dark); border-radius: 20px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; width: 340px;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                            <input type="text" id="damageSearchInput"
+                                placeholder="Buscar por socio, libro, inventario..."
+                                style="border: none; background: transparent; outline: none; color: var(--text-main); width: 100%; font-size: 0.8rem;">
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Incidencia</th>
+                                <th>Fecha y Hora</th>
+                                <th>Libro e Inventario</th>
+                                <th>Socio Infractor</th>
+                                <th>Nivel de Daño</th>
+                                <th>Detalle del Daño</th>
+                                <th>Registrado Por</th>
+                                <th>Estado Ejemplar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="damagesTableBody">
+                            <!-- Renderizado con JS -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- PÁGINA: BITÁCORA Y REGISTRO DE AUDITORÍA -->
+            <div id="viewAuditoria" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Bitácora de Auditoría y Acciones</h1>
+                        <p>Registro cronológico de todas las acciones, adiciones y cambios realizados por los
+                            administradores.</p>
+                    </div>
+                    <div class="welcome-actions" style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="btn-secondary" id="btnExportarAuditoria">
+                            <i class="fa-solid fa-file-arrow-down"></i> Exportar Registro JSON
+                        </button>
+                    </div>
+                </section>
+
+                <section class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--salvia">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statAuditTotal">0</h3>
+                            <p>Total de Acciones</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--mustard">
+                            <i class="fa-solid fa-sun"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statAuditManana">0</h3>
+                            <p>Acciones Turno Mañana</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--terracotta">
+                            <i class="fa-solid fa-cloud-sun"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="statAuditTarde">0</h3>
+                            <p>Acciones Turno Tarde</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="catalog-section">
+                    <div class="section-header" style="flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                            <div
+                                style="display: flex; align-items: center; gap: 0.4rem; background: var(--bg-surface); border: 1px solid var(--beige-dark); border-radius: 8px; padding: 0.3rem 0.7rem;">
+                                <label for="selectAuditAdminFilter"
+                                    style="font-size: 0.78rem; font-weight: 700; color: var(--accent-brown);"><i
+                                        class="fa-solid fa-user-shield"></i> Turno:</label>
+                                <select id="selectAuditAdminFilter"
+                                    style="border: none; outline: none; background: transparent; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                    <option value="all">Todos los Turnos</option>
+                                    <option value="Turno Mañana">Turno Mañana</option>
+                                    <option value="Turno Tarde">Turno Tarde</option>
+                                </select>
+                            </div>
+
+                            <div
+                                style="display: flex; align-items: center; gap: 0.4rem; background: var(--bg-surface); border: 1px solid var(--beige-dark); border-radius: 8px; padding: 0.3rem 0.7rem;">
+                                <label for="selectAuditCategoryFilter"
+                                    style="font-size: 0.78rem; font-weight: 700; color: var(--accent-brown);"><i
+                                        class="fa-solid fa-filter"></i> Categoría:</label>
+                                <select id="selectAuditCategoryFilter"
+                                    style="border: none; outline: none; background: transparent; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                    <option value="all">Todas las Categorías</option>
+                                    <option value="Libros">Libros / Catálogo</option>
+                                    <option value="Préstamos">Préstamos / Devoluciones</option>
+                                    <option value="Socios">Socios / Alumnos</option>
+                                    <option value="Daños">Control de Daños</option>
+                                    <option value="Sistema">Sistema / Sesión</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="search-bar-catalog"
+                            style="background-color: var(--bg-base); border: 1px solid var(--beige-dark); border-radius: 20px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; width: 340px;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                            <input type="text" id="auditSearchInput" placeholder="Buscar en la bitácora..."
+                                style="border: none; background: transparent; outline: none; color: var(--text-main); width: 100%; font-size: 0.8rem;">
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Administrador</th>
+                                <th>Categoría</th>
+                                <th>Acción</th>
+                                <th>Descripción y Detalles del Cambio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody">
+                            <!-- Renderizado con JS -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- PÁGINA 5: REPORTES Y ESTADÍSTICAS -->
+            <div id="viewReportes" class="view-section">
+                <section class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Reportes y Estadísticas de Préstamos</h1>
+                        <p>Análisis mensual de circulación, libros más solicitados y flujo de lectores.</p>
+                    </div>
+                    <div class="welcome-actions" style="display: flex; align-items: center; gap: 0.8rem;">
+                        <label for="selectReportMonth"
+                            style="font-weight: 600; font-size: 0.9rem; color: var(--accent-brown);"><i
+                                class="fa-solid fa-calendar-days"></i> Mes:</label>
+                        <select id="selectReportMonth" class="form-group input"
+                            style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--beige-dark); background: var(--bg-surface); font-weight: 600; cursor: pointer;">
+                            <option value="all">Todos los períodos</option>
+                            <option value="08-2026" selected>Agosto 2026</option>
+                            <option value="07-2026">Julio 2026</option>
+                            <option value="06-2026">Junio 2026</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Tarjetas de métricas del mes -->
+                <section class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--terracotta">
+                            <i class="fa-solid fa-hand-holding-hand"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="repTotalPrestamosMes">0</h3>
+                            <p>Préstamos en el Mes</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--salvia">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="repLibrosCirculacion">0</h3>
+                            <p>Libros en Circulación</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--mustard">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="repPrestamosActivos">0</h3>
+                            <p>Activos / En Curso</p>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--salvia">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div class="metric-data">
+                            <h3 id="repPrestamosDevueltos">0</h3>
+                            <p>Devueltos a Término</p>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="metrics-grid" style="margin-top: 1.5rem;">
+                    <!-- Libros más solicitados -->
+                    <div class="report-card">
+                        <h2 class="section-title"><i class="fa-solid fa-trophy" style="color: #D4A373;"></i> Libros Más
+                            Solicitados en el Mes</h2>
+                        <div class="chart-container" id="repTopLibrosContainer"></div>
+                    </div>
+
+                    <!-- Lectura por curso -->
+                    <div class="report-card">
+                        <h2 class="section-title"><i class="fa-solid fa-graduation-cap"></i> Lectura por Curso / Nivel
+                        </h2>
+                        <div class="chart-container" id="repCursosContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Detalle de Préstamos -->
+                <section class="recent-loans-section" style="margin-top: 1.5rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="section-title" style="margin: 0;"><i class="fa-solid fa-list-check"></i> Detalle de
+                            Préstamos del Período</h2>
+                        <span id="repTotalMovimientosBadge" class="badge badge-available">0 movimientos</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Préstamo</th>
+                                <th>Libro</th>
+                                <th>Socio</th>
+                                <th>Fecha Préstamo</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repTableBody"></tbody>
+                    </table>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 3. PIE DE PÁGINA -->
+    <footer class="dashboard-footer">
+        <div>
+            <p>&copy; 2026 Sistema SIP — Proyecto Escolar de Biblioteca</p>
+        </div>
+        <div class="footer-links">
+            <a href="#">Soporte</a>
+            <a href="#">Documentación</a>
+            <a href="#">Versión 1.0</a>
+        </div>
+    </footer>
+
+    <!-- MODAL: REGISTRAR PRÉSTAMO -->
+    <div class="modal-overlay" id="modalPrestamo">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Registrar Nuevo Préstamo</h2>
+                <button class="close-btn btnCerrarModal">&times;</button>
+            </div>
+            <form id="formNuevoPrestamo" autocomplete="off">
+                <div class="form-group" style="position: relative;">
+                    <label for="inputLibro">Título del Libro *</label>
+                    <input type="text" id="inputLibro" placeholder="Busca libro disponible..." required>
+                    <div id="autocompleteLibroList" class="autocomplete-suggestions" style="display:none;"></div>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <label for="inputSocio">Apellido y Nombre del Socio *</label>
+                    <input type="text" id="inputSocio" placeholder="Busca socio por nombre o apellido..." required>
+                    <div id="autocompleteSocioList" class="autocomplete-suggestions" style="display:none;"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Registrar Préstamo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DEVOLUCIÓN -->
+    <div class="modal-overlay" id="modalDevolucion">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Registrar Devolución de Libro</h2>
+                <button class="close-btn btnCerrarModal">&times;</button>
+            </div>
+            <form id="formDevolucion">
+                <div class="form-group">
+                    <label for="selectLibroDevolucion">Selecciona el libro a devolver</label>
+                    <select id="selectLibroDevolucion" required></select>
+                </div>
+
+                <!-- Sección para reportar daño durante la devolución -->
+                <div class="damage-report-box"
+                    style="margin-top: 1rem; background: var(--bg-base); border: 1px solid var(--beige-anchor); border-radius: 8px; padding: 0.8rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 700; font-size: 0.85rem; color: #721C24;">
+                        <input type="checkbox" id="checkDevolucionDano"
+                            style="width: 16px; height: 16px; accent-color: var(--accent-terracotta);">
+                        <span><i class="fa-solid fa-triangle-exclamation"></i> ¿El ejemplar presenta algún daño
+                            físico?</span>
+                    </label>
+
+                    <div id="panelDetalleDanoDevolucion"
+                        style="display: none; margin-top: 0.8rem; border-top: 1px dashed var(--beige-dark); padding-top: 0.8rem;">
+                        <div class="form-group" style="margin-bottom: 0.6rem;">
+                            <label for="selectNivelDanoDevolucion" style="font-size: 0.8rem; font-weight: 700;">Nivel de
+                                Daño *</label>
+                            <select id="selectNivelDanoDevolucion" style="font-weight: 600;">
+                                <option value="Daño leve">🟢 Daño leve (Hojas dobladas, marcas de lápiz, desgaste menor)
+                                </option>
+                                <option value="Daño moderado">🟠 Daño moderado (Manchas, subrayado en tinta, hojas
+                                    sueltas, lomo resentido)</option>
+                                <option value="CATASTROFICO!">🔴 CATASTRÓFICO! (Páginas rotas/arrancadas, mojado,
+                                    pérdida total)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.6rem;">
+                            <label for="inputDescripcionDanoDevolucion" style="font-size: 0.8rem;">Descripción del Daño
+                                *</label>
+                            <textarea id="inputDescripcionDanoDevolucion" rows="2"
+                                placeholder="Ej: Presenta 4 hojas rotas con tinta y mancha en la contratapa"></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="selectAccionCopiaDevolucion" style="font-size: 0.8rem;">Estado Posterior del
+                                Ejemplar</label>
+                            <select id="selectAccionCopiaDevolucion" style="font-size: 0.85rem;">
+                                <option value="disponible">Mantener Disponible (Apto para lectura)</option>
+                                <option value="mantenimiento" selected>Pasar a "En Mantenimiento" (Requiere
+                                    restauración/revisión)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 1.2rem;">
+                    <button type="button" class="btn-secondary btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar Devolución</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR SOCIO -->
+    <div class="modal-overlay" id="modalSocio">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Registrar Nuevo Socio</h2>
+                <button class="close-btn btnCerrarModal">&times;</button>
+            </div>
+            <form id="formNuevoSocio">
+                <div class="form-group">
+                    <label for="inputSocioApellido">Apellido *</label>
+                    <input type="text" id="inputSocioApellido" placeholder="Ej: Morales" required>
+                </div>
+                <div class="form-group">
+                    <label for="inputSocioNombre">Nombre *</label>
+                    <input type="text" id="inputSocioNombre" placeholder="Ej: Valentina" required>
+                </div>
+                <div class="form-group">
+                    <label for="selectSocioTipo">Tipo de Usuario *</label>
+                    <select id="selectSocioTipo" required>
+                        <option value="estudiante">Estudiante (Máx 1 libro)</option>
+                        <option value="docente">Docente (Máx 3 libros)</option>
+                        <option value="otro">Otro (Máx 1 libro)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputSocioAnio">Año / Grado (Opcional)</label>
+                    <input type="text" id="inputSocioAnio" placeholder="Ej: 5º Año A">
+                </div>
+                <div class="form-group">
+                    <label for="inputSocioTurno">Turno (Opcional)</label>
+                    <input type="text" id="inputSocioTurno" placeholder="Ej: Mañana">
+                </div>
+                <div class="form-group">
+                    <label for="inputSocioEmail">Email *</label>
+                    <input type="email" id="inputSocioEmail" placeholder="Ej: valentina@email.com" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Socio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AÑADIR / DUPLICAR LIBRO -->
+    <div class="modal-overlay" id="modalNuevoLibro">
+        <div class="modal-card modal-card--large">
+            <div class="modal-header">
+                <h2 id="modalLibroTituloHeader">Añadir Nuevo Libro al Catálogo</h2>
+                <button class="close-btn btnCerrarModal">&times;</button>
+            </div>
+            <form id="formNuevoLibro">
+                <input type="hidden" id="editBookOriginalIsbn" value="">
+                <div class="form-grid">
+
+                    <div class="form-section-title">Información Principal y Portada</div>
+
+                    <div class="form-group form-group--full-width">
+                        <label for="inputPortadaLibro">Foto de Portada (Imagen del Libro)</label>
+                        <input type="file" id="inputPortadaLibro" accept="image/*"
+                            style="background: var(--bg-base); padding: 0.4rem;">
+                        <input type="hidden" id="inputPortadaBase64" value="">
+                        <div id="previewPortadaContainer" style="margin-top: 0.5rem; display: none;">
+                            <img id="imgPreviewPortada" src="" alt="Vista previa"
+                                style="max-height: 100px; border-radius: 6px; border: 1px solid var(--beige-dark);">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputTituloLibro">Título *</label>
+                        <input type="text" id="inputTituloLibro" placeholder="Ej: Rayuela" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSubtituloLibro">Subtítulo</label>
+                        <input type="text" id="inputSubtituloLibro" placeholder="Ej: Novela experimental">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputAutorLibro">Autor *</label>
+                        <input type="text" id="inputAutorLibro" placeholder="Ej: Julio Cortázar" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputCategoriaLibro">Categoría / Tema *</label>
+                        <input type="text" id="inputCategoriaLibro" placeholder="Ej: Novela" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputIsbn">ISBN / ID Libro *</label>
+                        <input type="text" id="inputIsbn" placeholder="Ej: 978-950-511-356-9" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEdicion">Edición</label>
+                        <input type="text" id="inputEdicion" placeholder="Ej: 1ª Edición">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputExtension">Extensión (Páginas)</label>
+                        <input type="number" id="inputExtension" min="1" placeholder="Ej: 600">
+                    </div>
+
+                    <div class="form-section-title">Inventario y Clasificación de la Copia Inicial</div>
+
+                    <div class="form-group">
+                        <label for="inputLibristica">Libristica</label>
+                        <input type="text" id="inputLibristica" placeholder="Ej: LIBR-EXP">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputInventario">Número de Inventario *</label>
+                        <input type="text" id="inputInventario" placeholder="Ej: INV-74839" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputUbicacion">Ubicación física *</label>
+                        <input type="text" id="inputUbicacion" placeholder="Ej: Estante 4, Sector B" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputClasificacion">Clasificación (CDU / Dewey) *</label>
+                        <input type="text" id="inputClasificacion" placeholder="Ej: 863 C828r" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputNumero">Tomo / Identificador</label>
+                        <input type="text" id="inputNumero" placeholder="Ej: Tomo 1">
+                    </div>
+
+                    <div class="form-section-title">Datos de Publicación</div>
+
+                    <div class="form-group">
+                        <label for="inputEditorial">Editorial</label>
+                        <input type="text" id="inputEditorial" placeholder="Ej: Sudamericana">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputFechaPublicacion">Año de Publicación</label>
+                        <input type="text" id="inputFechaPublicacion" placeholder="Ej: 1963">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputLugarPublicacion">Lugar de Publicación</label>
+                        <input type="text" id="inputLugarPublicacion" placeholder="Ej: Buenos Aires">
+                    </div>
+
+                    <div class="form-section-title">Temas y Colección</div>
+
+                    <div class="form-group">
+                        <label for="inputTemas">Temas clave</label>
+                        <input type="text" id="inputTemas" placeholder="Separados por coma">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputTerminoMateria">Término Materia</label>
+                        <input type="text" id="inputTerminoMateria" placeholder="Ej: Narrativa Argentina">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputColeccionPersonal">Colección Personal</label>
+                        <input type="text" id="inputColeccionPersonal" placeholder="Ej: Bib. Privada">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputColeccionInstitucional">Colección Institucional</label>
+                        <input type="text" id="inputColeccionInstitucional" placeholder="Ej: Fondo Histórico">
+                    </div>
+
+                    <div class="form-section-title">Notas</div>
+
+                    <div class="form-group form-group--full-width">
+                        <label for="inputNotaGeneral">Nota General</label>
+                        <textarea id="inputNotaGeneral" rows="2"></textarea>
+                    </div>
+                    <div class="form-group form-group--full-width">
+                        <label for="inputNotaContenido">Nota de Contenido</label>
+                        <textarea id="inputNotaContenido" rows="2"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-actions" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn-secondary btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="btnGuardarLibroModal">Guardar Libro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: FICHA DETALLE Y GESTIÓN DE COPIAS CON PESTAÑAS COMPLETAS -->
+    <div class="modal-overlay" id="modalDetalleLibro">
+        <div class="modal-card modal-card--large">
+            <div class="modal-header" style="border-bottom: 2px solid var(--beige-anchor); align-items: center;">
+                <div>
+                    <h2 style="color: var(--accent-brown); font-size: 1.4rem; margin-bottom: 0.1rem;">Ficha y Gestión de
+                        Ejemplares</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Selecciona una pestaña para ver y editar
+                        los datos particulares de esa copia.</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button type="button" class="btn-secondary" id="btnDuplicarLibroModal"
+                        style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                        <i class="fa-solid fa-copy"></i> Duplicar a Nuevo Libro
+                    </button>
+                    <button class="close-btn btnCerrarModal" style="margin-left: 0.5rem;">&times;</button>
+                </div>
+            </div>
+
+            <!-- Pestañas de Copias estilo Google Chrome -->
+            <div class="copies-tab-container" style="margin-top: 0.8rem;">
+                <div class="copies-tabs-bar" id="copiesTabsBar"></div>
+            </div>
+
+            <!-- Panel de Ficha Completa de la Copia Seleccionada -->
+            <div class="book-details-container"
+                style="max-height: 60vh; overflow-y: auto; padding: 0.8rem 0.5rem; margin: 0.5rem 0;">
+                <form id="formEdicionCopia">
+                    <div
+                        style="display: flex; gap: 1.2rem; align-items: center; background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--beige-anchor); margin-bottom: 1rem;">
+                        <img id="detailPortadaImg" src="" alt="Portada"
+                            style="width: 70px; height: 95px; object-fit: cover; border-radius: 6px; border: 1px solid var(--beige-dark); display: none;">
+                        <div style="flex: 1;">
+                            <div class="form-group" style="margin-bottom: 0.4rem;">
+                                <label style="font-size: 0.75rem;">Título de este ejemplar</label>
+                                <input type="text" id="editCopyTitulo" required
+                                    style="font-weight: 700; font-size: 1.1rem; color: var(--accent-brown);">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.75rem;">Subtítulo</label>
+                                <input type="text" id="editCopySubtitulo" placeholder="Subtítulo opcional">
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <label style="font-size: 0.75rem; display: block; margin-bottom: 0.3rem;">Estado de la
+                                Copia</label>
+                            <select id="editCopyEstado"
+                                style="font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--beige-dark);">
+                                <option value="disponible">Disponible</option>
+                                <option value="prestado">Prestado</option>
+                                <option value="mantenimiento">En Mantenimiento</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="details-grid">
+                        <!-- Ficha Técnica -->
+                        <div class="detail-section-card">
+                            <div class="detail-section-header"><i class="fa-solid fa-address-card"></i> Identificación e
+                                Inventario</div>
+                            <div class="detail-fields-list">
+                                <div class="form-group"><label>ISBN / ID General</label><input type="text"
+                                        id="editCopyIsbn" required></div>
+                                <div class="form-group"><label>Nº de Inventario de esta copia *</label><input
+                                        type="text" id="editCopyInventario" required></div>
+                                <div class="form-group"><label>Ubicación Física *</label><input type="text"
+                                        id="editCopyUbicacion" required></div>
+                                <div class="form-group"><label>Clasificación (CDU/Dewey)</label><input type="text"
+                                        id="editCopyClasificacion"></div>
+                                <div class="form-group"><label>Libristica</label><input type="text"
+                                        id="editCopyLibristica"></div>
+                            </div>
+                        </div>
+
+                        <!-- Publicación y Autor -->
+                        <div class="detail-section-card">
+                            <div class="detail-section-header"><i class="fa-solid fa-print"></i> Publicación y Autor
+                            </div>
+                            <div class="detail-fields-list">
+                                <div class="form-group"><label>Autor *</label><input type="text" id="editCopyAutor"
+                                        required></div>
+                                <div class="form-group"><label>Editorial</label><input type="text"
+                                        id="editCopyEditorial"></div>
+                                <div class="form-group"><label>Año de Publicación</label><input type="text"
+                                        id="editCopyFecha"></div>
+                                <div class="form-group"><label>Lugar de Publicación</label><input type="text"
+                                        id="editCopyLugar"></div>
+                                <div class="form-group"><label>Edición</label><input type="text" id="editCopyEdicion">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Categorización -->
+                        <div class="detail-section-card">
+                            <div class="detail-section-header"><i class="fa-solid fa-tags"></i> Clasificación y
+                                Extensión</div>
+                            <div class="detail-fields-list">
+                                <div class="form-group"><label>Categoría</label><input type="text"
+                                        id="editCopyCategoria"></div>
+                                <div class="form-group"><label>Extensión (Páginas)</label><input type="number"
+                                        id="editCopyExtension"></div>
+                                <div class="form-group"><label>Temas / Palabras clave</label><input type="text"
+                                        id="editCopyTemas"></div>
+                                <div class="form-group"><label>Término Materia</label><input type="text"
+                                        id="editCopyTerminoMateria"></div>
+                            </div>
+                        </div>
+
+                        <!-- Colecciones -->
+                        <div class="detail-section-card">
+                            <div class="detail-section-header"><i class="fa-solid fa-building-columns"></i> Colecciones
+                            </div>
+                            <div class="detail-fields-list">
+                                <div class="form-group"><label>Dirección Personal</label><input type="text"
+                                        id="editCopyColeccionPersonal"></div>
+                                <div class="form-group"><label>Dirección Institucional</label><input type="text"
+                                        id="editCopyColeccionInstitucional"></div>
+                                <div class="form-group"><label>Identificador / Tomo</label><input type="text"
+                                        id="editCopyNumero"></div>
+                            </div>
+                        </div>
+
+                        <!-- Notas -->
+                        <div class="detail-section-card" style="grid-column: span 2;">
+                            <div class="detail-section-header"><i class="fa-solid fa-file-lines"></i> Notas Particulares
+                                de este Ejemplar</div>
+                            <div style="padding: 0.8rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                                <div class="form-group"><label>Nota General</label><textarea id="editCopyNotaGeneral"
+                                        rows="2"></textarea></div>
+                                <div class="form-group"><label>Nota de Contenido / Estado físico del
+                                        libro</label><textarea id="editCopyNotaContenido" rows="2"></textarea></div>
+                            </div>
+                        </div>
+
+                        <!-- Historial -->
+                        <div class="detail-section-card" style="grid-column: span 2;">
+                            <div class="detail-section-header"><i class="fa-solid fa-clock-rotate-left"></i> Historial
+                                de Préstamos</div>
+                            <div style="padding: 0.8rem; overflow-x: auto;">
+                                <table class="data-table" style="width: 100%; font-size: 0.85rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Préstamo</th>
+                                            <th>Socio</th>
+                                            <th>Fecha Préstamo</th>
+                                            <th>Fecha Límite</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bookHistoryTableBody"></tbody>
+                                </table>
+                                <div id="noBookHistoryMessage"
+                                    style="display:none; color:var(--text-muted); font-size:0.85rem; padding: 0.5rem; text-align: center;">
+                                    Sin préstamos históricos registrados.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.8rem;">
+                        <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem;">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios en esta Copia
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-actions" style="border-top: 1px solid var(--beige-anchor); padding-top: 0.8rem;">
+                <button type="button" class="btn-secondary btnCerrarModal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR DAÑO DIRECTO / MANUAL -->
+    <div class="modal-overlay" id="modalNuevoDano">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-triangle-exclamation" style="color: var(--accent-terracotta);"></i> Registrar
+                    Incidencia de Daño</h2>
+                <button class="close-btn btnCerrarModal">&times;</button>
+            </div>
+            <form id="formNuevoDano" autocomplete="off">
+                <div class="form-group" style="position: relative;">
+                    <label for="inputDanoLibro">Libro Afectado *</label>
+                    <input type="text" id="inputDanoLibro" placeholder="Busca título de libro..." required>
+                    <div id="autocompleteDanoLibroList" class="autocomplete-suggestions" style="display:none;"></div>
+                </div>
+
+                <div class="form-group" id="groupDanoCopia" style="display: none;">
+                    <label for="selectDanoCopia">Ejemplar / Copia *</label>
+                    <select id="selectDanoCopia"></select>
+                </div>
+
+                <div class="form-group" style="position: relative;">
+                    <label for="inputDanoSocio">Socio / Usuario Responsable *</label>
+                    <input type="text" id="inputDanoSocio" placeholder="Busca socio por nombre o ID..." required>
+                    <div id="autocompleteDanoSocioList" class="autocomplete-suggestions" style="display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectNivelDanoDirecto">Nivel de Daño *</label>
+                    <select id="selectNivelDanoDirecto" required style="font-weight: 600;">
+                        <option value="Daño leve">🟢 Daño leve (Hojas dobladas, marcas lápiz, desgaste menor)</option>
+                        <option value="Daño moderado">🟠 Daño moderado (Manchas, birome/marcador, hojas sueltas)
+                        </option>
+                        <option value="CATASTROFICO!">🔴 CATASTRÓFICO! (Páginas rotas/arrancadas, mojado, inutilizado)
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputDescripcionDanoDirecto">Descripción del Daño *</label>
+                    <textarea id="inputDescripcionDanoDirecto" rows="2"
+                        placeholder="Especifica qué daño tiene el ejemplar..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectAccionCopiaDirecto">Estado Posterior del Ejemplar</label>
+                    <select id="selectAccionCopiaDirecto">
+                        <option value="mantenimiento">Pasar a "En Mantenimiento"</option>
+                        <option value="disponible">Mantener como "Disponible"</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 1.2rem;">
+                    <button type="button" class="btn-secondary btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Registrar Daño</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js" defer></script>
+</body>
+
+</html>
