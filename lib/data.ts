@@ -1,0 +1,147 @@
+import { Book, Socio, Loan } from './types';
+
+export const initialBooks: Book[] = [
+  {
+    isbn: "978-950-511-356-9",
+    titulo: "Cien Años de Soledad",
+    subtitulo: "La gran saga familiar de Macondo",
+    autor: "Gabriel García Márquez",
+    categoria: "Novela",
+    libristica: "LIBR-GGM-01",
+    inventario: "INV-102030",
+    ubicacion: "Estante 3, Sector A",
+    extension: "471",
+    edicion: "4ª Edición",
+    lugarPublicacion: "Buenos Aires",
+    fecha: "1967",
+    editorial: "Sudamericana",
+    temas: "Realismo Mágico, Familia",
+    numero: "Único",
+    terminoMateria: "Narrativa Colombiana",
+    clasificacion: "863 G216c",
+    coleccionPersonal: "Privada",
+    coleccionInstitucional: "Nacional",
+    notaGeneral: "Fundamental.",
+    notaContenido: "Historia Buendía.",
+    copias: 3
+  },
+  {
+    isbn: "978-842-492-235-1",
+    titulo: "Don Quijote de la Mancha",
+    subtitulo: "El ingenioso hidalgo",
+    autor: "Miguel de Cervantes",
+    categoria: "Clásico",
+    libristica: "LIBR-CER-02",
+    inventario: "INV-102031",
+    ubicacion: "Estante 1, Sector C",
+    extension: "1056",
+    edicion: "Conmemorativa",
+    lugarPublicacion: "Madrid",
+    fecha: "1605",
+    editorial: "RAE",
+    temas: "Caballería",
+    numero: "Vol I y II",
+    terminoMateria: "Literatura Española",
+    clasificacion: "863 C337d",
+    coleccionPersonal: "Legado",
+    coleccionInstitucional: "Archivo",
+    notaGeneral: "Cumbre.",
+    notaContenido: "Andanzas.",
+    copias: 5
+  },
+  {
+    isbn: "978-950-042-835-4",
+    titulo: "Ficciones",
+    subtitulo: "El jardín de senderos que se bifurcan y Artificios",
+    autor: "Jorge Luis Borges",
+    categoria: "Cuentos",
+    libristica: "LIBR-BOR-01",
+    inventario: "INV-102032",
+    ubicacion: "Estante 2, Sector B",
+    extension: "224",
+    edicion: "Edición Definitiva",
+    lugarPublicacion: "Buenos Aires",
+    fecha: "1944",
+    editorial: "Sur",
+    temas: "Laberintos, Infinito, Filosofía",
+    numero: "Tomo 1",
+    terminoMateria: "Literatura Argentina",
+    clasificacion: "863 B732f",
+    coleccionPersonal: "Biblioteca Personal",
+    coleccionInstitucional: "Biblioteca Nacional",
+    notaGeneral: "Obra maestra del cuento fantástico universal.",
+    notaContenido: "Tlön, Uqbar, Orbis Tertius; Las ruinas circulares; La biblioteca de Babel.",
+    copias: 4
+  },
+  {
+    isbn: "978-843-760-494-7",
+    titulo: "Rayuela",
+    subtitulo: "Novela de contranovela",
+    autor: "Julio Cortázar",
+    categoria: "Novela",
+    libristica: "LIBR-COR-01",
+    inventario: "INV-102033",
+    ubicacion: "Estante 2, Sector A",
+    extension: "650",
+    edicion: "1ª Edición Cátedra",
+    lugarPublicacion: "Buenos Aires",
+    fecha: "1963",
+    editorial: "Sudamericana",
+    temas: "París, Jazz, Existencialismo",
+    numero: "Único",
+    terminoMateria: "Narrativa Latinoamericana",
+    clasificacion: "863 C828r",
+    coleccionPersonal: "Privada",
+    coleccionInstitucional: "Nacional",
+    notaGeneral: "Contiene el célebre tablero de dirección de lectura.",
+    notaContenido: "Del lado de allá, Del lado de acá, De otros lados.",
+    copias: 2
+  },
+  {
+    isbn: "978-987-113-810-4",
+    titulo: "El Aleph",
+    subtitulo: "El punto que contiene todos los puntos",
+    autor: "Jorge Luis Borges",
+    categoria: "Cuentos",
+    libristica: "LIBR-BOR-02",
+    inventario: "INV-102034",
+    ubicacion: "Estante 2, Sector B",
+    extension: "192",
+    edicion: "2ª Edición",
+    lugarPublicacion: "Buenos Aires",
+    fecha: "1949",
+    editorial: "Losada",
+    temas: "Inmortalidad, Tiempo, Espejos",
+    numero: "Único",
+    terminoMateria: "Narrativa Fantástica",
+    clasificacion: "863 B732a",
+    coleccionPersonal: "Privada",
+    coleccionInstitucional: "Archivo General",
+    notaGeneral: "Cuentos fundamentales del siglo XX.",
+    notaContenido: "El Aleph, El inmortal, La casa de Asterión.",
+    copias: 3
+  }
+];
+
+export const initialSocios: Socio[] = [
+  { id: "SOC-1001", apellido: "Gómez", nombre: "Carlos", tipo: "estudiante", anio: "5º Año A", turno: "Mañana", email: "carlos@edu.com", estado: "activo" },
+  { id: "SOC-1002", apellido: "Martínez", nombre: "Ana", tipo: "estudiante", anio: "3º Año B", turno: "Tarde", email: "ana@edu.com", estado: "activo" },
+  { id: "SOC-1003", apellido: "Pérez", nombre: "María", tipo: "docente", anio: "-", turno: "Tarde", email: "maria@edu.com", estado: "activo" }
+];
+
+export const initialLoans: Loan[] = [
+  // Agosto 2026
+  { id: "#P-1092", libro: "Cien Años de Soledad", socioId: "SOC-1001", socioNombre: "Gómez, Carlos", fechaPrestamo: "14 Ago 2026", fechaLimite: "21 Ago 2026", estado: "prestado" },
+  { id: "#P-1093", libro: "Don Quijote de la Mancha", socioId: "SOC-1002", socioNombre: "Martínez, Ana", fechaPrestamo: "10 Ago 2026", fechaLimite: "24 Ago 2026", estado: "prestado" },
+  { id: "#P-1094", libro: "Cien Años de Soledad", socioId: "SOC-1003", socioNombre: "Pérez, María", fechaPrestamo: "05 Ago 2026", fechaLimite: "19 Ago 2026", estado: "devuelto" },
+  { id: "#P-1095", libro: "Don Quijote de la Mancha", socioId: "SOC-1001", socioNombre: "Gómez, Carlos", fechaPrestamo: "02 Ago 2026", fechaLimite: "16 Ago 2026", estado: "devuelto" },
+  
+  // Julio 2026
+  { id: "#P-1080", libro: "Cien Años de Soledad", socioId: "SOC-1002", socioNombre: "Martínez, Ana", fechaPrestamo: "18 Jul 2026", fechaLimite: "01 Ago 2026", estado: "devuelto" },
+  { id: "#P-1081", libro: "Don Quijote de la Mancha", socioId: "SOC-1003", socioNombre: "Pérez, María", fechaPrestamo: "12 Jul 2026", fechaLimite: "26 Jul 2026", estado: "devuelto" },
+  { id: "#P-1082", libro: "Cien Años de Soledad", socioId: "SOC-1001", socioNombre: "Gómez, Carlos", fechaPrestamo: "05 Jul 2026", fechaLimite: "19 Jul 2026", estado: "devuelto" },
+
+  // Junio 2026
+  { id: "#P-1070", libro: "Don Quijote de la Mancha", socioId: "SOC-1001", socioNombre: "Gómez, Carlos", fechaPrestamo: "20 Jun 2026", fechaLimite: "04 Jul 2026", estado: "devuelto" },
+  { id: "#P-1071", libro: "Cien Años de Soledad", socioId: "SOC-1002", socioNombre: "Martínez, Ana", fechaPrestamo: "15 Jun 2026", fechaLimite: "29 Jun 2026", estado: "devuelto" }
+];

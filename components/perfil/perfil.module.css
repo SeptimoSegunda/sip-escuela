@@ -1,0 +1,397 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.pageWrapper {
+  --bg: #F3ECD9;
+  --paper: #FBF6E9;
+  --paper-edge: #E7DCB8;
+  --green: #1F3A2E;
+  --green-dark: #152A21;
+  --brass: #B8873B;
+  --ink: #24262B;
+  --stamp: #A13D2B;
+  --muted: #6B6455;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #FFFdf2 0%, transparent 60%),
+    var(--bg);
+  font-family: 'Source Sans 3', sans-serif;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 16px 80px;
+  box-sizing: border-box;
+}
+
+/* ── Cabecera ── */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--green);
+  color: #F3ECD9;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Fraunces', serif;
+  letter-spacing: .03em;
+  z-index: 50;
+  border-bottom: 2px solid var(--green-dark);
+}
+
+.topbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbarBrand {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #F3ECD9;
+  text-decoration: none;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(243, 236, 217, 0.15);
+  color: #F3ECD9;
+  border: 1px solid rgba(243, 236, 217, 0.3);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background: rgba(243, 236, 217, 0.25);
+  transform: translateX(-2px);
+}
+
+.topbarModule {
+  font-size: 0.72rem;
+  font-family: 'IBM Plex Mono', monospace;
+  opacity: .8;
+  letter-spacing: 0.05em;
+}
+
+/* ── Tarjeta principal ── */
+.card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 #fff inset, 0 18px 40px -20px rgba(31,58,46,.35);
+  position: relative;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+/* Perforación estilo ficha de catálogo */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 26px;
+  background-image: radial-gradient(circle, var(--bg) 4px, transparent 4.5px);
+  background-size: 26px 26px;
+  background-position: 13px 13px;
+  border-right: 1px dashed #D8CBA1;
+  pointer-events: none;
+}
+
+.cardInner {
+  padding: 32px 32px 32px 52px;
+}
+
+/* ── Encabezado de ficha ── */
+.fichaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--green);
+  padding-bottom: 10px;
+  margin-bottom: 22px;
+}
+
+.fichaHeader h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.35rem;
+  margin: 0;
+  color: var(--green-dark);
+}
+
+.fichaNum {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .75rem;
+  color: var(--muted);
+}
+
+/* ── Perfil (avatar + meta) ── */
+.perfilTop {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.avatarWrap {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  flex: none;
+}
+
+.avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--brass);
+  background: var(--green);
+  display: block;
+}
+
+.avatarBtn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brass);
+  border: 2px solid var(--paper);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.avatarBtn:hover {
+  background: #a3752e;
+  transform: scale(1.08);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.perfilMeta h2 {
+  margin: 0 0 4px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  color: var(--green-dark);
+}
+
+.perfilMeta p {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Secciones de contenido ── */
+.seccion {
+  margin-bottom: 24px;
+}
+
+.seccion h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .75rem;
+  color: var(--brass);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.seccion textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--paper-edge);
+  background: #fffdf6;
+  border-radius: 4px;
+  padding: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .95rem;
+  color: var(--ink);
+  box-sizing: border-box;
+}
+
+.seccion textarea:focus {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+}
+
+.rowBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.contador {
+  font-size: .75rem;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.principal {
+  background: var(--green);
+  color: #F3ECD9;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .9rem;
+  transition: background-color 0.15s ease;
+}
+
+.principal:hover {
+  background: var(--green-dark);
+}
+
+/* ── Chips de favoritos ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  min-height: 32px;
+}
+
+.chip {
+  background: #EFE6C8;
+  border: 1px solid var(--paper-edge);
+  color: var(--green-dark);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: .82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip button {
+  border: none;
+  background: none;
+  color: var(--stamp);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.chip button:hover {
+  color: #6d1f12;
+}
+
+.addFav {
+  display: flex;
+  gap: 8px;
+}
+
+.addFav input {
+  flex: 1;
+  border: 1px solid var(--paper-edge);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  background: #fffdf6;
+}
+
+.addFav input:focus {
+  outline: 2px solid var(--brass);
+}
+
+.addFav button {
+  border: 1px dashed var(--brass);
+  background: transparent;
+  color: var(--brass);
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.addFav button:hover {
+  background: #F3ECD9;
+  border-style: solid;
+}
+
+/* ── Sello de estado ── */
+.selloWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.sello {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  color: var(--stamp);
+  border: 2px solid var(--stamp);
+  border-radius: 4px;
+  padding: 6px 12px;
+  transform: rotate(-3deg);
+  opacity: .88;
+  transition: transform .25s ease, opacity .25s ease;
+  user-select: none;
+}
+
+.selloPulse {
+  animation: selloPop .4s ease;
+}
+
+@keyframes selloPop {
+  0%   { transform: rotate(-3deg) scale(1.35); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: rotate(-3deg) scale(1); }
+}
+
+.opcionalTag {
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  border: 1px solid var(--paper-edge);
+  border-radius: 3px;
+  padding: 2px 6px;
+  margin-left: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+@media (max-width: 520px) {
+  .cardInner {
+    padding: 24px 20px 24px 38px;
+  }
+  .perfilTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .topbarModule {
+    display: none;
+  }
+}

@@ -1,0 +1,979 @@
+/* ==========================================================================
+   1. VARIABLES DE COLOR (Paleta Neutra Cálida — Regla 60-30-10)
+   ========================================================================== */
+:root {
+    /* 60% — Dominante & Fondos */
+    --bg-base: #FAF7F2;
+    --bg-surface: #FFFFFF;
+
+    /* 30% — Estructura & Secundarios */
+    --beige-anchor: #EFE8DC;
+    --beige-dark: #D3C7B5;
+    --text-main: #332E2A;
+    --text-muted: #736B63;
+
+    /* 10% — Acentos & Pasteles Cálidos */
+    --accent-brown: #5C4A3E;
+    --accent-salvia: #A3B19B;
+    --accent-terracotta: #D9A08B;
+    --accent-mustard: #E6C594;
+}
+
+/* ==========================================================================
+   2. RESET
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ==========================================================================
+   3. CABECERA
+   ========================================================================== */
+.dashboard-header {
+    background-color: var(--bg-surface);
+    border-bottom: 2px solid var(--beige-anchor);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 48px;
+    width: 48px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: var(--bg-base);
+    padding: 2px;
+    border: 1px solid var(--beige-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.logo-container:hover .logo-img {
+    transform: scale(1.04);
+}
+
+.logo-text-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.logo-text {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #1A2838;
+    line-height: 1.1;
+}
+
+.logo-subtitle {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   4. LAYOUT PRINCIPAL
+   ========================================================================== */
+.dashboard-container {
+    display: flex;
+    flex: 1;
+}
+
+/* ── Barra lateral ── */
+.sidebar {
+    width: 220px;
+    background-color: var(--bg-surface);
+    border-right: 2px solid var(--beige-anchor);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.nav-button:hover,
+.nav-button.active {
+    background-color: var(--beige-anchor);
+    color: var(--accent-brown);
+}
+
+/* ── Contenido principal ── */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ==========================================================================
+   5. VISTAS
+   ========================================================================== */
+.view-section {
+    display: none;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.view-section.active-view {
+    display: flex;
+}
+
+/* ── Encabezado de vista ── */
+.welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.welcome-text h1 {
+    font-size: 1.6rem;
+    color: var(--text-main);
+}
+
+.welcome-text p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.welcome-actions--inline {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* ==========================================================================
+   6. BOTONES
+   ========================================================================== */
+.btn-primary {
+    background-color: var(--accent-brown);
+    color: var(--bg-surface);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: var(--beige-anchor);
+    color: var(--text-main);
+    border: 1px solid var(--beige-dark);
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--beige-dark);
+}
+
+.btn--ml-auto {
+    margin-left: auto;
+}
+
+/* ==========================================================================
+   7. MÉTRICAS
+   ========================================================================== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.metrics-grid--spaced {
+    margin-top: 1.5rem;
+}
+
+.metric-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--beige-anchor);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.metric-icon--salvia {
+    background-color: var(--accent-salvia);
+    color: #2D3B28;
+}
+
+.metric-icon--terracotta {
+    background-color: var(--accent-terracotta);
+    color: #4A2318;
+}
+
+.metric-icon--mustard {
+    background-color: var(--accent-mustard);
+    color: #4A3A18;
+}
+
+.metric-data h3 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.metric-data p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   8. TARJETAS Y SECCIONES
+   ========================================================================== */
+.recent-loans-section,
+.catalog-section,
+.report-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--beige-anchor);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.section-title--no-margin {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-header--wrap {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+}
+
+.section-header__count {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ── Grid resumen de dashboard ── */
+.dashboard-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* ── Inventario ── */
+.inventory-status-container {
+    margin-top: 1.5rem;
+}
+
+.inventory-totals {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.inventory-total-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.inventory-total-value--accent {
+    color: var(--accent-salvia);
+}
+
+.inventory-total-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ── Estado de préstamos ── */
+.loans-status-list {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loans-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-base);
+    padding: 0.8rem;
+    border-radius: 8px;
+}
+
+.loans-status-row--overdue {
+    background: #FFF5F5;
+    border-left: 4px solid var(--accent-terracotta);
+}
+
+.loans-status-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.loans-status-label--overdue {
+    color: #721C24;
+}
+
+/* ==========================================================================
+   9. TABLAS
+   ========================================================================== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--beige-anchor);
+    font-size: 0.9rem;
+}
+
+.data-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.data-table--sm {
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   10. BADGES
+   ========================================================================== */
+.badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-available {
+    background-color: var(--accent-salvia);
+    color: #2D3B28;
+}
+
+.badge-borrowed {
+    background-color: var(--accent-terracotta);
+    color: #4A2318;
+}
+
+.badge-low {
+    background-color: var(--accent-mustard);
+    color: #4A3A18;
+}
+
+.badge-overdue {
+    background-color: #F5C6CB;
+    color: #721C24;
+}
+
+/* ==========================================================================
+   11. REPORTES / GRÁFICOS
+   ========================================================================== */
+.report-icon--trophy {
+    color: #D4A373;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.bar-track {
+    height: 10px;
+    background-color: var(--beige-anchor);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background-color: var(--accent-brown);
+    border-radius: 5px;
+    width: var(--bar-width, 0%);
+}
+
+.bar-fill--salvia {
+    background-color: var(--accent-salvia);
+}
+
+/* ==========================================================================
+   12. PIE DE PÁGINA
+   ========================================================================== */
+.dashboard-footer {
+    background-color: var(--bg-surface);
+    border-top: 2px solid var(--beige-anchor);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: var(--accent-brown);
+}
+
+/* ==========================================================================
+   13. MODALES
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(51, 46, 42, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--beige-anchor);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-card--large {
+    max-width: 850px;
+    width: 90%;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.modal-header--bordered {
+    border-bottom: 2px solid var(--beige-anchor);
+    padding-bottom: 1rem;
+    margin-bottom: 0;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.modal-actions--spaced {
+    margin-top: 1.5rem;
+}
+
+.modal-actions--top-border {
+    border-top: 1px solid var(--beige-anchor);
+    padding-top: 1rem;
+    margin-top: 0;
+}
+
+/* ==========================================================================
+   14. FORMULARIOS
+   ========================================================================== */
+.form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group--autocomplete {
+    position: relative;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--beige-dark);
+    border-radius: 6px;
+    background-color: var(--bg-base);
+    outline: none;
+    color: var(--text-main);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+/* ── Formulario de libro (grid 2 columnas) ── */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.form-section-title {
+    grid-column: span 2;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-brown);
+    border-bottom: 1px solid var(--beige-anchor);
+    padding-bottom: 0.3rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-group--full-width {
+    grid-column: span 2;
+}
+
+/* ── Selector de mes en reportes ── */
+.report-month-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--accent-brown);
+}
+
+.select-month {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--beige-dark);
+    background: var(--bg-surface);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-main);
+}
+
+/* ==========================================================================
+   15. BARRA DE BÚSQUEDA DEL CATÁLOGO
+   ========================================================================== */
+.search-bar-catalog {
+    background-color: var(--bg-base);
+    border: 1px solid var(--beige-dark);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 340px;
+}
+
+.search-bar-catalog i {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.search-bar-catalog input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-main);
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   16. FILTROS DE PRÉSTAMOS
+   ========================================================================== */
+.loans-filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    background-color: var(--bg-surface);
+    color: var(--text-muted);
+    border: 1px solid var(--beige-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+    background-color: var(--accent-brown);
+    color: var(--bg-surface);
+    border-color: var(--accent-brown);
+}
+
+/* ==========================================================================
+   17. AUTOCOMPLETADO
+   ========================================================================== */
+.autocomplete-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--beige-dark);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    z-index: 1010;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--bg-base);
+    transition: background 0.2s;
+}
+
+.autocomplete-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-suggestion-item:hover {
+    background-color: var(--beige-anchor);
+    color: var(--accent-brown);
+}
+
+.autocomplete-suggestion-item .suggestion-main {
+    font-weight: 600;
+    display: block;
+}
+
+.autocomplete-suggestion-item .suggestion-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+/* ==========================================================================
+   18. FICHA DETALLE DE LIBRO
+   ========================================================================== */
+.detail-book-title {
+    color: var(--accent-brown);
+    font-size: 1.6rem;
+    margin-bottom: 0.2rem;
+}
+
+.detail-book-subtitle {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.book-details-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    margin: 1rem 0;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.detail-section-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--beige-anchor);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.detail-section-card--full {
+    grid-column: span 2;
+}
+
+.detail-section-header {
+    background-color: var(--beige-anchor);
+    color: var(--accent-brown);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-fields-list {
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.detail-field {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    border-bottom: 1px dashed var(--beige-anchor);
+    padding-bottom: 0.4rem;
+}
+
+.detail-field:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.field-label {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.field-value {
+    color: var(--text-main);
+    text-align: right;
+    max-width: 60%;
+    word-break: break-word;
+}
+
+.field-value--accent {
+    color: var(--accent-brown);
+}
+
+/* ── Notas de libro ── */
+.detail-notes-body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail-note-heading {
+    color: var(--accent-brown);
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+}
+
+.detail-note-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-main);
+    background: var(--bg-base);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.detail-note-text--salvia {
+    border-left: 3px solid var(--accent-salvia);
+}
+
+.detail-note-text--terracotta {
+    border-left: 3px solid var(--accent-terracotta);
+}
+
+/* ── Historial préstamos en ficha ── */
+.detail-table-wrapper {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.no-history-message {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+/* ==========================================================================
+   19. CONTROL DE CANTIDAD (STOCK)
+   ========================================================================== */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--bg-base);
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    width: fit-content;
+    border: 1px solid var(--beige-anchor);
+}
+
+.btn-qty {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-qty--minus {
+    background-color: var(--accent-terracotta);
+    color: #4A2318;
+}
+
+.btn-qty--plus {
+    background-color: var(--accent-salvia);
+    color: #2D3B28;
+}
+
+.btn-qty:hover {
+    transform: scale(1.1);
+    filter: brightness(0.95);
+}
+
+.btn-qty:active {
+    transform: scale(0.9);
+}
+
+.qty-val {
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-width: 15px;
+    text-align: center;
+}

@@ -1,0 +1,623 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+
+.cardsPage {
+  font-family: 'Work Sans', sans-serif;
+  background: #FBFAF8;
+  color: #20180F;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Topbar ── */
+.topNav {
+  background: #20180F;
+  color: #FAF7F1;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 2px solid #3A2E20;
+}
+
+.topNavBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #FAF7F1;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FAF7F1;
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  transition: background-color 0.15s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.topNavLinks {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topNavLink {
+  color: #D9C19D;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.15s ease;
+}
+
+.topNavLink:hover {
+  color: #fff;
+}
+
+/* ── Intro ── */
+.intro {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 24px 44px;
+  text-align: center;
+}
+
+.kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8A7A63;
+  margin-bottom: 14px;
+}
+
+.introTitle {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  color: #20180F;
+}
+
+.introDesc {
+  color: #5C5040;
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+/* ── Showcase Sections ── */
+.showcase {
+  padding: 70px 0;
+}
+
+.showcaseInner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.showcaseHead {
+  margin-bottom: 38px;
+  max-width: 580px;
+}
+
+.showcaseNum {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.showcaseTitle {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(24px, 2.8vw, 32px);
+  margin-bottom: 10px;
+}
+
+.showcaseDesc {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.cardsRow {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+/* ── 01 Editorial Clásica ── */
+.showcaseEd {
+  background: #FAF7F1;
+  color: #2A2118;
+}
+
+.showcaseEd .showcaseNum { color: #A9793C; }
+.showcaseEd .showcaseDesc { color: #6E6250; }
+
+.cardEd {
+  width: 250px;
+  background: #FFFEFB;
+  border: 1px solid #E4D9C4;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardEd:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -22px rgba(42,33,24,.35);
+}
+
+.cardEd .cover {
+  aspect-ratio: 2/3;
+  background-size: cover;
+  background-position: center;
+}
+
+.cardEd .rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #A9793C, transparent);
+}
+
+.cardEd .meta {
+  padding: 18px 20px 22px;
+}
+
+.cardEd .genre {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #A9793C;
+  margin-bottom: 8px;
+}
+
+.cardEd .title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  color: #2A2118;
+}
+
+.cardEd .author {
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #6E6250;
+}
+
+/* ── 02 Placa de Galería ── */
+.showcaseMu {
+  background: #EDE6D9;
+  color: #2B2620;
+}
+
+.showcaseMu .showcaseNum { color: #8C6B3D; }
+.showcaseMu .showcaseDesc { color: #5F5648; }
+
+.cardMu {
+  width: 240px;
+}
+
+.cardMu .frame {
+  background: #DED2BC;
+  padding: 14px;
+  border: 1px solid #C6B692;
+  box-shadow: inset 0 0 0 1px #FBF7EE;
+}
+
+.cardMu .cover {
+  aspect-ratio: 2/3;
+  border: 1px solid #B7A578;
+  background-size: cover;
+  background-position: center;
+}
+
+.cardMu .plate {
+  margin-top: 14px;
+  background: #D9C9A3;
+  border: 1px solid #B7A578;
+  padding: 14px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.cardMu .plate::before,
+.cardMu .plate::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #8C6B3D;
+  opacity: .6;
+}
+
+.cardMu .plate::before { left: 6px; }
+.cardMu .plate::after { right: 6px; }
+
+.cardMu .title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  line-height: 1.35;
+  color: #2B2620;
+}
+
+.cardMu .author {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #5F5648;
+  margin-bottom: 8px;
+}
+
+.cardMu .catno {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  color: #8C6B3D;
+  letter-spacing: .08em;
+}
+
+/* ── 03 Ficha de Biblioteca ── */
+.showcaseLib {
+  background: #E7D6A9;
+  color: #2A2413;
+}
+
+.showcaseLib .showcaseNum { color: #A13D2B; }
+.showcaseLib .showcaseDesc { color: #5C5232; }
+
+.cardLib {
+  width: 360px;
+  background:
+    repeating-linear-gradient(#F3E7C4 0px, #F3E7C4 27px, #E4D2A0 28px),
+    #F3E7C4;
+  border: 1px solid #C9B57C;
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 18px 20px 18px 26px;
+  box-shadow: 0 10px 22px -14px rgba(42,36,19,.4);
+  box-sizing: border-box;
+}
+
+.cardLib::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #A13D2B;
+  opacity: .55;
+}
+
+.cardLib .cover {
+  width: 80px;
+  aspect-ratio: 2/3;
+  flex-shrink: 0;
+  transform: rotate(-3deg);
+  border: 1px solid #8C7A44;
+  box-shadow: 2px 3px 0 rgba(42,36,19,.15);
+  align-self: flex-start;
+  margin-top: 4px;
+  background-size: cover;
+  background-position: center;
+}
+
+.cardLib .fields {
+  flex: 1;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.8;
+}
+
+.cardLib .row {
+  display: flex;
+  gap: 6px;
+}
+
+.cardLib .k {
+  color: #8C7A44;
+  min-width: 64px;
+  flex-shrink: 0;
+}
+
+.cardLib .v {
+  color: #2A2413;
+}
+
+.cardLib .titleV {
+  font-weight: 600;
+}
+
+.cardLib .stamp {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px dashed #A13D2B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: rotate(-14deg);
+  color: #A13D2B;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  opacity: .85;
+}
+
+/* ── 04 Afiche Pulp ── */
+.showcasePo {
+  background: #2E0F16;
+  color: #F3E4D6;
+}
+
+.showcasePo .showcaseNum { color: #D9A94C; }
+.showcasePo .showcaseDesc { color: #C8AA9B; }
+
+.cardPo {
+  width: 250px;
+  aspect-ratio: 2/3;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 22px 44px -18px rgba(0,0,0,.6);
+  transition: transform .3s ease;
+}
+
+.cardPo:hover {
+  transform: translateY(-6px);
+}
+
+.cardPo .cover {
+  position: absolute;
+  inset: 0;
+  transition: transform .5s ease;
+  background-size: cover;
+  background-position: center;
+}
+
+.cardPo:hover .cover {
+  transform: scale(1.06);
+}
+
+.cardPo .scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(20,6,9,.92) 100%);
+}
+
+.cardPo .ribbon {
+  position: absolute;
+  top: 14px;
+  right: -34px;
+  background: #D9A94C;
+  color: #2E0F16;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  padding: 4px 40px;
+  transform: rotate(35deg);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.cardPo .meta {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 3;
+}
+
+.cardPo .title {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 23px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: #F3E4D6;
+  margin-bottom: 8px;
+}
+
+.cardPo .author {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #D9A94C;
+}
+
+/* ── 05 Flip Interactiva ── */
+.showcaseFl {
+  background: #F1ECFA;
+  color: #352C4A;
+  font-family: 'Poppins', sans-serif;
+}
+
+.showcaseFl .showcaseNum { color: #8E7BC7; }
+.showcaseFl .showcaseDesc { color: #6E6389; }
+
+.flipCard {
+  width: 230px;
+  height: 340px;
+  perspective: 1200px;
+  cursor: pointer;
+  outline-offset: 4px;
+}
+
+.flipCard:focus-visible {
+  outline: 3px solid #8E7BC7;
+  border-radius: 20px;
+}
+
+.flipInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform .55s cubic-bezier(.4, .2, .2, 1);
+  transform-style: preserve-3d;
+  border-radius: 20px;
+  box-shadow: 0 16px 34px -18px rgba(53, 44, 74, .35);
+}
+
+.isFlipped .flipInner {
+  transform: rotateY(180deg);
+}
+
+.flipFace {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.flipFront {
+  background: #EDE7F6;
+  display: flex;
+  flex-direction: column;
+}
+
+.flipFront .cover {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+}
+
+.flipFront .pill {
+  background: #FFFEFC;
+  margin: -22px 16px 16px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 18px -10px rgba(53, 44, 74, .3);
+  position: relative;
+  z-index: 2;
+}
+
+.flipFront .title {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #352C4A;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.flipFront .author {
+  font-size: 11.5px;
+  color: #8E7BC7;
+  font-weight: 500;
+}
+
+.tapHint {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, .85);
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.flipBack {
+  background: #FBE3D0;
+  transform: rotateY(180deg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.flipBack .title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #352C4A;
+  margin-bottom: 8px;
+}
+
+.flipBack .stars {
+  font-size: 13px;
+  color: #D98A4C;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.flipBack .synopsis {
+  font-size: 12.5px;
+  color: #5C4E38;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.flipBack .tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 12px 0 14px;
+}
+
+.tag {
+  background: #FFFFFF88;
+  border: 1px solid #E8B98A;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 10px;
+  color: #7A4B22;
+}
+
+.flipBack .cta {
+  align-self: flex-start;
+  background: #352C4A;
+  color: #F1ECFA;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .cardsRow {
+    justify-content: center;
+  }
+}
