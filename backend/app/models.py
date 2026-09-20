@@ -72,20 +72,6 @@ class Libro(Base):
     id_autor: Mapped[int | None] = mapped_column(ForeignKey("autor.id"))
 
 
-class Notebook(Base):
-    __tablename__ = "notebooks"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    numero_inventario: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    estado: Mapped[str] = mapped_column(String(50), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
-
-
 class Prestamo(Base):
     __tablename__ = "prestamo"
 
@@ -102,7 +88,6 @@ class Prestamo(Base):
     )
     id_usuario: Mapped[int] = mapped_column(ForeignKey("usuario.id"), nullable=False)
     id_libro: Mapped[int | None] = mapped_column(ForeignKey("libros.id"))
-    id_notebook: Mapped[int | None] = mapped_column(ForeignKey("notebooks.id"))
     id_socio: Mapped[int] = mapped_column(ForeignKey("socios.id"), nullable=False)
 
 

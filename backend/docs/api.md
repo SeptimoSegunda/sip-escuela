@@ -2,7 +2,7 @@
 
 ## Qué es esto
 
-Una API REST para gestionar una biblioteca escolar: libros, notebooks, préstamos a socios, autores, editoriales y usuarios del sistema.
+Una API REST para gestionar una biblioteca escolar: libros, préstamos a socios, autores, editoriales y usuarios del sistema.
 
 ## Cómo funciona
 
@@ -64,12 +64,10 @@ class Libro(Base):
 Libro ──id_autor──→ Autor
 Libro ──id_editorial──→ Editorial
 Prestamo ──id_libro──→ Libro (nullable)
-Prestamo ──id_notebook──→ Notebook (nullable)
 Prestamo ──id_usuario──→ Usuario
 Prestamo ──id_socio──→ Socio
 ```
 
-Un préstamo puede tener `id_libro` O `id_notebook` (o ambos null si se prestara otra cosa).
 
 ### `schemas.py` - Validación de datos
 
@@ -162,11 +160,6 @@ def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
 | `POST` | `/api/libros/` | Crea un libro |
 | `PUT` | `/api/libros/{id}` | Actualiza un libro |
 | `DELETE` | `/api/libros/{id}` | Elimina un libro |
-| `GET` | `/api/notebooks/` | Lista todas las notebooks |
-| `GET` | `/api/notebooks/{id}` | Obtiene una notebook |
-| `POST` | `/api/notebooks/` | Crea una notebook |
-| `PUT` | `/api/notebooks/{id}` | Actualiza una notebook |
-| `DELETE` | `/api/notebooks/{id}` | Elimina una notebook |
 | `GET` | `/api/prestamos/` | Lista todos los préstamos |
 | `GET` | `/api/prestamos/{id}` | Obtiene un préstamo |
 | `POST` | `/api/prestamos/` | Crea un préstamo |
@@ -206,21 +199,6 @@ curl -X POST http://localhost:8000/api/prestamos/ \
     "estado": "activo",
     "id_usuario": 1,
     "id_libro": 1,
-    "id_socio": 1
-  }'
-```
-
-**Crear un préstamo (notebook):**
-```bash
-curl -X POST http://localhost:8000/api/prestamos/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "id_prestamo": "PRE-002",
-    "fecha_prestamo": "2026-08-26",
-    "fecha_limite": "2026-09-10",
-    "estado": "activo",
-    "id_usuario": 1,
-    "id_notebook": 1,
     "id_socio": 1
   }'
 ```

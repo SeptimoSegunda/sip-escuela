@@ -3,12 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.config import engine, Base, get_db
-from app.models import Autor, Editorial, Libro, Notebook, Prestamo, Socio, Usuario
+from app.models import Autor, Editorial, Libro, Prestamo, Socio, Usuario
 from app.schemas import (
     AutorCreate, AutorUpdate, AutorResponse,
     EditorialCreate, EditorialUpdate, EditorialResponse,
     LibroCreate, LibroUpdate, LibroResponse,
-    NotebookCreate, NotebookUpdate, NotebookResponse,
     PrestamoCreate, PrestamoUpdate, PrestamoResponse,
     SocioCreate, SocioUpdate, SocioResponse,
     UsuarioCreate, UsuarioUpdate, UsuarioResponse,
@@ -212,52 +211,6 @@ def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
     db.delete(libro)
     db.commit()
     return {"detail": "Libro eliminado"}
-
-
-# ── Notebooks ───────────────────────────────────────────
-
-@app.get("/api/notebooks/", response_model=list[NotebookResponse])
-def listar_notebooks(db: Session = Depends(get_db)):
-    return db.query(Notebook).all()
-
-
-@app.get("/api/notebooks/{notebook_id}", response_model=NotebookResponse)
-def obtener_notebook(notebook_id: int, db: Session = Depends(get_db)):
-    notebook = db.query(Notebook).filter(Notebook.id == notebook_id).first()
-    if not notebook:
-        raise HTTPException(status_code=404, detail="Notebook no encontrado")
-    return notebook
-
-
-@app.post("/api/notebooks/", response_model=NotebookResponse, status_code=201)
-def crear_notebook(data: NotebookCreate, db: Session = Depends(get_db)):
-    notebook = Notebook(**data.model_dump())
-    db.add(notebook)
-    db.commit()
-    db.refresh(notebook)
-    return notebook
-
-
-@app.put("/api/notebooks/{notebook_id}", response_model=NotebookResponse)
-def actualizar_notebook(notebook_id: int, data: NotebookUpdate, db: Session = Depends(get_db)):
-    notebook = db.query(Notebook).filter(Notebook.id == notebook_id).first()
-    if not notebook:
-        raise HTTPException(status_code=404, detail="Notebook no encontrado")
-    for key, value in data.model_dump(exclude_unset=True).items():
-        setattr(notebook, key, value)
-    db.commit()
-    db.refresh(notebook)
-    return notebook
-
-
-@app.delete("/api/notebooks/{notebook_id}")
-def eliminar_notebook(notebook_id: int, db: Session = Depends(get_db)):
-    notebook = db.query(Notebook).filter(Notebook.id == notebook_id).first()
-    if not notebook:
-        raise HTTPException(status_code=404, detail="Notebook no encontrado")
-    db.delete(notebook)
-    db.commit()
-    return {"detail": "Notebook eliminado"}
 
 
 # ── Prestamos ───────────────────────────────────────────

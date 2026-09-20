@@ -161,28 +161,6 @@ class LibroResponse(BaseModel):
     id_autor: int | None
 
 
-# ── Notebook ────────────────────────────────────────────
-
-class NotebookCreate(BaseModel):
-    numero_inventario: str
-    estado: str
-
-
-class NotebookUpdate(BaseModel):
-    numero_inventario: str | None = None
-    estado: str | None = None
-
-
-class NotebookResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    numero_inventario: str
-    estado: str
-    created_at: datetime
-    updated_at: datetime
-
-
 # ── Prestamo ────────────────────────────────────────────
 
 class PrestamoCreate(BaseModel):
@@ -192,7 +170,6 @@ class PrestamoCreate(BaseModel):
     estado: str
     id_usuario: int
     id_libro: int | None = None
-    id_notebook: int | None = None
     id_socio: int
 
 
@@ -203,7 +180,6 @@ class PrestamoUpdate(BaseModel):
     estado: str | None = None
     id_usuario: int | None = None
     id_libro: int | None = None
-    id_notebook: int | None = None
     id_socio: int | None = None
 
 
@@ -219,7 +195,6 @@ class PrestamoResponse(BaseModel):
     updated_at: datetime
     id_usuario: int
     id_libro: int | None
-    id_notebook: int | None
     id_socio: int
 
 
