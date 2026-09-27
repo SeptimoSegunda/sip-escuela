@@ -10,13 +10,16 @@ import { ViewInicio } from "@/components/views/ViewInicio";
 import { ViewCatalogo } from "@/components/views/ViewCatalogo";
 import { ViewPrestamos } from "@/components/views/ViewPrestamos";
 import { ViewSocios } from "@/components/views/ViewSocios";
-import { ViewReportes } from "@/components/views/ViewReportes";
+import { ViewDanos } from "@/components/views/ViewDanos";
+import { ViewAuditoria } from "@/components/views/ViewAuditoria";
 
 import { ModalPrestamo } from "@/components/modals/ModalPrestamo";
 import { ModalDevolucion } from "@/components/modals/ModalDevolucion";
 import { ModalSocio } from "@/components/modals/ModalSocio";
 import { ModalNuevoLibro } from "@/components/modals/ModalNuevoLibro";
 import { ModalDetalleLibro } from "@/components/modals/ModalDetalleLibro";
+import { ModalNuevoDano } from "@/components/modals/ModalNuevoDano";
+import { ModalExpedienteSocio } from "@/components/modals/ModalExpedienteSocio";
 
 export default function DashboardPage() {
   const { activeView, activeModal } = useApp();
@@ -31,8 +34,10 @@ export default function DashboardPage() {
         return <ViewPrestamos />;
       case "socios":
         return <ViewSocios />;
-      case "reportes":
-        return <ViewReportes />;
+      case "danos":
+        return <ViewDanos />;
+      case "auditoria":
+        return <ViewAuditoria />;
       default:
         return <ViewInicio />;
     }
@@ -57,6 +62,8 @@ export default function DashboardPage() {
       {activeModal === "socio" && <ModalSocio />}
       {activeModal === "nuevoLibro" && <ModalNuevoLibro />}
       {activeModal === "detalleLibro" && <ModalDetalleLibro />}
+      {activeModal === "nuevoDano" && <ModalNuevoDano />}
+      {activeModal === "expedienteSocio" && <ModalExpedienteSocio />}
     </>
   );
 }
