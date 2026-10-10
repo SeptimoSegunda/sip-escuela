@@ -1,0 +1,163 @@
+.dashboardHeader {
+  background-color: var(--bg-surface);
+  border-bottom: 2px solid var(--beige-anchor);
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ── Logo ── */
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+}
+
+.logoImg {
+  object-fit: contain;
+  border-radius: 50%;
+  background-color: var(--bg-base);
+  padding: 2px;
+  border: 1px solid var(--beige-anchor);
+  box-shadow: 0 2px 4px rgba(11, 63, 125, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.logoContainer:hover .logoImg {
+  transform: scale(1.04);
+}
+
+.logoTextGroup {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--accent-brown);
+  line-height: 1.1;
+}
+
+.logoSubtitle {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+/* ── Admin control ── */
+.headerAdminControl {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.adminSelectorWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.adminSelectorLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .adminSelectorLabel {
+    display: none;
+  }
+}
+
+.adminPill {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: var(--bg-base);
+  border: 1.5px solid var(--beige-dark);
+  padding: 0.35rem 0.9rem;
+  border-radius: 24px;
+  cursor: default;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.adminAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.manana {
+  background: linear-gradient(135deg, #F39C12, #F1C40F);
+  color: #3E2723;
+}
+
+.tarde {
+  background: linear-gradient(135deg, #D35400, #E67E22);
+  color: #ffffff;
+}
+
+.adminInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.adminName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.adminBadgeRole {
+  font-size: 0.65rem;
+  color: var(--accent-brown);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Logout button ── */
+.btnAdminLogout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: var(--bg-base);
+  border: 1.5px solid var(--beige-dark);
+  padding: 0.45rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-brown);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+}
+
+.btnAdminLogout:hover {
+  background-color: #fee2e2;
+  border-color: #fecaca;
+  color: #991b1b;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(153, 27, 27, 0.12);
+}

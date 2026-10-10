@@ -1,0 +1,67 @@
+.inputFieldGroup {
+  margin-bottom: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inputLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0B2545;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIconLeft {
+  position: absolute;
+  left: 0.85rem;
+  color: #5B7A9C;
+  pointer-events: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.loginInput {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1.5px solid #CFE7FF;
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem 0.7rem 2.4rem;
+  font-size: 0.9rem;
+  color: #0B2545;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.loginInput:focus {
+  border-color: #0B3F7D;
+  box-shadow: 0 0 0 3px rgba(11, 63, 125, 0.15);
+}
+
+.loginInput::placeholder {
+  color: #8CB5EA;
+}
+
+.inputBtnToggle {
+  position: absolute;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  color: #5B7A9C;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.inputBtnToggle:hover {
+  color: #0B3F7D;
+}

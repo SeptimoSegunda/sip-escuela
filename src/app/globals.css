@@ -1,0 +1,439 @@
+/* ============================================================
+   SIPnr — Design System & Global Tokens
+   Paleta: Azul y Blanca (dash/v2/styles.css)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ── 1. CSS Variables (Design Tokens) ─────────────────────── */
+:root {
+  /* ── Paleta Oficial (azul y blanca) ── */
+  --bg-base:         #EAF5FF;   /* fondo general */
+  --bg-surface:      #FFFFFF;   /* cards, panels */
+  --bg:              #EAF5FF;   /* alias body */
+  --beige-anchor:    #CFE7FF;   /* bordes suaves */
+  --beige-dark:      #8CB5EA;   /* bordes más definidos */
+  --cream:           #FFFFFF;
+
+  /* Azules principales */
+  --navy:            #0B2545;
+  --blue:            #0B3F7D;
+  --blue-hover:      #082E5C;
+  --accent-brown:    #0B3F7D;   /* reutilizado para azul primario */
+
+  /* Colores de acento */
+  --accent-salvia:   #7EC4FF;
+  --accent-terracotta: #F2B1B7;
+  --accent-mustard:  #D8B9E8;
+  --terracotta:      #F2B1B7;
+  --mustard:         #D8B9E8;
+
+  /* Tipografía */
+  --text:            #0B2545;
+  --text-main:       #0B2545;
+  --text-muted:      #5B7A9C;
+
+  /* Alias semánticos */
+  --primary:         var(--blue);
+  --primary-hover:   var(--blue-hover);
+  --border-radius:   12px;
+  --font-family:     'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Dashboard específicos */
+  --sidebar-width:   220px;
+  --header-height:   64px;
+  --shadow-sm:       0 2px 8px rgba(11, 37, 69, 0.08);
+  --shadow-md:       0 4px 14px rgba(11, 37, 69, 0.12);
+  --shadow-lg:       0 15px 30px rgba(11, 37, 69, 0.08);
+  --transition:      0.2s ease-in-out;
+}
+
+/* ── 2. Reset & Base ───────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── 3. Utility Classes ────────────────────────────────────── */
+
+/* Badges de estado */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.badge-available {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-loaned {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-overdue {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-damaged {
+  background-color: #ffedd5;
+  color: #9a3412;
+}
+
+/* ── 4. Botones globales ───────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  border: none;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(58, 118, 159, 0.35);
+}
+
+.btn-primary:hover {
+  background-color: var(--blue-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(58, 118, 159, 0.45);
+}
+
+.btn-secondary {
+  background-color: var(--cream);
+  color: var(--green-light);
+  border: 1px solid var(--beige);
+}
+
+.btn-secondary:hover {
+  background-color: var(--beige);
+  color: var(--text);
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* ── 5. Tablas globales ────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table th {
+  background-color: var(--bg-base);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--beige-dark);
+}
+
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--beige-dark);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(11, 63, 125, 0.06);
+}
+
+/* ── 6. Formularios globales ───────────────────────────────── */
+.form-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--beige-dark);
+  border-radius: 8px;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-family: var(--font-family);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(58, 118, 159, 0.15);
+}
+
+/* ── 7. Modales globales ───────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(11, 37, 69, 0.55);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-window {
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+/* ── 8. Métricas / KPI Cards ───────────────────────────────── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-dark);
+  border-radius: var(--border-radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition);
+}
+
+.metric-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.metric-icon--salvia {
+  background-color: #dbeeff;
+  color: var(--blue);
+}
+
+.metric-icon--mustard {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.metric-icon--terracotta {
+  background-color: #ffedd5;
+  color: var(--terracotta);
+}
+
+.metric-icon--catastrofico {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.metric-data h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.metric-data p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* ── 9. Report Cards ───────────────────────────────────────── */
+.report-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-dark);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.report-card-header {
+  margin-bottom: 1rem;
+}
+
+.report-card-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.dashboard-simple-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ── 10. Secciones comunes del Dashboard ───────────────────── */
+.welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.welcome-text h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.welcome-text p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catalog-section {
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--beige-dark);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+/* ── 11. Filtros / Pills ───────────────────────────────────── */
+.btn-filter {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--beige-dark);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all var(--transition);
+}
+
+.btn-filter.active,
+.btn-filter:hover {
+  background-color: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+/* ── 12. Spinner ───────────────────────────────────────────── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 13. Responsive base ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .dashboard-simple-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

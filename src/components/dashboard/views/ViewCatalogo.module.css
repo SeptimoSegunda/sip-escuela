@@ -1,0 +1,383 @@
+.viewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Encabezado ── */
+.welcomeSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.viewTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.25rem;
+}
+
+.viewSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Sección catálogo ── */
+.catalogSection {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-anchor);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.2rem;
+}
+
+.sectionCount {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.searchTools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.searchBar {
+  background-color: var(--bg-base);
+  border: 1px solid var(--beige-dark);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 300px;
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text-main);
+  width: 100%;
+  font-size: 0.8rem;
+  font-family: inherit;
+}
+
+.btnAssistedSearch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-base);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 20px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent-brown);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btnAssistedSearch:hover {
+  background: var(--beige-anchor);
+  border-color: var(--accent-brown);
+}
+
+/* ── Barra de acciones grupal ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
+
+.groupDeleteBar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #fee2e2;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+}
+
+.groupDeleteCount {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.btnDanger:hover {
+  background: #b91c1c;
+}
+
+.btnSecondarySmall {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--beige-dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Tabla ── */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dataTable th,
+.dataTable td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--beige-anchor);
+  font-size: 0.9rem;
+}
+
+.dataTable th {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.thCheck {
+  width: 36px;
+  text-align: center;
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTable tbody tr:hover td {
+  background-color: var(--bg-base);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 2.5rem 1rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── Celdas especiales ── */
+.cellMono {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bookTitle {
+  display: block;
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.bookAuthor {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.bookCategory {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+
+.copiesCount {
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── Botones de acción ── */
+.actionBtns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btnView,
+.btnEdit {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+
+.btnView {
+  background-color: #f0fdf4;
+  color: #166534;
+}
+
+.btnView:hover {
+  background-color: #bbf7d0;
+}
+
+.btnEdit {
+  background-color: #e2f3ff;
+  color: #074b83;
+}
+
+.btnEdit:hover {
+  background-color: #bae2ff;
+}
+
+/* ── Portada en tabla ── */
+.tituloConPortada {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.portadaThumb {
+  width: 36px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--beige-dark);
+  flex-shrink: 0;
+}
+
+.portadaPlaceholder {
+  width: 36px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--beige-anchor);
+  border-radius: 4px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* ── Banner filtro activo (búsqueda asistida) ── */
+.filtroActivoBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 20px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #92400e;
+  white-space: nowrap;
+}
+
+.btnLimpiarFiltro {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b45309;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+.btnLimpiarFiltro:hover { color: #92400e; }

@@ -1,0 +1,166 @@
+.viewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Encabezado ── */
+.welcomeSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.viewTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.periodoSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.periodoLabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--accent-brown);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.periodoSelect {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--beige-dark);
+  background: var(--bg-surface);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-main);
+  outline: none;
+}
+
+/* ── Grid de métricas ── */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Grids de gráficos ── */
+.dashGrid,
+.dashGridBottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .dashGrid,
+  .dashGridBottom {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Historial ── */
+.historialHeader {
+  margin-bottom: 0.5rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.dataTable th,
+.dataTable td {
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--beige-anchor);
+}
+
+.dataTable th {
+  background: var(--beige-anchor);
+  color: var(--accent-brown);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.dataTable tbody tr:hover td {
+  background-color: var(--bg-base);
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Fecha vencida */
+.fechaVencida {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+
+.emptyState {
+  text-align: center;
+  padding: 1.5rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.cellMono {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Ícono de fondo decorativo en los charts ── */
+.chartFontIconWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  opacity: 0.06;
+  pointer-events: none;
+  user-select: none;
+}
+
+.chartBgIcon {
+  font-size: 3.5rem;
+  color: var(--accent-brown);
+}
+
+/* ── Empty chart ── */
+.emptyChart {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}

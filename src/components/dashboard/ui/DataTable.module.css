@@ -1,0 +1,58 @@
+.tableSection {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-anchor);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* ── Cabecera de sección ── */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Tabla ── */
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dataTable th,
+.dataTable td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--beige-anchor);
+  font-size: 0.9rem;
+}
+
+.dataTable th {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTable tbody tr:hover td {
+  background-color: var(--bg-base);
+}
+
+/* ── Estado vacío ── */
+.emptyState {
+  text-align: center;
+  padding: 2.5rem 1rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
