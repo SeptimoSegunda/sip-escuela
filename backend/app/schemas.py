@@ -168,7 +168,7 @@ class PrestamoCreate(BaseModel):
     fecha_prestamo: str
     fecha_limite: str
     estado: str
-    id_usuario: int
+    id_usuario: int | None = None  # Se inyecta desde header X-Active-Shift
     id_libro: int | None = None
     id_socio: int
 
@@ -231,3 +231,29 @@ class UsuarioResponse(BaseModel):
     turno: str | None
     tipo_usuario: str
     email: str
+
+
+# ── Usuario (simplificado para turnos) ────────────────────
+
+class UsuarioTurnoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nombre: str
+    turno: str
+    activo: bool
+
+
+# ── Auditoria ─────────────────────────────────────────────
+
+class AuditoriaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    endpoint: str
+    metodo: str
+    turno: str
+    status_code: int
+    duracion_ms: int
+    created_at: datetime
+    id_usuario: int | None

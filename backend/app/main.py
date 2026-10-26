@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.config import engine, Base, get_db
-from app.models import Autor, Editorial, Libro, Prestamo, Socio, Usuario
+from app.models import Autor, Editorial, Libro, Prestamo, Socio, Usuario, Auditoria
 from app.schemas import (
     AutorCreate, AutorUpdate, AutorResponse,
     EditorialCreate, EditorialUpdate, EditorialResponse,
@@ -11,9 +12,17 @@ from app.schemas import (
     PrestamoCreate, PrestamoUpdate, PrestamoResponse,
     SocioCreate, SocioUpdate, SocioResponse,
     UsuarioCreate, UsuarioUpdate, UsuarioResponse,
+    UsuarioTurnoResponse, AuditoriaResponse,
 )
 
+# --- NUEVO: import middleware y dependencia ---
+from app.middleware.auditoria import AuditoriaMiddleware
+from app.dependencies import get_turno_actual
+
 app = FastAPI(title="SIP-Escuela API", version="0.1.0")
+
+# --- NUEVO: registrar middleware de auditoría ---
+app.add_middleware(AuditoriaMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -229,8 +238,15 @@ def obtener_prestamo(prestamo_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/prestamos/", response_model=PrestamoResponse, status_code=201)
-def crear_prestamo(data: PrestamoCreate, db: Session = Depends(get_db)):
-    prestamo = Prestamo(**data.model_dump())
+def crear_prestamo(
+    data: PrestamoCreate,
+    usuario: Usuario = Depends(get_turno_actual),   # ← inyecta el usuario del turno actual
+    db: Session = Depends(get_db)
+):
+    # data.id_usuario viene del frontend, pero lo sobrescribimos con el turno real
+    prestamo_data = data.model_dump()
+    prestamo_data["id_usuario"] = usuario.id
+    prestamo = Prestamo(**prestamo_data)
     db.add(prestamo)
     db.commit()
     db.refresh(prestamo)
@@ -303,6 +319,46 @@ def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db.delete(usuario)
     db.commit()
     return {"detail": "Usuario eliminado"}
+
+
+# --- NUEVO: Auditoría ---
+@app.get("/api/auditoria/", response_model=list[AuditoriaResponse])
+def listar_auditoria(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    return db.query(Auditoria).order_by(Auditoria.created_at.desc()).offset(skip).limit(limit).all()
+
+
+# --- NUEVO: Endpoint para obtener el turno actual (útil para frontend) ---
+@app.get("/api/turno/actual", response_model=UsuarioTurnoResponse)
+def obtener_turno_actual(usuario: Usuario = Depends(get_turno_actual)):
+    """
+    Devuelve info del turno actual basado en el header X-Active-Shift.
+    El frontend puede usarlo para mostrar 'Turno Mañana' / 'Turno Tarde'.
+    """
+    return usuario
+
+
+# --- NUEVO: Endpoint validar cambio de turno (opcional) ---
+@app.get("/api/turno/validar")
+def validar_cambio(turno_nuevo: str, usuario_actual: Usuario = Depends(get_turno_actual)):
+    """
+    Frontend llama antes de hacer el switch.
+    Reglas de negocio: ej. no permitir 'tarde' antes de las 13:00.
+    """
+    turno_nuevo = turno_nuevo.lower().strip()
+    if turno_nuevo not in ("mañana", "tarde"):
+        return {"permitido": False, "motivo": "Turno inválido"}
+
+    ahora = datetime.now().hour
+    if turno_nuevo == "tarde" and ahora < 13:
+        return {"permitido": False, "motivo": "El turno tarde empieza a las 13:00"}
+    if turno_nuevo == "mañana" and ahora >= 13:
+        return {"permitido": False, "motivo": "El turno mañana terminó a las 13:00"}
+
+    return {"permitido": True}
 
 
 @app.on_event("startup")
