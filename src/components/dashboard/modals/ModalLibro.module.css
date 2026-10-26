@@ -1,0 +1,77 @@
+/* ── ModalLibro — estilos adicionales ── */
+
+/* Portada: upload local */
+.portadaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fileInput {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px dashed var(--beige-dark);
+  border-radius: 8px;
+  background: var(--bg-base);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.fileInput:hover {
+  border-color: var(--accent-brown);
+}
+
+.fileInput::file-selector-button {
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-right: 0.75rem;
+  transition: opacity 0.15s;
+}
+
+.fileInput::file-selector-button:hover {
+  opacity: 0.85;
+}
+
+/* Preview de portada */
+.portadaPreview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.portadaImg {
+  height: 90px;
+  width: auto;
+  max-width: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--beige-dark);
+}
+
+.btnClearPortada {
+  background: none;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnClearPortada:hover {
+  background: #fee2e2;
+}

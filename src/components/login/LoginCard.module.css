@@ -1,0 +1,36 @@
+.loginCard {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px rgba(11, 37, 69, 0.13);
+  padding: 2.5rem 2rem 2rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.loginHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+
+.logoImgSip {
+  object-fit: contain;
+  margin-bottom: 0.25rem;
+}
+
+.loginTitle {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.loginSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted, #6b7280);
+  margin: 0;
+  text-align: center;
+}

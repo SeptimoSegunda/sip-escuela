@@ -1,0 +1,8 @@
+.loginPageWrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+  padding: 1.5rem;
+}

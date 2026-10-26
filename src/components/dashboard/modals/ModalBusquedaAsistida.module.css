@@ -1,0 +1,98 @@
+/* ── ModalBusquedaAsistida — Aguapey style ── */
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-brown);
+  cursor: pointer;
+}
+
+.helpText {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── Filas ── */
+.filasWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+@media (max-width: 520px) {
+  .fila {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Placeholder para la primera fila (sin operador) */
+.opPlaceholder {
+  width: 90px;
+}
+
+/* Grupo de botones de operador */
+.opGroup {
+  display: flex;
+  gap: 3px;
+}
+
+.opBtn {
+  flex: 1;
+  border: 1.5px solid var(--beige-dark);
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 0.3rem 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+}
+
+.opBtn:hover { border-color: var(--accent-brown); color: var(--accent-brown); }
+
+.opBtnActive {
+  background: var(--accent-brown);
+  color: #fff;
+  border-color: var(--accent-brown);
+}
+
+.fieldSelect {
+  font-size: 0.82rem !important;
+  padding: 0.45rem 0.6rem !important;
+}
+
+.queryInput {
+  font-size: 0.85rem !important;
+}

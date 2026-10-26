@@ -1,0 +1,231 @@
+.viewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Encabezado ── */
+.welcomeSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.viewTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 600px;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Grid de métricas ── */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Sección de tabla ── */
+.tableSection {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-anchor);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.filterBar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1.5px solid var(--beige-dark);
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filterBtn:hover {
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
+
+.filterBtnActive {
+  background-color: var(--beige-anchor);
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
+
+.searchBar {
+  background-color: var(--bg-base);
+  border: 1px solid var(--beige-dark);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 280px;
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text-main);
+  width: 100%;
+  font-size: 0.8rem;
+  font-family: inherit;
+}
+
+/* ── Tabla ── */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dataTable th,
+.dataTable td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--beige-anchor);
+  font-size: 0.9rem;
+}
+
+.dataTable th {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTable tbody tr:hover td {
+  background-color: var(--bg-base);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 2.5rem 1rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── Celdas especiales ── */
+.cellMono {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.tipoChip {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-brown);
+}
+
+.incidenciasNum {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.desglose {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.desgloseItem {
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--beige-anchor);
+  padding: 0.15rem 0.45rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+
+.desgloseRed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btnDetalle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-brown);
+  background: none;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btnDetalle:hover {
+  background: var(--beige-anchor);
+  border-color: var(--accent-brown);
+}

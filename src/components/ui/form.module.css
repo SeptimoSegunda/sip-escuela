@@ -1,0 +1,200 @@
+/* ── Formulario: estilos compartidos entre modales ── */
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .formGrid { grid-template-columns: 1fr; }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.formGroupFull {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.labelOptional {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 8px;
+  background: var(--bg-base);
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--accent-brown);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.sectionTitle {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-brown);
+  padding: 0.4rem 0 0.1rem;
+  border-bottom: 1px solid var(--beige-anchor);
+  margin-top: 0.5rem;
+}
+
+/* ── Acciones del formulario ── */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--beige-anchor);
+}
+
+.btnCancel {
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnCancel:hover {
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
+
+.btnSubmit {
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btnSubmit:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btnSubmitDanger {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+}
+
+/* ── Autocomplete ── */
+.autocompleteWrapper {
+  position: relative;
+}
+
+.suggestionList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--beige-dark);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(4, 19, 43, 0.1);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem 0;
+}
+
+.suggestionItem {
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.suggestionItem:hover,
+.suggestionItemActive {
+  background: var(--beige-anchor);
+  color: var(--accent-brown);
+}
+
+.suggestionSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Caja de daño en devolución ── */
+.damageBox {
+  margin-top: 1rem;
+  background: var(--bg-base);
+  border: 1px solid var(--beige-anchor);
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+
+.damageCheckLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #721c24;
+}
+
+.damagePanel {
+  border-top: 1px dashed var(--beige-dark);
+  padding-top: 0.8rem;
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Error inline ── */
+.errorMsg {
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}

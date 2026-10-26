@@ -1,0 +1,56 @@
+.metricCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--beige-anchor);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.metricIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* Variantes de color */
+.icon--salvia {
+  background-color: var(--accent-salvia);
+  color: #073b6e;
+}
+
+.icon--terracotta {
+  background-color: var(--accent-terracotta);
+  color: #8a1e2b;
+}
+
+.icon--mustard {
+  background-color: var(--accent-mustard);
+  color: #551e70;
+}
+
+.icon--catastrofico {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Datos */
+.metricData h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.metricData p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
