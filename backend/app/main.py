@@ -4,9 +4,11 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.config import engine, Base, get_db
-from app.models import Autor, Editorial, Libro, Prestamo, Socio, Usuario, Auditoria
+from app.models import Autor, Copia, Dano, Editorial, Libro, Prestamo, Socio, Usuario, Auditoria
 from app.schemas import (
     AutorCreate, AutorUpdate, AutorResponse,
+    CopiaCreate, CopiaUpdate, CopiaResponse,
+    DanoCreate, DanoUpdate, DanoResponse,
     EditorialCreate, EditorialUpdate, EditorialResponse,
     LibroCreate, LibroUpdate, LibroResponse,
     PrestamoCreate, PrestamoUpdate, PrestamoResponse,
@@ -222,6 +224,44 @@ def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
     return {"detail": "Libro eliminado"}
 
 
+# ── Copias ──────────────────────────────────────────────
+
+@app.get("/api/copias/", response_model=list[CopiaResponse])
+def listar_copias(db: Session = Depends(get_db)):
+    return db.query(Copia).all()
+
+
+@app.post("/api/copias/", response_model=CopiaResponse, status_code=201)
+def crear_copia(data: CopiaCreate, db: Session = Depends(get_db)):
+    copia = Copia(**data.model_dump())
+    db.add(copia)
+    db.commit()
+    db.refresh(copia)
+    return copia
+
+
+@app.put("/api/copias/{copia_id}", response_model=CopiaResponse)
+def actualizar_copia(copia_id: int, data: CopiaUpdate, db: Session = Depends(get_db)):
+    copia = db.query(Copia).filter(Copia.id == copia_id).first()
+    if not copia:
+        raise HTTPException(status_code=404, detail="Copia no encontrada")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(copia, key, value)
+    db.commit()
+    db.refresh(copia)
+    return copia
+
+
+@app.delete("/api/copias/{copia_id}")
+def eliminar_copia(copia_id: int, db: Session = Depends(get_db)):
+    copia = db.query(Copia).filter(Copia.id == copia_id).first()
+    if not copia:
+        raise HTTPException(status_code=404, detail="Copia no encontrada")
+    db.delete(copia)
+    db.commit()
+    return {"detail": "Copia eliminada"}
+
+
 # ── Prestamos ───────────────────────────────────────────
 
 @app.get("/api/prestamos/", response_model=list[PrestamoResponse])
@@ -273,6 +313,50 @@ def eliminar_prestamo(prestamo_id: int, db: Session = Depends(get_db)):
     db.delete(prestamo)
     db.commit()
     return {"detail": "Prestamo eliminado"}
+
+
+# ── Danos ───────────────────────────────────────────────
+
+@app.get("/api/danos/", response_model=list[DanoResponse])
+def listar_danos(db: Session = Depends(get_db)):
+    return db.query(Dano).all()
+
+
+@app.post("/api/danos/", response_model=DanoResponse, status_code=201)
+def crear_dano(
+    data: DanoCreate,
+    usuario: Usuario = Depends(get_turno_actual),
+    db: Session = Depends(get_db)
+):
+    dano_data = data.model_dump()
+    dano_data["turno"] = usuario.turno
+    dano = Dano(**dano_data)
+    db.add(dano)
+    db.commit()
+    db.refresh(dano)
+    return dano
+
+
+@app.put("/api/danos/{dano_id}", response_model=DanoResponse)
+def actualizar_dano(dano_id: int, data: DanoUpdate, db: Session = Depends(get_db)):
+    dano = db.query(Dano).filter(Dano.id == dano_id).first()
+    if not dano:
+        raise HTTPException(status_code=404, detail="Daño no encontrado")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(dano, key, value)
+    db.commit()
+    db.refresh(dano)
+    return dano
+
+
+@app.delete("/api/danos/{dano_id}")
+def eliminar_dano(dano_id: int, db: Session = Depends(get_db)):
+    dano = db.query(Dano).filter(Dano.id == dano_id).first()
+    if not dano:
+        raise HTTPException(status_code=404, detail="Daño no encontrado")
+    db.delete(dano)
+    db.commit()
+    return {"detail": "Daño eliminado"}
 
 
 # ── Usuarios ────────────────────────────────────────────

@@ -2,10 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-const SIP_CURRENT_ADMIN_KEY = 'SIP_CURRENT_ADMIN';
-const SIP_AUTH_USER_KEY = 'SIP_AUTH_USER';
-const SIP_AUTH_TIME_KEY = 'SIP_AUTH_TIME';
+import { setActiveTurno } from '@/lib/api';
 
 export interface SesionAdmin {
   turno: string;
@@ -13,35 +10,28 @@ export interface SesionAdmin {
   horaIngreso: string;
 }
 
-/** Guarda la sesión en localStorage. */
+/** Sesión en memoria (sin localStorage). Se pierde al recargar la página. */
+let sessionState: SesionAdmin | null = null;
+
+/** Guarda la sesión activa y configura el turno para las llamadas a la API. */
 export function guardarSesion(turno: string, usuario: string): void {
-  localStorage.setItem(SIP_CURRENT_ADMIN_KEY, turno);
-  localStorage.setItem(SIP_AUTH_USER_KEY, usuario);
-  localStorage.setItem(SIP_AUTH_TIME_KEY, new Date().toISOString());
+  sessionState = { turno, usuario, horaIngreso: new Date().toISOString() };
+  setActiveTurno(turno);
 }
 
 /** Obtiene la sesión activa, o null si no hay ninguna. */
 export function obtenerSesion(): SesionAdmin | null {
-  if (typeof window === 'undefined') return null;
-
-  const turno = localStorage.getItem(SIP_CURRENT_ADMIN_KEY);
-  const usuario = localStorage.getItem(SIP_AUTH_USER_KEY);
-  const horaIngreso = localStorage.getItem(SIP_AUTH_TIME_KEY);
-
-  if (!turno || !usuario || !horaIngreso) return null;
-  return { turno, usuario, horaIngreso };
+  return sessionState;
 }
 
-/** Cierra la sesión limpiando localStorage. */
+/** Cierra la sesión. */
 export function cerrarSesion(): void {
-  localStorage.removeItem(SIP_CURRENT_ADMIN_KEY);
-  localStorage.removeItem(SIP_AUTH_USER_KEY);
-  localStorage.removeItem(SIP_AUTH_TIME_KEY);
+  sessionState = null;
+  setActiveTurno(null);
 }
 
 /**
  * Hook de guardia: redirige al login si no hay sesión activa.
- * Usar en páginas protegidas (dashboard).
  */
 export function useRequireAuth(): SesionAdmin | null {
   const router = useRouter();
@@ -58,7 +48,6 @@ export function useRequireAuth(): SesionAdmin | null {
 
 /**
  * Hook de guardia inversa: redirige al dashboard si ya hay sesión.
- * Usar en la página de login.
  */
 export function useRedirectIfAuth(): void {
   const router = useRouter();

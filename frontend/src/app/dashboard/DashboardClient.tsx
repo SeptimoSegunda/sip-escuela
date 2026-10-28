@@ -21,11 +21,7 @@ import ModalDevolucion     from '@/components/dashboard/modals/ModalDevolucion';
 import ModalDano           from '@/components/dashboard/modals/ModalDano';
 import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
 import type { Socio, Libro } from '@/types';
-import { loadSeedData } from '@/lib/seedData';
 import styles from './page.module.css';
-
-/* Precargar datos de ejemplo si localStorage está vacío */
-if (typeof window !== 'undefined') loadSeedData();
 
 
 /* ── Estado de modales ── */

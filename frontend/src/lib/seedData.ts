@@ -158,15 +158,10 @@ const SEED_AUDIT: AuditLog[] = [
 ];
 
 /**
- * Carga datos de ejemplo en localStorage si las colecciones están vacías.
- * Llama esta función una sola vez al iniciar el dashboard.
+ * Carga datos de ejemplo.
+ * NOTA: ya no se usa localStorage. Los datos se siembran en el backend
+ * con `python seed.py` y se consumen mediante la API.
  */
 export function loadSeedData(): void {
-  if (typeof window === 'undefined') return;
-
-  if (storage.getLibros().length   === 0) storage.setLibros(SEED_LIBROS);
-  if (storage.getSocios().length   === 0) storage.setSocios(SEED_SOCIOS);
-  if (storage.getPrestamos().length === 0) storage.setPrestamos(SEED_PRESTAMOS);
-  if (storage.getDanos().length    === 0) storage.setDanos(SEED_DANOS);
-  if (storage.getAuditLog().length === 0) storage.setAuditLog(SEED_AUDIT);
+  // No-op: los datos provienen del backend vía API.
 }

@@ -1,20 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Socio, TurnoAdmin, EstadoSocio } from '@/types';
-import { storage } from '@/lib/storage';
+import { api, toFrontendId, toBackendId } from '@/lib/api';
 
 /* ────────────────────────────────────────
-   useSocios — CRUD completo de socios
-──────────────────────────────────────── */
-
-function generarIdSocio(socios: Socio[]): string {
-  const nums = socios
-    .map((s) => parseInt(s.id.replace(/\D/g, ''), 10))
-    .filter((n) => !isNaN(n));
-  const max = nums.length > 0 ? Math.max(...nums) : 1000;
-  return `S-${max + 1}`;
-}
+   useSocios — CRUD completo de socios vía API
+ ──────────────────────────────────────── */
 
 export interface NuevoSocioData {
   apellido: string;
@@ -25,84 +17,122 @@ export interface NuevoSocioData {
   email?: string;
 }
 
+function mapSocioDto(dto: any): Socio {
+  return {
+    id:               toFrontendId('socio', dto.id),
+    apellido:         dto.apellido,
+    nombre:           dto.nombre,
+    tipo:             (dto.tipo ?? 'estudiante') as Socio['tipo'],
+    anio:             dto.anio ?? undefined,
+    turno:            dto.turno ?? undefined,
+    email:            dto.email ?? undefined,
+    estado:           'activo' as EstadoSocio,
+    prestamosActivos: 0,
+    fechaRegistro:    dto.created_at ?? new Date().toISOString(),
+  };
+}
+
 export function useSocios(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Socios', accion: string, desc: string, turno: TurnoAdmin) => void
 ) {
-  const [socios, setSocios] = useState<Socio[]>(() => storage.getSocios());
+  const [socios, setSocios] = useState<Socio[]>([]);
+
+  /* ── Cargar ── */
+  const cargarSocios = useCallback(async () => {
+    try {
+      const dtos = await api.getSocios();
+      setSocios(dtos.map(mapSocioDto));
+    } catch (err) {
+      console.error('[useSocios] Error cargando socios:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarSocios();
+  }, [cargarSocios]);
 
   /* ── Crear ── */
   const crearSocio = useCallback(
-    (data: NuevoSocioData): Socio => {
-      const actual = storage.getSocios();
-      const nuevo: Socio = {
-        id:              generarIdSocio(actual),
-        apellido:        data.apellido.trim(),
-        nombre:          data.nombre.trim(),
-        tipo:            data.tipo,
-        anio:            data.anio?.trim(),
-        turno:           data.turno,
-        email:           data.email?.trim(),
-        estado:          'activo',
-        prestamosActivos: 0,
-        fechaRegistro:   new Date().toISOString(),
-      };
+    async (data: NuevoSocioData): Promise<Socio | null> => {
+      try {
+        const dto = await api.createSocio({
+          nombre: data.nombre,
+          apellido: data.apellido,
+          email: data.email ?? '',
+          tipo: data.tipo,
+          matricula: undefined,
+          anio: data.anio,
+          turno: data.turno,
+        });
 
-      const actualizado = [nuevo, ...actual];
-      storage.setSocios(actualizado);
-      setSocios(actualizado);
+        const socio = mapSocioDto(dto);
 
-      registrarAccion(
-        'Socios',
-        'Nuevo Socio Registrado',
-        `Registrado ${nuevo.tipo} ${nuevo.apellido}, ${nuevo.nombre} (ID: ${nuevo.id}).`,
-        turnoAdmin
-      );
+        setSocios((prev) => [socio, ...prev]);
 
-      return nuevo;
+        registrarAccion(
+          'Socios',
+          'Nuevo Socio Registrado',
+          `Registrado ${socio.tipo} ${socio.apellido}, ${socio.nombre} (ID: ${socio.id}).`,
+          turnoAdmin
+        );
+
+        return socio;
+      } catch (err) {
+        console.error('[useSocios] Error creando socio:', err);
+        return null;
+      }
     },
     [turnoAdmin, registrarAccion]
   );
 
   /* ── Editar ── */
   const editarSocio = useCallback(
-    (id: string, cambios: Partial<Omit<Socio, 'id' | 'fechaRegistro'>>): void => {
-      setSocios((prev) => {
-        const actualizado = prev.map((s) =>
-          s.id === id ? { ...s, ...cambios } : s
-        );
-        storage.setSocios(actualizado);
+    async (id: string, cambios: Partial<Omit<Socio, 'id' | 'fechaRegistro'>>): Promise<void> => {
+      const socioId = toBackendId(id);
+      try {
+        const dto = await api.updateSocio(socioId, {
+          nombre: cambios.nombre,
+          apellido: cambios.apellido,
+          email: cambios.email,
+          tipo: cambios.tipo,
+          matricula: undefined,
+          anio: cambios.anio,
+          turno: cambios.turno,
+        });
 
-        const socio = actualizado.find((s) => s.id === id);
-        if (socio) {
-          registrarAccion(
-            'Socios',
-            'Socio Modificado',
-            `Actualizados datos de ${socio.apellido}, ${socio.nombre} (ID: ${id}).`,
-            turnoAdmin
-          );
-        }
-        return actualizado;
-      });
+        setSocios((prev) => prev.map((s) => (s.id === id ? { ...s, ...mapSocioDto(dto) } : s)));
+
+        const socio = mapSocioDto(dto);
+        registrarAccion(
+          'Socios',
+          'Socio Modificado',
+          `Actualizados datos de ${socio.apellido}, ${socio.nombre} (ID: ${id}).`,
+          turnoAdmin
+        );
+      } catch (err) {
+        console.error('[useSocios] Error editando socio:', err);
+      }
     },
     [turnoAdmin, registrarAccion]
   );
 
   /* ── Cambiar estado ── */
   const cambiarEstado = useCallback(
-    (id: string, estado: EstadoSocio): void => {
-      editarSocio(id, { estado });
+    async (id: string, estado: EstadoSocio): Promise<void> => {
+      await editarSocio(id, { estado });
     },
     [editarSocio]
   );
 
   /* ── Eliminar ── */
   const eliminarSocio = useCallback(
-    (id: string): void => {
-      setSocios((prev) => {
-        const socio = prev.find((s) => s.id === id);
-        const actualizado = prev.filter((s) => s.id !== id);
-        storage.setSocios(actualizado);
+    async (id: string): Promise<void> => {
+      try {
+        const socio = socios.find((s) => s.id === id);
+        await api.deleteSocio(toBackendId(id));
+
+        setSocios((prev) => prev.filter((s) => s.id !== id));
 
         if (socio) {
           registrarAccion(
@@ -112,27 +142,49 @@ export function useSocios(
             turnoAdmin
           );
         }
-        return actualizado;
-      });
+      } catch (err) {
+        console.error('[useSocios] Error eliminando socio:', err);
+      }
     },
-    [turnoAdmin, registrarAccion]
+    [socios, turnoAdmin, registrarAccion]
   );
 
-  /* ── Incrementar/decrementar préstamos activos ── */
+  /* ── Ajustar préstamos activos ── */
   const ajustarPrestamosActivos = useCallback(
-    (socioId: string, delta: 1 | -1): void => {
-      setSocios((prev) => {
-        const actualizado = prev.map((s) =>
-          s.id === socioId
-            ? { ...s, prestamosActivos: Math.max(0, s.prestamosActivos + delta) }
-            : s
+    async (socioId: string, delta: 1 | -1): Promise<void> => {
+      try {
+        const socio = socios.find((s) => s.id === socioId);
+        if (!socio) return;
+
+        const nuevoActivos = Math.max(0, socio.prestamosActivos + delta);
+        await api.updateSocio(toBackendId(socioId), {
+          nombre: socio.nombre,
+          apellido: socio.apellido,
+          email: socio.email,
+          tipo: socio.tipo,
+          anio: socio.anio,
+          turno: socio.turno,
+        });
+
+        setSocios((prev) =>
+          prev.map((s) =>
+            s.id === socioId ? { ...s, prestamosActivos: nuevoActivos } : s
+          )
         );
-        storage.setSocios(actualizado);
-        return actualizado;
-      });
+      } catch (err) {
+        console.error('[useSocios] Error ajustando préstamos activos:', err);
+      }
     },
-    []
+    [socios]
   );
 
-  return { socios, crearSocio, editarSocio, cambiarEstado, eliminarSocio, ajustarPrestamosActivos };
+  return {
+    socios,
+    crearSocio,
+    editarSocio,
+    cambiarEstado,
+    eliminarSocio,
+    ajustarPrestamosActivos,
+    recargarSocios: cargarSocios,
+  };
 }

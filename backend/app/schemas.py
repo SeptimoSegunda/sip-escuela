@@ -202,22 +202,12 @@ class PrestamoResponse(BaseModel):
 
 class UsuarioCreate(BaseModel):
     nombre: str
-    apellido: str
-    id_usuario: str
-    ano: int | None = None
     turno: str | None = None
-    tipo_usuario: str
-    email: EmailStr
 
 
 class UsuarioUpdate(BaseModel):
     nombre: str | None = None
-    apellido: str | None = None
-    id_usuario: str | None = None
-    ano: int | None = None
     turno: str | None = None
-    tipo_usuario: str | None = None
-    email: EmailStr | None = None
 
 
 class UsuarioResponse(BaseModel):
@@ -225,12 +215,8 @@ class UsuarioResponse(BaseModel):
 
     id: int
     nombre: str
-    apellido: str
-    id_usuario: str
-    ano: int | None
     turno: str | None
-    tipo_usuario: str
-    email: str
+    activo: bool
 
 
 # ── Usuario (simplificado para turnos) ────────────────────
@@ -242,6 +228,60 @@ class UsuarioTurnoResponse(BaseModel):
     nombre: str
     turno: str
     activo: bool
+
+
+# ── Copia ─────────────────────────────────────────────────
+
+class CopiaCreate(BaseModel):
+    inventario_num: str
+    estado: str = "disponible"
+    libro_id: int
+
+
+class CopiaUpdate(BaseModel):
+    inventario_num: str | None = None
+    estado: str | None = None
+
+
+class CopiaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    inventario_num: str
+    estado: str
+    libro_id: int
+    created_at: datetime
+
+
+# ── Dano ──────────────────────────────────────────────────
+
+class DanoCreate(BaseModel):
+    libro_id: int
+    copia_id: int | None = None
+    socio_id: int
+    severidad: str
+    descripcion: str
+    fecha: str
+    turno: str
+
+
+class DanoUpdate(BaseModel):
+    severidad: str | None = None
+    descripcion: str | None = None
+
+
+class DanoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    libro_id: int
+    copia_id: int | None
+    socio_id: int
+    severidad: str
+    descripcion: str
+    fecha: str
+    turno: str
+    created_at: datetime
 
 
 # ── Auditoria ─────────────────────────────────────────────

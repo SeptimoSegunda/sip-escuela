@@ -1,20 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Dano, SeveridadDano, TurnoAdmin } from '@/types';
-import { storage } from '@/lib/storage';
+import { api, toFrontendId, toBackendId } from '@/lib/api';
 
 /* ────────────────────────────────────────
-   useDanos — Registro de daños a libros
-──────────────────────────────────────── */
-
-function generarIdDano(danos: Dano[]): string {
-  const nums = danos
-    .map((d) => parseInt(d.id.replace(/\D/g, ''), 10))
-    .filter((n) => !isNaN(n));
-  const max = nums.length > 0 ? Math.max(...nums) : 1000;
-  return `#D-${max + 1}`;
-}
+   useDanos — Registro de daños a libros vía API
+ ──────────────────────────────────────── */
 
 export interface NuevoDanoData {
   libroId: string;
@@ -26,52 +18,82 @@ export interface NuevoDanoData {
   descripcion: string;
 }
 
+function mapDanoDto(dto: any): Dano {
+  return {
+    id:           toFrontendId('dano', dto.id),
+    libroId:      toFrontendId('libro', dto.libro_id),
+    libroTitulo:  dto.libro?.titulo ?? '',
+    copiaId:      dto.copia_id ? toFrontendId('copia', dto.copia_id) : '',
+    socioId:      toFrontendId('socio', dto.socio_id),
+    socioNombre:  `${dto.socio?.apellido ?? ''}, ${dto.socio?.nombre ?? ''}`,
+    severidad:    dto.severidad as SeveridadDano,
+    descripcion:  dto.descripcion,
+    fecha:        dto.fecha ?? new Date().toISOString(),
+    turnoAdmin:   (dto.turno === 'mañana' ? 'Turno Mañana' : 'Turno Tarde') as TurnoAdmin,
+  };
+}
+
 export function useDanos(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Daños', accion: string, desc: string, turno: TurnoAdmin) => void,
   onCopiaEstado: (libroId: string, copiaId: string, estado: 'dañado' | 'disponible') => void
 ) {
-  const [danos, setDanos] = useState<Dano[]>(() => storage.getDanos());
+  const [danos, setDanos] = useState<Dano[]>([]);
+
+  /* ── Cargar ── */
+  const cargarDanos = useCallback(async () => {
+    try {
+      const dtos = await api.getDanos();
+      setDanos(dtos.map(mapDanoDto));
+    } catch (err) {
+      console.error('[useDanos] Error cargando daños:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarDanos();
+  }, [cargarDanos]);
 
   /* ── Registrar daño ── */
   const registrarDano = useCallback(
-    (data: NuevoDanoData): Dano => {
-      const actual = storage.getDanos();
-      const nuevo: Dano = {
-        id:          generarIdDano(actual),
-        libroId:     data.libroId,
-        libroTitulo: data.libroTitulo,
-        copiaId:     data.copiaId,
-        socioId:     data.socioId,
-        socioNombre: data.socioNombre,
-        severidad:   data.severidad,
-        descripcion: data.descripcion,
-        fecha:       new Date().toISOString(),
-        turnoAdmin,
-      };
+    async (data: NuevoDanoData): Promise<Dano | null> => {
+      try {
+        const dto = await api.createDano({
+          libro_id: toBackendId(data.libroId),
+          copia_id: data.copiaId ? toBackendId(data.copiaId) : undefined,
+          socio_id: toBackendId(data.socioId),
+          severidad: data.severidad,
+          descripcion: data.descripcion,
+          fecha: new Date().toISOString(),
+          turno: turnoAdmin === 'Turno Mañana' ? 'mañana' : 'tarde',
+        });
 
-      const actualizado = [nuevo, ...actual];
-      storage.setDanos(actualizado);
-      setDanos(actualizado);
+        const nuevo = mapDanoDto(dto);
 
-      // Si el daño es catastrófico, la copia queda fuera de circulación
-      if (data.severidad === 'catastrofico') {
-        onCopiaEstado(data.libroId, data.copiaId, 'dañado');
+        setDanos((prev) => [nuevo, ...prev]);
+
+        // Si el daño es catastrófico, la copia queda fuera de circulación
+        if (data.severidad === 'catastrofico' && data.copiaId) {
+          void onCopiaEstado(data.libroId, data.copiaId, 'dañado');
+        }
+
+        registrarAccion(
+          'Daños',
+          'Reporte de Daño Físico',
+          `Registrado daño [${severidadLabel(data.severidad)}] a "${data.libroTitulo}" atribuido a ${data.socioNombre}. Detalle: ${data.descripcion}`,
+          turnoAdmin
+        );
+
+        return nuevo;
+      } catch (err) {
+        console.error('[useDanos] Error registrando daño:', err);
+        return null;
       }
-
-      registrarAccion(
-        'Daños',
-        'Reporte de Daño Físico',
-        `Registrado daño [${severidadLabel(data.severidad)}] a "${data.libroTitulo}" atribuido a ${data.socioNombre}. Detalle: ${data.descripcion}`,
-        turnoAdmin
-      );
-
-      return nuevo;
     },
     [turnoAdmin, registrarAccion, onCopiaEstado]
   );
 
-  return { danos, registrarDano };
+  return { danos, registrarDano, recargarDanos: cargarDanos };
 }
 
 /* ── Helper local ── */

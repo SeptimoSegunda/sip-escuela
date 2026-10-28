@@ -2,36 +2,41 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { Prestamo, Libro, Socio, TurnoAdmin, SeveridadDano } from '@/types';
-import { storage } from '@/lib/storage';
+import { api, toFrontendId, toBackendId } from '@/lib/api';
 
 /* ────────────────────────────────────────
-   usePrestamos — Crear préstamos y
-   registrar devoluciones (con daño opcional)
-──────────────────────────────────────── */
+   usePrestamos — Préstamos y devoluciones vía API
+ ──────────────────────────────────────── */
 
 const DIAS_LIMITE_PRESTAMO = 7;
 
-function generarIdPrestamo(prestamos: Prestamo[]): string {
-  const nums = prestamos
-    .map((p) => parseInt(p.id.replace(/\D/g, ''), 10))
-    .filter((n) => !isNaN(n));
-  const max = nums.length > 0 ? Math.max(...nums) : 999;
-  return `#P-${max + 1}`;
-}
-
 export interface NuevoPrestamoData {
   libro: Libro;
-  /** ID de la copia específica a prestar. Si es null, se usa la primera disponible. */
   copiaId: string | null;
   socio: Socio;
 }
 
 export interface DevolucionData {
   prestamoId: string;
-  /** Si hubo daño al devolver */
   dano?: {
     severidad: SeveridadDano;
     descripcion: string;
+  };
+}
+
+function mapPrestamoDto(dto: any): Prestamo {
+  return {
+    id:             toFrontendId('prestamo', dto.id),
+    libroId:        toFrontendId('libro', dto.id_libro),
+    libroTitulo:    dto.libro?.titulo ?? '',
+    copiaId:        toFrontendId('copia', dto.copia_id ?? 0),
+    socioId:        toFrontendId('socio', dto.id_socio),
+    socioNombre:    `${dto.socio?.apellido ?? ''}, ${dto.socio?.nombre ?? ''}`,
+    fechaPrestamo:  dto.fecha_prestamo ?? new Date().toISOString(),
+    fechaLimite:    dto.fecha_limite ?? new Date().toISOString(),
+    fechaDevolucion: dto.fecha_devolucion ?? undefined,
+    estado:         (dto.estado ?? 'prestado') as 'prestado' | 'devuelto' | 'moroso',
+    turnoAdmin:     (dto.turno === 'mañana' ? 'Turno Mañana' : 'Turno Tarde') as TurnoAdmin,
   };
 }
 
@@ -41,9 +46,23 @@ export function usePrestamos(
   onCopiaEstado: (libroId: string, copiaId: string, estado: 'prestado' | 'disponible' | 'dañado') => void,
   onSocioAjuste: (socioId: string, delta: 1 | -1) => void
 ) {
-  const [prestamos, setPrestamos] = useState<Prestamo[]>(() => storage.getPrestamos());
+  const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
 
-  /* ── Verificar morosidad al leer ── */
+  /* ── Cargar ── */
+  const cargarPrestamos = useCallback(async () => {
+    try {
+      const dtos = await api.getPrestamos();
+      setPrestamos(dtos.map(mapPrestamoDto));
+    } catch (err) {
+      console.error('[usePrestamos] Error cargando préstamos:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarPrestamos();
+  }, [cargarPrestamos]);
+
+  /* ── Verificar morosidad ── */
   const actualizarMorosidad = useCallback((lista: Prestamo[]): Prestamo[] => {
     const ahora = new Date();
     return lista.map((p) => {
@@ -56,7 +75,7 @@ export function usePrestamos(
 
   /* ── Crear préstamo ── */
   const crearPrestamo = useCallback(
-    (data: NuevoPrestamoData): Prestamo | null => {
+    async (data: NuevoPrestamoData): Promise<Prestamo | null> => {
       const { libro, socio } = data;
 
       // Encontrar copia disponible
@@ -69,58 +88,65 @@ export function usePrestamos(
       const ahora = new Date();
       const limite = new Date(ahora.getTime() + DIAS_LIMITE_PRESTAMO * 24 * 60 * 60 * 1000);
 
-      const actual = storage.getPrestamos();
-      const nuevo: Prestamo = {
-        id:              generarIdPrestamo(actual),
-        libroId:         libro.id,
-        libroTitulo:     libro.titulo,
-        copiaId:         copia.id,
-        socioId:         socio.id,
-        socioNombre:     `${socio.apellido}, ${socio.nombre}`,
-        fechaPrestamo:   ahora.toISOString(),
-        fechaLimite:     limite.toISOString(),
-        estado:          'prestado',
-        turnoAdmin,
-      };
+      try {
+        const dto = await api.createPrestamo({
+          id_prestamo: `PRE-${Date.now()}`,
+          fecha_prestamo: ahora.toISOString(),
+          fecha_limite: limite.toISOString(),
+          estado: 'prestado',
+          id_libro: toBackendId(libro.id),
+          id_socio: toBackendId(socio.id),
+          // id_usuario se inyecta desde el header X-Active-Shift en el backend
+        });
 
-      const actualizado = [nuevo, ...actual];
-      storage.setPrestamos(actualizado);
-      setPrestamos(actualizado);
+        const prestamo = mapPrestamoDto(dto);
 
-      // Efectos secundarios
-      onCopiaEstado(libro.id, copia.id, 'prestado');
-      onSocioAjuste(socio.id, 1);
+        setPrestamos((prev) => [prestamo, ...prev]);
 
-      registrarAccion(
-        'Préstamos',
-        'Nuevo Préstamo Registrado',
-        `Préstamo ${nuevo.id} de "${libro.titulo}" otorgado a ${nuevo.socioNombre} (Vencimiento: ${limite.toLocaleDateString('es-AR')}).`,
-        turnoAdmin
-      );
+        // Efectos secundarios
+        void onCopiaEstado(libro.id, copia.id, 'prestado');
+        void onSocioAjuste(socio.id, 1);
 
-      return nuevo;
+        registrarAccion(
+          'Préstamos',
+          'Nuevo Préstamo Registrado',
+          `Préstamo ${prestamo.id} de "${libro.titulo}" otorgado a ${prestamo.socioNombre} (Vencimiento: ${limite.toLocaleDateString('es-AR')}).`,
+          turnoAdmin
+        );
+
+        return prestamo;
+      } catch (err) {
+        console.error('[usePrestamos] Error creando préstamo:', err);
+        return null;
+      }
     },
     [turnoAdmin, registrarAccion, onCopiaEstado, onSocioAjuste]
   );
 
   /* ── Registrar devolución ── */
   const registrarDevolucion = useCallback(
-    (data: DevolucionData): void => {
-      setPrestamos((prev) => {
-        const prestamo = prev.find((p) => p.id === data.prestamoId);
-        if (!prestamo) return prev;
+    async (data: DevolucionData): Promise<void> => {
+      const prestamo = prestamos.find((p) => p.id === data.prestamoId);
+      if (!prestamo) return;
 
-        const actualizado = prev.map((p) =>
-          p.id === data.prestamoId
-            ? { ...p, estado: 'devuelto' as const, fechaDevolucion: new Date().toISOString() }
-            : p
+      try {
+        const dto = await api.updatePrestamo(toBackendId(data.prestamoId), {
+          estado: 'devuelto',
+          fecha_devolucion: new Date().toISOString(),
+        });
+
+        const prestamoActualizado = mapPrestamoDto(dto);
+
+        setPrestamos((prev) =>
+          prev.map((p) =>
+            p.id === data.prestamoId ? { ...p, ...prestamoActualizado } : p
+          )
         );
-        storage.setPrestamos(actualizado);
 
         // Efectos secundarios
         const estadoCopia = data.dano ? 'dañado' : 'disponible';
-        onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
-        onSocioAjuste(prestamo.socioId, -1);
+        void onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
+        void onSocioAjuste(prestamo.socioId, -1);
 
         registrarAccion(
           'Préstamos',
@@ -128,15 +154,20 @@ export function usePrestamos(
           `Devuelto préstamo ${prestamo.id} — "${prestamo.libroTitulo}" por ${prestamo.socioNombre}.${data.dano ? ` Con daño: ${data.dano.descripcion}` : ''}`,
           turnoAdmin
         );
-
-        return actualizado;
-      });
+      } catch (err) {
+        console.error('[usePrestamos] Error registrando devolución:', err);
+      }
     },
-    [turnoAdmin, registrarAccion, onCopiaEstado, onSocioAjuste]
+    [prestamos, turnoAdmin, registrarAccion, onCopiaEstado, onSocioAjuste]
   );
 
   /* ── Lista con morosidad actualizada ── */
   const prestamosActualizados = actualizarMorosidad(prestamos);
 
-  return { prestamos: prestamosActualizados, crearPrestamo, registrarDevolucion };
+  return {
+    prestamos: prestamosActualizados,
+    crearPrestamo,
+    registrarDevolucion,
+    recargarPrestamos: cargarPrestamos,
+  };
 }

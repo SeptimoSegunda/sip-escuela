@@ -6,40 +6,40 @@ import { useLibros }     from './useLibros';
 import { useSocios }     from './useSocios';
 import { usePrestamos }  from './usePrestamos';
 import { useDanos }      from './useDanos';
-import { storage }       from '@/lib/storage';
+import { obtenerSesion } from './useAuth';
 import type { TurnoAdmin } from '@/types';
 
 /* ────────────────────────────────────────
-   useDashboard
-   Hook orquestador que conecta todos los
-   hooks de dominio y expone el estado
-   global del dashboard.
-──────────────────────────────────────── */
+   useDashboard — Hook orquestador (datos vía API, sin localStorage)
+ ──────────────────────────────────────── */
 
 export function useDashboard() {
-  /* ── Turno del administrador activo ── */
-  const sesion = storage.getSession();
-  const turnoAdmin: TurnoAdmin = sesion?.turno ?? 'Turno Mañana';
+  /* ── Turno del administrador activo (desde sesión en memoria) ── */
+  const sesion = obtenerSesion();
+  const turnoAdmin: TurnoAdmin = (sesion?.turno === 'tarde' ? 'Turno Tarde' : 'Turno Mañana');
 
-  /* ── Auditoría (base) ── */
-  const { logs: auditLogs, registrarAccion, exportarJson: exportarAuditoria } = useAuditoria();
+  /* ── Auditoría ── */
+  const { logs: auditLogs, exportarJson: exportarAuditoria, recargarAuditoria } = useAuditoria();
 
   /* ── Callbacks de auditoría tipados por categoría ── */
   const logLibros = useCallback(
-    (accion: string, desc: string) => registrarAccion('Libros', accion, desc, turnoAdmin),
-    [registrarAccion, turnoAdmin]
+    (accion: string, desc: string) => {
+      // Nota: el registro real de auditoría se hace en cada hook de dominio
+      // llamando a su propio registrarAccion con el turno actual.
+    },
+    [turnoAdmin]
   );
   const logSocios = useCallback(
-    (accion: string, desc: string) => registrarAccion('Socios', accion, desc, turnoAdmin),
-    [registrarAccion, turnoAdmin]
+    (accion: string, desc: string) => {},
+    [turnoAdmin]
   );
   const logPrestamos = useCallback(
-    (accion: string, desc: string) => registrarAccion('Préstamos', accion, desc, turnoAdmin),
-    [registrarAccion, turnoAdmin]
+    (accion: string, desc: string) => {},
+    [turnoAdmin]
   );
   const logDanos = useCallback(
-    (accion: string, desc: string) => registrarAccion('Daños', accion, desc, turnoAdmin),
-    [registrarAccion, turnoAdmin]
+    (accion: string, desc: string) => {},
+    [turnoAdmin]
   );
 
   /* ── Libros ── */
@@ -75,7 +75,7 @@ export function useDashboard() {
   const { danos, registrarDano } = useDanos(
     turnoAdmin,
     (_, accion, desc) => logDanos(accion, desc),
-    (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado)
+    (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado as any)
   );
 
   return {
@@ -111,5 +111,6 @@ export function useDashboard() {
 
     /* Auditoría */
     exportarAuditoria,
+    recargarAuditoria,
   };
 }

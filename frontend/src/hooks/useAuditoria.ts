@@ -1,46 +1,53 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { AuditLog, CategoriaAudit, TurnoAdmin } from '@/types';
-import { storage } from '@/lib/storage';
+import { api } from '@/lib/api';
 
 /* ────────────────────────────────────────
-   useAuditoria
-   Hook base de auditoría — se llama desde
-   los demás hooks para registrar acciones.
-──────────────────────────────────────── */
+   useAuditoria — Log de auditoría vía API
+ ──────────────────────────────────────── */
 
-function generarIdLog(): string {
-  return `LOG-${Date.now().toString().slice(-6)}`;
+function turnoToAdmin(turno: string): TurnoAdmin {
+  return turno === 'tarde' ? 'Turno Tarde' : 'Turno Mañana';
+}
+
+function categoriaDeEndpoint(endpoint: string): CategoriaAudit {
+  const e = (endpoint ?? '').toLowerCase();
+  if (e.includes('libro')) return 'Libros';
+  if (e.includes('prestamo')) return 'Préstamos';
+  if (e.includes('socio')) return 'Socios';
+  if (e.includes('dano')) return 'Daños';
+  return 'Sistema';
+}
+
+function mapAuditoriaDto(dto: any): AuditLog {
+  return {
+    id:        `LOG-${dto.id ?? Date.now()}`,
+    fecha:     dto.created_at ?? new Date().toISOString(),
+    admin:     turnoToAdmin(dto.turno ?? 'mañana'),
+    categoria: categoriaDeEndpoint(dto.endpoint ?? ''),
+    accion:    dto.metodo ?? '',
+    descripcion: `${dto.metodo ?? ''} ${dto.endpoint ?? ''} — turno ${dto.turno ?? '-'}`,
+  };
 }
 
 export function useAuditoria() {
-  const [logs, setLogs] = useState<AuditLog[]>(() => storage.getAuditLog());
+  const [logs, setLogs] = useState<AuditLog[]>([]);
 
-  const registrarAccion = useCallback(
-    (
-      categoria: CategoriaAudit,
-      accion: string,
-      descripcion: string,
-      turno: TurnoAdmin
-    ) => {
-      const entrada: AuditLog = {
-        id:          generarIdLog(),
-        fecha:       new Date().toISOString(),
-        admin:       turno,
-        categoria,
-        accion,
-        descripcion,
-      };
+  /* ── Cargar ── */
+  const cargarLogs = useCallback(async () => {
+    try {
+      const dtos = await api.getAuditoria();
+      setLogs(dtos.map(mapAuditoriaDto));
+    } catch (err) {
+      console.error('[useAuditoria] Error cargando auditoría:', err);
+    }
+  }, []);
 
-      setLogs((prev) => {
-        const actualizado = [entrada, ...prev];
-        storage.setAuditLog(actualizado);
-        return actualizado;
-      });
-    },
-    []
-  );
+  useEffect(() => {
+    cargarLogs();
+  }, [cargarLogs]);
 
   const exportarJson = useCallback(() => {
     const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(logs, null, 2));
@@ -50,5 +57,5 @@ export function useAuditoria() {
     a.click();
   }, [logs]);
 
-  return { logs, registrarAccion, exportarJson };
+  return { logs, registrarAccion: () => {}, exportarJson, recargarAuditoria: cargarLogs };
 }

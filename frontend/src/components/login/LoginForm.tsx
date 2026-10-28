@@ -4,30 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUser,
-  faLock,
-  faCircleExclamation,
-  faCheck,
-  faArrowRight,
+  faUser, faLock, faCircleExclamation, faCheck, faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import InputField from './InputField';
 import { guardarSesion } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import styles from './LoginForm.module.css';
 
 type Turno = 'Turno Mañana' | 'Turno Tarde';
-
-function resolverTurno(usuario: string, contrasena: string): Turno | null {
-  const u = usuario.trim().toLowerCase();
-  const p = contrasena.trim();
-
-  if ((u === 'adminmañana' || u === 'adminmanana') && p === '1234') {
-    return 'Turno Mañana';
-  }
-  if (u === 'admintarde' && p === '1234') {
-    return 'Turno Tarde';
-  }
-  return null;
-}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -38,7 +22,14 @@ export default function LoginForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [assignedTurno, setAssignedTurno] = useState<Turno | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const resolverTurno = (usuario: string): Turno | null => {
+    const u = usuario.trim().toLowerCase();
+    if (u.includes('mañana') || u.includes('manana')) return 'Turno Mañana';
+    if (u.includes('tarde')) return 'Turno Tarde';
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -51,29 +42,30 @@ export default function LoginForm() {
       return;
     }
 
-    const turno = resolverTurno(username, password);
+    const turno = resolverTurno(username);
     if (!turno) {
       setError('Credenciales incorrectas. Consulta los datos de acceso al pie.');
       return;
     }
 
-    setAssignedTurno(turno);
     setIsLoading(true);
 
-    setTimeout(() => {
-      try {
-        guardarSesion(turno, username.trim().toLowerCase());
-      } catch (err) {
-        console.error('Error al guardar en localStorage', err);
-      }
+    try {
+      // Validar el turno contra el backend vía /api/turno/actual
+      await api.validarTurnoHeader(turno === 'Turno Mañana' ? 'mañana' : 'tarde');
 
+      guardarSesion(turno, username.trim().toLowerCase());
       setIsLoading(false);
       setIsSuccess(true);
 
       setTimeout(() => {
         router.push('/dashboard');
       }, 600);
-    }, 400);
+    } catch (err) {
+      setIsLoading(false);
+      setError('Turno no válido o no configurado en el sistema.');
+      console.error('[Login] Error validando turno:', err);
+    }
   };
 
   return (
@@ -89,7 +81,7 @@ export default function LoginForm() {
         id="inputUsername"
         label="Usuario"
         type="text"
-        placeholder="Usuario"
+        placeholder="Ej: adminmañana / admintarde"
         value={username}
         onChange={(e) => {
           setUsername(e.target.value);
@@ -122,7 +114,7 @@ export default function LoginForm() {
         {isLoading ? (
           <>
             <span className={styles.spinner} aria-hidden="true" />
-            <span>Verificando credenciales...</span>
+            <span>Verificando turno...</span>
           </>
         ) : isSuccess ? (
           <>

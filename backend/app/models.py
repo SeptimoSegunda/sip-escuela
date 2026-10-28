@@ -72,6 +72,8 @@ class Libro(Base):
     id_editorial: Mapped[Optional[int]] = mapped_column(ForeignKey("editorial.id"))
     id_autor: Mapped[Optional[int]] = mapped_column(ForeignKey("autor.id"))
 
+    copias: Mapped[list["Copia"]] = relationship(back_populates="libro")
+
 
 class Prestamo(Base):
     __tablename__ = "prestamo"
@@ -107,6 +109,38 @@ class Usuario(Base):
 
     prestamos: Mapped[list["Prestamo"]] = relationship(back_populates="usuario")
     auditorias: Mapped[list["Auditoria"]] = relationship(back_populates="usuario")
+
+
+class Copia(Base):
+    """Copia física de un libro (ejemplar con número de inventario y estado)."""
+    __tablename__ = "copias"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    inventario_num: Mapped[str] = mapped_column(String(50), nullable=False)
+    estado: Mapped[str] = mapped_column(String(20), default="disponible", nullable=False)  # disponible | prestado | dañado | perdido
+    libro_id: Mapped[int] = mapped_column(ForeignKey("libros.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    libro: Mapped["Libro"] = relationship(back_populates="copias")
+
+
+class Dano(Base):
+    """Registro de daño físico a una copia de libro."""
+    __tablename__ = "danos"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    libro_id: Mapped[int] = mapped_column(ForeignKey("libros.id"), nullable=False)
+    copia_id: Mapped[Optional[int]] = mapped_column(ForeignKey("copias.id"), nullable=True)
+    socio_id: Mapped[int] = mapped_column(ForeignKey("socios.id"), nullable=False)
+    severidad: Mapped[str] = mapped_column(String(20), nullable=False)  # leve | moderado | catastrofico
+    descripcion: Mapped[str] = mapped_column(Text, nullable=False)
+    fecha: Mapped[str] = mapped_column(String(30), nullable=False)
+    turno: Mapped[str] = mapped_column(String(20), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    libro: Mapped["Libro"] = relationship(foreign_keys=[libro_id])
+    copia: Mapped[Optional["Copia"]] = relationship(foreign_keys=[copia_id])
+    socio: Mapped["Socio"] = relationship(foreign_keys=[socio_id])
 
 
 class Auditoria(Base):

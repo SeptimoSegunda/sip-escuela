@@ -1,24 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Libro, Copia, EstadoCopia, TurnoAdmin } from '@/types';
-import { storage } from '@/lib/storage';
+import {
+  api,
+  toFrontendId,
+  toBackendId,
+} from '@/lib/api';
 
 /* ────────────────────────────────────────
-   useLibros — CRUD de libros y copias
-──────────────────────────────────────── */
-
-function generarIdLibro(): string {
-  return `L-${Date.now().toString().slice(-7)}`;
-}
-
-function generarIdCopia(libro: Libro): string {
-  const nums = libro.copias
-    .map((c) => parseInt(c.inventarioNum.replace(/\D/g, ''), 10))
-    .filter((n) => !isNaN(n));
-  const max = nums.length > 0 ? Math.max(...nums) : 1000;
-  return `INV-${max + 1}`;
-}
+   useLibros — CRUD de libros y copias vía API
+ ──────────────────────────────────────── */
 
 export interface NuevoLibroData {
   isbn: string;
@@ -45,183 +37,281 @@ export interface NuevoLibroData {
   notaContenido?: string;
 }
 
+function mapLibroDto(dto: any): Libro {
+  return {
+    id:           toFrontendId('libro', dto.id),
+    isbn:         dto.isbn ?? '',
+    titulo:       dto.titulo,
+    subtitulo:    dto.subtitulo ?? undefined,
+    autor:        dto.autor ?? '',
+    categoria:    dto.temas ?? 'General',
+    ubicacion:    dto.ubicacion ?? 'Estante Principal',
+    portadaUrl:   undefined,
+    copias:       (dto.copias ?? []).map((c: any) => ({
+      id:           toFrontendId('copia', c.id),
+      inventarioNum: c.inventario_num,
+      estado:       c.estado as EstadoCopia,
+    })),
+    fechaAgregado: dto.created_at ?? new Date().toISOString(),
+    edicion:              dto.edicion ?? undefined,
+    extension:            dto.extension ?? undefined,
+    inventario:           dto.numero_de_inventario ?? undefined,
+    clasificacion:        dto.clasificacion ?? undefined,
+    libristica:           dto.libristica ?? undefined,
+    tomo:                 dto.numero ?? undefined,
+    editorial:            dto.editorial ?? undefined,
+    fechaPublicacion:     dto.publicacion ?? undefined,
+    lugarPublicacion:     dto.lugar_publicacion ?? undefined,
+    temas:                dto.temas ?? undefined,
+    terminoMateria:       dto.termino_material ?? undefined,
+    coleccionPersonal:    undefined,
+    coleccionInstitucional: undefined,
+    notaGeneral:          dto.nota_general ?? undefined,
+    notaContenido:        dto.nota_contenido ?? undefined,
+  };
+}
+
 export function useLibros(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Libros', accion: string, desc: string, turno: TurnoAdmin) => void
 ) {
-  const [libros, setLibros] = useState<Libro[]>(() => storage.getLibros());
+  const [libros, setLibros] = useState<Libro[]>([]);
 
-  /* ── Crear libro ── */
+  /* ── Cargar ── */
+  const cargarLibros = useCallback(async () => {
+    try {
+      const dtos = await api.getLibros();
+      setLibros(dtos.map(mapLibroDto));
+    } catch (err) {
+      console.error('[useLibros] Error cargando libros:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarLibros();
+  }, [cargarLibros]);
+
+  /* ── Crear ── */
   const crearLibro = useCallback(
-    (data: NuevoLibroData): Libro => {
-      const actual = storage.getLibros();
-      const nuevo: Libro = {
-        id:                   generarIdLibro(),
-        isbn:                 data.isbn.trim(),
-        titulo:               data.titulo.trim(),
-        subtitulo:            data.subtitulo?.trim() || undefined,
-        autor:                data.autor.trim(),
-        categoria:            data.categoria.trim(),
-        ubicacion:            data.ubicacion.trim() || 'Estante Principal',
-        portadaUrl:           data.portadaUrl || undefined,
-        copias:               [],
-        fechaAgregado:        new Date().toISOString(),
-        edicion:              data.edicion?.trim() || undefined,
-        extension:            data.extension?.trim() || undefined,
-        inventario:           data.inventario?.trim() || undefined,
-        clasificacion:        data.clasificacion?.trim() || undefined,
-        libristica:           data.libristica?.trim() || undefined,
-        tomo:                 data.tomo?.trim() || undefined,
-        editorial:            data.editorial?.trim() || undefined,
-        fechaPublicacion:     data.fechaPublicacion?.trim() || undefined,
-        lugarPublicacion:     data.lugarPublicacion?.trim() || undefined,
-        temas:                data.temas?.trim() || undefined,
-        terminoMateria:       data.terminoMateria?.trim() || undefined,
-        coleccionPersonal:    data.coleccionPersonal?.trim() || undefined,
-        coleccionInstitucional: data.coleccionInstitucional?.trim() || undefined,
-        notaGeneral:          data.notaGeneral?.trim() || undefined,
-        notaContenido:        data.notaContenido?.trim() || undefined,
-      };
+    async (data: NuevoLibroData): Promise<Libro | null> => {
+      try {
+        const dto = await api.createLibro({
+          titulo: data.titulo,
+          subtitulo: data.subtitulo,
+          autor: data.autor,
+          isbn: data.isbn,
+          editorial: data.editorial,
+          anio_publicacion: data.fechaPublicacion ? parseInt(data.fechaPublicacion, 10) : undefined,
+          cantidad: 1,
+          ubicacion: data.ubicacion,
+          libristica: data.libristica,
+          numero_de_inventario: data.inventario,
+          publicacion: data.fechaPublicacion,
+          edicion: data.edicion,
+          lugar_publicacion: data.lugarPublicacion,
+          temas: data.temas,
+          numero: data.tomo,
+          termino_material: data.terminoMateria,
+          extension: data.extension ? parseInt(data.extension, 10) : undefined,
+          nota_general: data.notaGeneral,
+          nota_contenido: data.notaContenido,
+        });
 
-      const actualizado = [nuevo, ...actual];
-      storage.setLibros(actualizado);
-      setLibros(actualizado);
+        const libro = mapLibroDto(dto);
 
-      registrarAccion(
-        'Libros',
-        'Libro Añadido al Catálogo',
-        `Añadido "${nuevo.titulo}" de ${nuevo.autor} (ISBN: ${nuevo.isbn}).`,
-        turnoAdmin
-      );
+        setLibros((prev) => [libro, ...prev]);
 
-      return nuevo;
-    },
-    [turnoAdmin, registrarAccion]
-  );
-
-  /* ── Editar libro ── */
-  const editarLibro = useCallback(
-    (id: string, cambios: Partial<Omit<Libro, 'id' | 'copias' | 'fechaAgregado'>>): void => {
-      setLibros((prev) => {
-        const actualizado = prev.map((l) =>
-          l.id === id ? { ...l, ...cambios } : l
+        registrarAccion(
+          'Libros',
+          'Libro Añadido al Catálogo',
+          `Añadido "${libro.titulo}" de ${libro.autor} (ISBN: ${libro.isbn}).`,
+          turnoAdmin
         );
-        storage.setLibros(actualizado);
 
-        const libro = actualizado.find((l) => l.id === id);
-        if (libro) {
-          registrarAccion(
-            'Libros',
-            'Libro Modificado',
-            `Actualizados datos de "${libro.titulo}" (ID: ${id}).`,
-            turnoAdmin
-          );
-        }
-        return actualizado;
-      });
+        return libro;
+      } catch (err) {
+        console.error('[useLibros] Error creando libro:', err);
+        return null;
+      }
     },
     [turnoAdmin, registrarAccion]
   );
 
-  /* ── Eliminar uno o varios libros ── */
+  /* ── Editar ── */
+  const editarLibro = useCallback(
+    async (id: string, cambios: Partial<Omit<Libro, 'id' | 'copias' | 'fechaAgregado'>>): Promise<void> => {
+      const libroId = toBackendId(id);
+      try {
+        const dto = await api.updateLibro(libroId, {
+          titulo: cambios.titulo,
+          subtitulo: cambios.subtitulo,
+          autor: cambios.autor,
+          isbn: cambios.isbn,
+          editorial: cambios.editorial,
+          anio_publicacion: cambios.fechaPublicacion ? parseInt(cambios.fechaPublicacion, 10) : undefined,
+          cantidad: cambios.extension ? 1 : undefined,
+          ubicacion: cambios.ubicacion,
+          libristica: cambios.libristica,
+          numero_de_inventario: cambios.inventario,
+          publicacion: cambios.fechaPublicacion,
+          edicion: cambios.edicion,
+          lugar_publicacion: cambios.lugarPublicacion,
+          temas: cambios.temas,
+          numero: cambios.tomo,
+          termino_material: cambios.terminoMateria,
+          extension: cambios.extension ? parseInt(cambios.extension, 10) : undefined,
+          nota_general: cambios.notaGeneral,
+          nota_contenido: cambios.notaContenido,
+        });
+
+        setLibros((prev) => prev.map((l) => (l.id === id ? { ...l, ...mapLibroDto(dto) } : l)));
+
+        const libro = mapLibroDto(dto);
+        registrarAccion(
+          'Libros',
+          'Libro Modificado',
+          `Actualizados datos de "${libro.titulo}" (ID: ${id}).`,
+          turnoAdmin
+        );
+      } catch (err) {
+        console.error('[useLibros] Error editando libro:', err);
+      }
+    },
+    [turnoAdmin, registrarAccion]
+  );
+
+  /* ── Eliminar ── */
   const eliminarLibros = useCallback(
-    (ids: string[]): void => {
-      setLibros((prev) => {
-        const eliminados = prev.filter((l) => ids.includes(l.id));
-        const actualizado = prev.filter((l) => !ids.includes(l.id));
-        storage.setLibros(actualizado);
+    async (ids: string[]): Promise<void> => {
+      try {
+        for (const id of ids) {
+          await api.deleteLibro(toBackendId(id));
+        }
+        setLibros((prev) => prev.filter((l) => !ids.includes(l.id)));
 
-        eliminados.forEach((l) => {
-          registrarAccion(
-            'Libros',
-            'Libro Eliminado del Catálogo',
-            `Eliminado "${l.titulo}" (ISBN: ${l.isbn}) y sus ${l.copias.length} copia(s).`,
-            turnoAdmin
-          );
+        ids.forEach((id) => {
+          const l = libros.find((x) => x.id === id);
+          if (l) {
+            registrarAccion(
+              'Libros',
+              'Libro Eliminado del Catálogo',
+              `Eliminado "${l.titulo}" (ISBN: ${l.isbn}).`,
+              turnoAdmin
+            );
+          }
         });
-        return actualizado;
-      });
+      } catch (err) {
+        console.error('[useLibros] Error eliminando libros:', err);
+      }
     },
-    [turnoAdmin, registrarAccion]
+    [libros, turnoAdmin, registrarAccion]
   );
 
-  /* ── Agregar copia a un libro ── */
+  /* ── Agregar copia ── */
   const agregarCopia = useCallback(
-    (libroId: string): Copia | null => {
-      let nuevaCopia: Copia | null = null;
-
-      setLibros((prev) => {
-        const actualizado = prev.map((l) => {
-          if (l.id !== libroId) return l;
-          nuevaCopia = {
-            id:           `C-${Date.now()}`,
-            inventarioNum: generarIdCopia(l),
-            estado:       'disponible',
-          };
-          registrarAccion(
-            'Libros',
-            'Copia Añadida',
-            `Nueva copia (${nuevaCopia.inventarioNum}) añadida a "${l.titulo}".`,
-            turnoAdmin
-          );
-          return { ...l, copias: [...l.copias, nuevaCopia] };
+    async (libroId: string): Promise<Copia | null> => {
+      const libroBackendId = toBackendId(libroId);
+      try {
+        const dto = await api.createCopia({
+          inventario_num: `INV-${libroBackendId.toString().padStart(4, '0')}-001`,
+          estado: 'disponible',
+          libro_id: libroBackendId,
         });
-        storage.setLibros(actualizado);
-        return actualizado;
-      });
 
-      return nuevaCopia;
+        const nuevaCopia: Copia = {
+          id:           toFrontendId('copia', dto.id),
+          inventarioNum: dto.inventario_num,
+          estado:       dto.estado as EstadoCopia,
+        };
+
+        setLibros((prev) =>
+          prev.map((l) => {
+            if (l.id !== libroId) return l;
+            return { ...l, copias: [...l.copias, nuevaCopia] };
+          })
+        );
+
+        registrarAccion(
+          'Libros',
+          'Copia Añadida',
+          `Nueva copia (${nuevaCopia.inventarioNum}) añadida.`,
+          turnoAdmin
+        );
+
+        return nuevaCopia;
+      } catch (err) {
+        console.error('[useLibros] Error añadiendo copia:', err);
+        return null;
+      }
     },
     [turnoAdmin, registrarAccion]
   );
 
-  /* ── Quitar la última copia disponible de un libro ── */
+  /* ── Quitar copia ── */
   const disminuirCopia = useCallback(
-    (libroId: string): void => {
-      setLibros((prev) => {
-        const actualizado = prev.map((l) => {
-          if (l.id !== libroId || l.copias.length <= 1) return l;
-          // Preferir eliminar la última copia disponible; si no hay, la última
-          const idxDisp = [...l.copias].reverse().findIndex((c) => c.estado === 'disponible');
-          const removeIdx =
-            idxDisp !== -1
-              ? l.copias.length - 1 - idxDisp
-              : l.copias.length - 1;
-          const copia = l.copias[removeIdx];
-          registrarAccion(
-            'Libros',
-            'Copia Eliminada',
-            `Copia (${copia.inventarioNum}) eliminada de "${l.titulo}".`,
-            turnoAdmin
-          );
-          return { ...l, copias: l.copias.filter((_, i) => i !== removeIdx) };
-        });
-        storage.setLibros(actualizado);
-        return actualizado;
-      });
+    async (libroId: string): Promise<void> => {
+      try {
+        const libro = libros.find((l) => l.id === libroId);
+        if (!libro || libro.copias.length <= 1) return;
+
+        const copia = libro.copias[libro.copias.length - 1];
+        await api.deleteCopia(toBackendId(copia.id));
+
+        setLibros((prev) =>
+          prev.map((l) => {
+            if (l.id !== libroId) return l;
+            return {
+              ...l,
+              copias: l.copias.filter((_, i) => i !== l.copias.length - 1),
+            };
+          })
+        );
+
+        registrarAccion(
+          'Libros',
+          'Copia Eliminada',
+          `Copia (${copia.inventarioNum}) eliminada.`,
+          turnoAdmin
+        );
+      } catch (err) {
+        console.error('[useLibros] Error eliminando copia:', err);
+      }
     },
-    [turnoAdmin, registrarAccion]
+    [libros, turnoAdmin, registrarAccion]
   );
 
-  /* ── Cambiar estado de una copia ── */
+  /* ── Cambiar estado de copia ── */
   const cambiarEstadoCopia = useCallback(
-    (libroId: string, copiaId: string, estado: EstadoCopia): void => {
-      setLibros((prev) => {
-        const actualizado = prev.map((l) => {
-          if (l.id !== libroId) return l;
-          return {
-            ...l,
-            copias: l.copias.map((c) =>
-              c.id === copiaId ? { ...c, estado } : c
-            ),
-          };
-        });
-        storage.setLibros(actualizado);
-        return actualizado;
-      });
+    async (libroId: string, copiaId: string, estado: EstadoCopia): Promise<void> => {
+      try {
+        await api.updateCopia(toBackendId(copiaId), { estado });
+
+        setLibros((prev) =>
+          prev.map((l) => {
+            if (l.id !== libroId) return l;
+            return {
+              ...l,
+              copias: l.copias.map((c) =>
+                c.id === copiaId ? { ...c, estado } : c
+              ),
+            };
+          })
+        );
+      } catch (err) {
+        console.error('[useLibros] Error cambiando estado de copia:', err);
+      }
     },
     []
   );
 
-  return { libros, crearLibro, editarLibro, eliminarLibros, agregarCopia, disminuirCopia, cambiarEstadoCopia };
+  return {
+    libros,
+    crearLibro,
+    editarLibro,
+    eliminarLibros,
+    agregarCopia,
+    disminuirCopia,
+    cambiarEstadoCopia,
+    recargarLibros: cargarLibros,
+  };
 }
