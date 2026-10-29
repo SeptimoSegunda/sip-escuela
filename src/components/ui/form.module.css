@@ -24,13 +24,13 @@
 }
 
 .label {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-main);
 }
 
 .labelOptional {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-muted);
 }
@@ -44,7 +44,7 @@
   border-radius: 8px;
   background: var(--bg-base);
   color: var(--text-main);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
@@ -64,10 +64,10 @@
 
 .sectionTitle {
   grid-column: 1 / -1;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--accent-brown);
   padding: 0.4rem 0 0.1rem;
   border-bottom: 1px solid var(--beige-anchor);
@@ -90,7 +90,7 @@
   border: 1.5px solid var(--beige-dark);
   border-radius: 8px;
   padding: 0.6rem 1.2rem;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -108,7 +108,7 @@
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1.4rem;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;

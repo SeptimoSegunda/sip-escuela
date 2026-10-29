@@ -108,7 +108,8 @@ export default function ModalBusquedaAsistida({
     onClose();
   };
 
-  const OPERADORES: Operador[] = ['OR', 'AND', 'NOT'];
+  const CYCLE: Operador[] = ['OR', 'AND', 'NOT'];
+  const nextOp = (op: Operador): Operador => CYCLE[(CYCLE.indexOf(op) + 1) % CYCLE.length];
 
   return (
     <Modal open={open} onClose={onClose} title="Búsqueda asistida" id="modalBusquedaAsistida" size="md">
@@ -135,18 +136,14 @@ export default function ModalBusquedaAsistida({
               {i === 0 ? (
                 <div className={styles.opPlaceholder} />
               ) : (
-                <div className={styles.opGroup}>
-                  {OPERADORES.map((op) => (
-                    <button
-                      key={op}
-                      type="button"
-                      className={`${styles.opBtn} ${fila.operador === op ? styles.opBtnActive : ''}`}
-                      onClick={() => setFila(i, { operador: op })}
-                    >
-                      {op}
-                    </button>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  className={`${styles.opBtn} ${styles[`opBtn${fila.operador}`]}`}
+                  onClick={() => setFila(i, { operador: nextOp(fila.operador) })}
+                  title="Clic para cambiar operador"
+                >
+                  {fila.operador}
+                </button>
               )}
 
               {/* Campo */}

@@ -204,7 +204,6 @@ export default function ViewCatalogo({
                   </th>
                 )}
                 <th>Código ISBN</th>
-                <th>Portada</th>
                 <th>Título</th>
                 <th>Autor y Categoría</th>
                 <th>Ubicación Principal</th>
@@ -216,7 +215,7 @@ export default function ViewCatalogo({
             <tbody id="catalogTableBody">
               {librosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={modoBorradoGrupal ? 9 : 8} className={styles.emptyState}>
+                  <td colSpan={modoBorradoGrupal ? 8 : 7} className={styles.emptyState}>
                     No hay libros que coincidan con la búsqueda.
                   </td>
                 </tr>

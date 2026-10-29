@@ -59,34 +59,29 @@
   width: 90px;
 }
 
-/* Grupo de botones de operador */
-.opGroup {
-  display: flex;
-  gap: 3px;
-}
-
+/* Botón de operador único (cicla con cada click) */
 .opBtn {
-  flex: 1;
-  border: 1.5px solid var(--beige-dark);
+  width: 90px;
+  border: 2px solid var(--beige-dark);
   background: var(--bg-base);
   color: var(--text-muted);
-  border-radius: 6px;
-  padding: 0.3rem 0.2rem;
-  font-size: 0.72rem;
+  border-radius: 20px;
+  padding: 0.35rem 0;
+  font-size: 0.78rem;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: all 0.15s;
+  letter-spacing: 0.06em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+  text-align: center;
 }
 
-.opBtn:hover { border-color: var(--accent-brown); color: var(--accent-brown); }
+.opBtn:hover { transform: scale(1.06); }
 
-.opBtnActive {
-  background: var(--accent-brown);
-  color: #fff;
-  border-color: var(--accent-brown);
-}
+/* Color por operador */
+.opBtnOR  { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+.opBtnAND { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.opBtnNOT { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
 .fieldSelect {
   font-size: 0.82rem !important;

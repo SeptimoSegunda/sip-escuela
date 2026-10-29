@@ -14,7 +14,7 @@
 }
 
 .viewTitle {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: var(--text-main);
   margin: 0 0 0.25rem;
@@ -24,7 +24,7 @@
 }
 
 .viewSubtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
   margin: 0;
 }
@@ -37,7 +37,7 @@
 
 .periodoLabel {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--accent-brown);
   white-space: nowrap;
   display: flex;
@@ -51,7 +51,7 @@
   border: 1px solid var(--beige-dark);
   background: var(--bg-surface);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
   font-family: inherit;
   color: var(--text-main);
@@ -93,7 +93,7 @@
 .dataTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-align: left;
 }
 
@@ -106,7 +106,7 @@
 .dataTable th {
   background: var(--beige-anchor);
   color: var(--accent-brown);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -136,7 +136,7 @@
 }
 
 .cellMono {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   white-space: nowrap;
 }
