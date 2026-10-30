@@ -257,7 +257,7 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
                       <tr key={p.id}>
                         <td className={styles.cellMono}>{p.id}</td>
                         <td>{p.libroTitulo}</td>
-                        <td>{p.socioNombre}</td>
+                        <td>{p.prestatario}</td>
                         <td>{formatFecha(p.fechaPrestamo)}</td>
                         <td className={vencido ? styles.fechaVencida : ''}>
                           {formatFecha(p.fechaLimite)}

@@ -2,7 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { setActiveTurno } from '@/lib/api';
+
+const SIP_CURRENT_ADMIN_KEY = 'SIP_CURRENT_ADMIN';
+const SIP_AUTH_USER_KEY = 'SIP_AUTH_USER';
+const SIP_AUTH_TIME_KEY = 'SIP_AUTH_TIME';
 
 export interface SesionAdmin {
   turno: string;
@@ -10,36 +13,35 @@ export interface SesionAdmin {
   horaIngreso: string;
 }
 
-/** Sesión en memoria (sin localStorage). Se pierde al recargar la página. */
-let sessionState: SesionAdmin | null = null;
-
-/** Normaliza el turno de la UI al valor que espera el header X-Active-Shift. */
-function turnoParaHeader(turno: string): string {
-  const t = turno.trim().toLowerCase();
-  if (t.includes('mañana') || t.includes('manana')) return 'mañana';
-  if (t.includes('tarde')) return 'tarde';
-  return turno;
-}
-
-/** Guarda la sesión activa y configura el turno para las llamadas a la API. */
+/** Guarda la sesión en localStorage. */
 export function guardarSesion(turno: string, usuario: string): void {
-  sessionState = { turno, usuario, horaIngreso: new Date().toISOString() };
-  setActiveTurno(turnoParaHeader(turno));
+  localStorage.setItem(SIP_CURRENT_ADMIN_KEY, turno);
+  localStorage.setItem(SIP_AUTH_USER_KEY, usuario);
+  localStorage.setItem(SIP_AUTH_TIME_KEY, new Date().toISOString());
 }
 
 /** Obtiene la sesión activa, o null si no hay ninguna. */
 export function obtenerSesion(): SesionAdmin | null {
-  return sessionState;
+  if (typeof window === 'undefined') return null;
+
+  const turno = localStorage.getItem(SIP_CURRENT_ADMIN_KEY);
+  const usuario = localStorage.getItem(SIP_AUTH_USER_KEY);
+  const horaIngreso = localStorage.getItem(SIP_AUTH_TIME_KEY);
+
+  if (!turno || !usuario || !horaIngreso) return null;
+  return { turno, usuario, horaIngreso };
 }
 
-/** Cierra la sesión. */
+/** Cierra la sesión limpiando localStorage. */
 export function cerrarSesion(): void {
-  sessionState = null;
-  setActiveTurno(null);
+  localStorage.removeItem(SIP_CURRENT_ADMIN_KEY);
+  localStorage.removeItem(SIP_AUTH_USER_KEY);
+  localStorage.removeItem(SIP_AUTH_TIME_KEY);
 }
 
 /**
  * Hook de guardia: redirige al login si no hay sesión activa.
+ * Usar en páginas protegidas (dashboard).
  */
 export function useRequireAuth(): SesionAdmin | null {
   const router = useRouter();
@@ -56,6 +58,7 @@ export function useRequireAuth(): SesionAdmin | null {
 
 /**
  * Hook de guardia inversa: redirige al dashboard si ya hay sesión.
+ * Usar en la página de login.
  */
 export function useRedirectIfAuth(): void {
   const router = useRouter();

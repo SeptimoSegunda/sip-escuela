@@ -12,7 +12,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import InputField from './InputField';
 import { guardarSesion } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
 import styles from './LoginForm.module.css';
 
 type Turno = 'Turno Mañana' | 'Turno Tarde';
@@ -39,7 +38,7 @@ export default function LoginForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [assignedTurno, setAssignedTurno] = useState<Turno | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -61,22 +60,20 @@ export default function LoginForm() {
     setAssignedTurno(turno);
     setIsLoading(true);
 
-    try {
-      // Validar el turno contra el backend vía /api/turno/actual
-      await api.validarTurnoHeader(turno === 'Turno Mañana' ? 'mañana' : 'tarde');
+    setTimeout(() => {
+      try {
+        guardarSesion(turno, username.trim().toLowerCase());
+      } catch (err) {
+        console.error('Error al guardar en localStorage', err);
+      }
 
-      guardarSesion(turno, username.trim().toLowerCase());
       setIsLoading(false);
       setIsSuccess(true);
 
       setTimeout(() => {
         router.push('/dashboard');
       }, 600);
-    } catch (err) {
-      setIsLoading(false);
-      setError('Turno no válido o no configurado en el sistema.');
-      console.error('[Login] Error validando turno:', err);
-    }
+    }, 400);
   };
 
   return (
