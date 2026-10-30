@@ -19,7 +19,7 @@ import ModalBusquedaAsistida from '@/components/dashboard/modals/ModalBusquedaAs
 import ModalPrestamo       from '@/components/dashboard/modals/ModalPrestamo';
 import ModalDevolucion     from '@/components/dashboard/modals/ModalDevolucion';
 import ModalDano           from '@/components/dashboard/modals/ModalDano';
-import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
+
 import type { Libro } from '@/types';
 import { loadSeedData } from '@/lib/seedData';
 import styles from './page.module.css';
@@ -37,8 +37,7 @@ type ModalState =
   | { type: 'busquedaAsistida' }
   | { type: 'nuevoPrestamo' }
   | { type: 'devolucion' }
-  | { type: 'nuevoDano' }
-  | { type: 'expedienteSocio'; socioId: string };
+  | { type: 'nuevoDano' };
 
 export default function DashboardPage() {
   const sesion        = useRequireAuth();
@@ -90,6 +89,7 @@ export default function DashboardPage() {
             prestamos={dash.prestamos}
             onNuevoPrestamo={() => setModal({ type: 'nuevoPrestamo' })}
             onDevolucion={() => setModal({ type: 'devolucion' })}
+            onEliminar={(ids) => dash.eliminarPrestamos(ids)}
           />
         );
 
@@ -97,9 +97,8 @@ export default function DashboardPage() {
         return (
           <ViewDanos
             danos={dash.danos}
-            socios={dash.socios}
             onRegistrarDano={() => setModal({ type: 'nuevoDano' })}
-            onVerDetalle={(socioId) => setModal({ type: 'expedienteSocio', socioId })}
+            onEliminar={(ids) => dash.eliminarDanos(ids)}
           />
         );
       case 'viewAuditoria':
@@ -170,11 +169,9 @@ export default function DashboardPage() {
         open={modal.type === 'nuevoPrestamo'}
         onClose={closeModal}
         libros={dash.libros}
-        socios={dash.socios}
-        onRegistrar={(libroId, copiaId, socioId) => {
+        onRegistrar={(libroId, copiaId, prestatario) => {
           const libro = dash.libros.find((l) => l.id === libroId);
-          const socio = dash.socios.find((s) => s.id === socioId);
-          if (libro && socio) dash.crearPrestamo({ libro, copiaId, socio });
+          if (libro) dash.crearPrestamo({ libro, copiaId, prestatario });
         }}
       />
 
@@ -191,18 +188,10 @@ export default function DashboardPage() {
         open={modal.type === 'nuevoDano'}
         onClose={closeModal}
         libros={dash.libros}
-        socios={dash.socios}
         onRegistrar={(data) => dash.registrarDano(data)}
       />
 
-      {/* Modal Expediente de Socio */}
-      <ModalExpedienteSocio
-        open={modal.type === 'expedienteSocio'}
-        onClose={closeModal}
-        socioId={modal.type === 'expedienteSocio' ? modal.socioId : null}
-        socios={dash.socios}
-        danos={dash.danos}
-      />
+
     </div>
   );
 }

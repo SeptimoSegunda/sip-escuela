@@ -73,7 +73,7 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
               >
                 {prestamosActivos.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.libroTitulo} — [{p.socioNombre}] ({p.id})
+                    {p.libroTitulo} — [{p.prestatario}] ({p.id})
                   </option>
                 ))}
               </select>

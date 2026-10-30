@@ -374,7 +374,7 @@ export default function ModalFichaLibro({
                     historial.map((p) => (
                       <tr key={p.id}>
                         <td className={styles.cellMono}>{p.id}</td>
-                        <td>{p.socioNombre}</td>
+                        <td>{p.prestatario}</td>
                         <td>{formatFecha(p.fechaPrestamo)}</td>
                         <td>{formatFecha(p.fechaLimite)}</td>
                         <td>

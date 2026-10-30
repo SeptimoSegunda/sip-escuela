@@ -229,3 +229,99 @@
   background: var(--beige-anchor);
   border-color: var(--accent-brown);
 }
+
+/* ── Borrado grupal ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.btnBorradoGrupal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnBorradoGrupal:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.groupDeleteBar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #fee2e2;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+}
+
+.groupDeleteCount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.btnDanger:hover {
+  background: #b91c1c;
+}
+
+.btnSecondarySmall {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--beige-dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.thCheck {
+  width: 40px;
+  text-align: center;
+}
+
+.rowSeleccionada td {
+  background-color: #fef2f2 !important;
+}
+
+.descripcionCell {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

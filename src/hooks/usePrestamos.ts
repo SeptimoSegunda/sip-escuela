@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import type { Prestamo, Libro, Socio, TurnoAdmin, SeveridadDano } from '@/types';
+import type { Prestamo, Libro, TurnoAdmin, SeveridadDano } from '@/types';
 import { storage } from '@/lib/storage';
 
 /* ────────────────────────────────────────
@@ -23,7 +23,8 @@ export interface NuevoPrestamoData {
   libro: Libro;
   /** ID de la copia específica a prestar. Si es null, se usa la primera disponible. */
   copiaId: string | null;
-  socio: Socio;
+  /** Nombre libre del prestatario (sin necesidad de socio registrado) */
+  prestatario: string;
 }
 
 export interface DevolucionData {
@@ -39,7 +40,6 @@ export function usePrestamos(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Préstamos', accion: string, desc: string, turno: TurnoAdmin) => void,
   onCopiaEstado: (libroId: string, copiaId: string, estado: 'prestado' | 'disponible' | 'dañado') => void,
-  onSocioAjuste: (socioId: string, delta: 1 | -1) => void
 ) {
   const [prestamos, setPrestamos] = useState<Prestamo[]>(() => storage.getPrestamos());
 
@@ -57,7 +57,7 @@ export function usePrestamos(
   /* ── Crear préstamo ── */
   const crearPrestamo = useCallback(
     (data: NuevoPrestamoData): Prestamo | null => {
-      const { libro, socio } = data;
+      const { libro, prestatario } = data;
 
       // Encontrar copia disponible
       const copia =
@@ -75,8 +75,7 @@ export function usePrestamos(
         libroId:         libro.id,
         libroTitulo:     libro.titulo,
         copiaId:         copia.id,
-        socioId:         socio.id,
-        socioNombre:     `${socio.apellido}, ${socio.nombre}`,
+        prestatario,
         fechaPrestamo:   ahora.toISOString(),
         fechaLimite:     limite.toISOString(),
         estado:          'prestado',
@@ -87,20 +86,19 @@ export function usePrestamos(
       storage.setPrestamos(actualizado);
       setPrestamos(actualizado);
 
-      // Efectos secundarios
+      // Marcar copia como prestada
       onCopiaEstado(libro.id, copia.id, 'prestado');
-      onSocioAjuste(socio.id, 1);
 
       registrarAccion(
         'Préstamos',
         'Nuevo Préstamo Registrado',
-        `Préstamo ${nuevo.id} de "${libro.titulo}" otorgado a ${nuevo.socioNombre} (Vencimiento: ${limite.toLocaleDateString('es-AR')}).`,
+        `Préstamo ${nuevo.id} de "${libro.titulo}" otorgado a ${prestatario} (Vencimiento: ${limite.toLocaleDateString('es-AR')}).`,
         turnoAdmin
       );
 
       return nuevo;
     },
-    [turnoAdmin, registrarAccion, onCopiaEstado, onSocioAjuste]
+    [turnoAdmin, registrarAccion, onCopiaEstado]
   );
 
   /* ── Registrar devolución ── */
@@ -117,26 +115,50 @@ export function usePrestamos(
         );
         storage.setPrestamos(actualizado);
 
-        // Efectos secundarios
+        // Marcar copia como disponible o dañada
         const estadoCopia = data.dano ? 'dañado' : 'disponible';
         onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
-        onSocioAjuste(prestamo.socioId, -1);
 
         registrarAccion(
           'Préstamos',
           'Devolución Registrada',
-          `Devuelto préstamo ${prestamo.id} — "${prestamo.libroTitulo}" por ${prestamo.socioNombre}.${data.dano ? ` Con daño: ${data.dano.descripcion}` : ''}`,
+          `Devuelto préstamo ${prestamo.id} — "${prestamo.libroTitulo}" por ${prestamo.prestatario}.${data.dano ? ` Con daño: ${data.dano.descripcion}` : ''}`,
           turnoAdmin
         );
 
         return actualizado;
       });
     },
-    [turnoAdmin, registrarAccion, onCopiaEstado, onSocioAjuste]
+    [turnoAdmin, registrarAccion, onCopiaEstado]
+  );
+
+  /* ── Eliminar préstamos por IDs ── */
+  const eliminarPrestamos = useCallback(
+    (ids: string[]): void => {
+      setPrestamos((prev) => {
+        const idSet = new Set(ids);
+        // Restaurar copias a disponible si el préstamo estaba activo
+        prev
+          .filter((p) => idSet.has(p.id) && (p.estado === 'prestado' || p.estado === 'moroso'))
+          .forEach((p) => onCopiaEstado(p.libroId, p.copiaId, 'disponible'));
+
+        const actualizado = prev.filter((p) => !idSet.has(p.id));
+        storage.setPrestamos(actualizado);
+
+        registrarAccion(
+          'Préstamos',
+          'Préstamos Eliminados',
+          `Se eliminaron ${ids.length} registro${ids.length !== 1 ? 's' : ''} de préstamos.`,
+          turnoAdmin
+        );
+        return actualizado;
+      });
+    },
+    [turnoAdmin, registrarAccion, onCopiaEstado]
   );
 
   /* ── Lista con morosidad actualizada ── */
   const prestamosActualizados = actualizarMorosidad(prestamos);
 
-  return { prestamos: prestamosActualizados, crearPrestamo, registrarDevolucion };
+  return { prestamos: prestamosActualizados, crearPrestamo, registrarDevolucion, eliminarPrestamos };
 }

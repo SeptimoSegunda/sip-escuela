@@ -64,15 +64,14 @@ export function useDashboard() {
   } = useSocios(turnoAdmin, (_, accion, desc) => logSocios(accion, desc));
 
   /* ── Préstamos ── */
-  const { prestamos, crearPrestamo, registrarDevolucion } = usePrestamos(
+  const { prestamos, crearPrestamo, registrarDevolucion, eliminarPrestamos } = usePrestamos(
     turnoAdmin,
     (_, accion, desc) => logPrestamos(accion, desc),
     cambiarEstadoCopia,
-    ajustarPrestamosActivos
   );
 
   /* ── Daños ── */
-  const { danos, registrarDano } = useDanos(
+  const { danos, registrarDano, eliminarDanos } = useDanos(
     turnoAdmin,
     (_, accion, desc) => logDanos(accion, desc),
     (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado)
@@ -105,9 +104,11 @@ export function useDashboard() {
     /* Acciones — Préstamos */
     crearPrestamo,
     registrarDevolucion,
+    eliminarPrestamos,
 
     /* Acciones — Daños */
     registrarDano,
+    eliminarDanos,
 
     /* Auditoría */
     exportarAuditoria,

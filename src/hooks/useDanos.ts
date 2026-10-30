@@ -20,8 +20,8 @@ export interface NuevoDanoData {
   libroId: string;
   libroTitulo: string;
   copiaId: string;
-  socioId: string;
-  socioNombre: string;
+  /** Nombre libre del responsable (sin necesidad de socio registrado) */
+  responsable: string;
   severidad: SeveridadDano;
   descripcion: string;
 }
@@ -42,8 +42,7 @@ export function useDanos(
         libroId:     data.libroId,
         libroTitulo: data.libroTitulo,
         copiaId:     data.copiaId,
-        socioId:     data.socioId,
-        socioNombre: data.socioNombre,
+        responsable: data.responsable,
         severidad:   data.severidad,
         descripcion: data.descripcion,
         fecha:       new Date().toISOString(),
@@ -62,7 +61,7 @@ export function useDanos(
       registrarAccion(
         'Daños',
         'Reporte de Daño Físico',
-        `Registrado daño [${severidadLabel(data.severidad)}] a "${data.libroTitulo}" atribuido a ${data.socioNombre}. Detalle: ${data.descripcion}`,
+        `Registrado daño [${severidadLabel(data.severidad)}] a "${data.libroTitulo}" atribuido a ${data.responsable}. Detalle: ${data.descripcion}`,
         turnoAdmin
       );
 
@@ -71,7 +70,32 @@ export function useDanos(
     [turnoAdmin, registrarAccion, onCopiaEstado]
   );
 
-  return { danos, registrarDano };
+  /* ── Eliminar daños por IDs ── */
+  const eliminarDanos = useCallback(
+    (ids: string[]): void => {
+      setDanos((prev) => {
+        const idSet = new Set(ids);
+        // Restaurar copias dañadas a disponible al borrar el registro
+        prev
+          .filter((d) => idSet.has(d.id))
+          .forEach((d) => onCopiaEstado(d.libroId, d.copiaId, 'disponible'));
+
+        const actualizado = prev.filter((d) => !idSet.has(d.id));
+        storage.setDanos(actualizado);
+
+        registrarAccion(
+          'Daños',
+          'Registros de Daño Eliminados',
+          `Se eliminaron ${ids.length} registro${ids.length !== 1 ? 's' : ''} de daños.`,
+          turnoAdmin
+        );
+        return actualizado;
+      });
+    },
+    [turnoAdmin, registrarAccion, onCopiaEstado]
+  );
+
+  return { danos, registrarDano, eliminarDanos };
 }
 
 /* ── Helper local ── */
