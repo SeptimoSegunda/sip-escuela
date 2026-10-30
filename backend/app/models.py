@@ -82,7 +82,9 @@ class Prestamo(Base):
     id_prestamo: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     fecha_prestamo: Mapped[str] = mapped_column(String(20), nullable=False)
     fecha_limite: Mapped[str] = mapped_column(String(20), nullable=False)
+    fecha_devolucion: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     estado: Mapped[str] = mapped_column(String(50), nullable=False)
+    turno: Mapped[str] = mapped_column(String(20), nullable=False, default="mañana")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
@@ -92,10 +94,12 @@ class Prestamo(Base):
     id_usuario: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
     id_libro: Mapped[Optional[int]] = mapped_column(ForeignKey("libros.id"))
     id_socio: Mapped[int] = mapped_column(ForeignKey("socios.id"), nullable=False)
+    copia_id: Mapped[Optional[int]] = mapped_column(ForeignKey("copias.id"), nullable=True)
 
     usuario: Mapped["Usuario"] = relationship(foreign_keys=[id_usuario])
     libro: Mapped[Optional["Libro"]] = relationship(foreign_keys=[id_libro])
     socio: Mapped["Socio"] = relationship(foreign_keys=[id_socio])
+    copia: Mapped[Optional["Copia"]] = relationship(foreign_keys=[copia_id])
 
 
 class Usuario(Base):

@@ -91,8 +91,8 @@ export function usePrestamos(
       try {
         const dto = await api.createPrestamo({
           id_prestamo: `PRE-${Date.now()}`,
-          fecha_prestamo: ahora.toISOString(),
-          fecha_limite: limite.toISOString(),
+          fecha_prestamo: ahora.toISOString().split('T')[0],
+          fecha_limite: limite.toISOString().split('T')[0],
           estado: 'prestado',
           id_libro: toBackendId(libro.id),
           id_socio: toBackendId(socio.id),
@@ -132,7 +132,7 @@ export function usePrestamos(
       try {
         const dto = await api.updatePrestamo(toBackendId(data.prestamoId), {
           estado: 'devuelto',
-          fecha_devolucion: new Date().toISOString(),
+          fecha_devolucion: new Date().toISOString().split('T')[0],
         });
 
         const prestamoActualizado = mapPrestamoDto(dto);
@@ -145,7 +145,13 @@ export function usePrestamos(
 
         // Efectos secundarios
         const estadoCopia = data.dano ? 'dañado' : 'disponible';
-        void onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
+        if (toBackendId(prestamo.copiaId) > 0) {
+          void onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
+        } else {
+          console.warn(
+            '[usePrestamos] Préstamo sin copia_id válido; no se actualiza el estado de la copia.'
+          );
+        }
         void onSocioAjuste(prestamo.socioId, -1);
 
         registrarAccion(

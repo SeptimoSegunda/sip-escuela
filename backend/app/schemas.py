@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
 # ── Socio ───────────────────────────────────────────────
@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 class SocioCreate(BaseModel):
     nombre: str
     apellido: str
-    email: EmailStr
+    email: str | None = None
     tipo: str
     matricula: str | None = None
     anio: str | None = None
@@ -18,7 +18,7 @@ class SocioCreate(BaseModel):
 class SocioUpdate(BaseModel):
     nombre: str | None = None
     apellido: str | None = None
-    email: EmailStr | None = None
+    email: str | None = None
     tipo: str | None = None
     matricula: str | None = None
     anio: str | None = None
@@ -159,6 +159,7 @@ class LibroResponse(BaseModel):
     nota_contenido: str | None
     id_editorial: int | None
     id_autor: int | None
+    copias: list["CopiaResponse"] = []
 
 
 # ── Prestamo ────────────────────────────────────────────
@@ -190,12 +191,17 @@ class PrestamoResponse(BaseModel):
     id_prestamo: str
     fecha_prestamo: str
     fecha_limite: str
+    fecha_devolucion: str | None = None
     estado: str
+    turno: str = "mañana"
     created_at: datetime
     updated_at: datetime
     id_usuario: int
     id_libro: int | None
     id_socio: int
+    copia_id: int | None = None
+    libro: "LibroResponse | None" = None
+    socio: "SocioResponse | None" = None
 
 
 # ── Usuario ─────────────────────────────────────────────
@@ -282,6 +288,8 @@ class DanoResponse(BaseModel):
     fecha: str
     turno: str
     created_at: datetime
+    libro: "LibroResponse | None" = None
+    socio: "SocioResponse | None" = None
 
 
 # ── Auditoria ─────────────────────────────────────────────

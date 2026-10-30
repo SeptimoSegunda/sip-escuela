@@ -4,7 +4,12 @@
  * El header X-Active-Shift se inyecta automáticamente desde el turno activo.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
+/**
+ * En desarrollo se usa la ruta relativa '/api'; Next.js la proxya a FastAPI
+ * mediante rewrites() en next.config.ts (evita problemas de CORS).
+ * NEXT_PUBLIC_API_URL se mantiene por compatibilidad, pero no se usa aquí.
+ */
+const API_BASE = '/api'
 
 /** Turno activo actual (mañana | tarde). Se establece al iniciar sesión. */
 let activeTurno: string | null = null
@@ -42,6 +47,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (response.status === 204) {
     return undefined as T
   }
+
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json')) {
+    const text = await response.text()
+    if (!text) return undefined as T
+    throw new Error(
+      `Respuesta inesperada del servidor (${response.status}): ${text.slice(0, 200)}`
+    )
+  }
+
   return response.json()
 }
 
@@ -145,18 +160,7 @@ export const api = {
   getTurnoActual: () => request<any>('/turno/actual'),
   /** Valida un turno concreto enviando el header X-Active-Shift (útil en el login). */
   validarTurnoHeader: (turno: string) =>
-    fetch(`${API_BASE}/turno/actual`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Active-Shift': turno,
-      },
-    }).then(async (res) => {
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || `Error ${res.status}`);
-      }
-      return res.json();
-    }),
+    request<any>('/turno/actual', { headers: { 'X-Active-Shift': turno } }),
   validarTurno: (turnoNuevo: string) =>
     request<any>(`/turno/validar?turno_nuevo=${encodeURIComponent(turnoNuevo)}`),
 

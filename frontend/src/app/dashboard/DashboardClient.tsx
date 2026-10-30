@@ -9,10 +9,10 @@ import DashboardFooter     from '@/components/dashboard/layout/DashboardFooter';
 import ViewInicio          from '@/components/dashboard/views/ViewInicio';
 import ViewCatalogo        from '@/components/dashboard/views/ViewCatalogo';
 import ViewPrestamos       from '@/components/dashboard/views/ViewPrestamos';
-import ViewSocios          from '@/components/dashboard/views/ViewSocios';
+
 import ViewDanos           from '@/components/dashboard/views/ViewDanos';
 import ViewAuditoria       from '@/components/dashboard/views/ViewAuditoria';
-import ModalSocio          from '@/components/dashboard/modals/ModalSocio';
+
 import ModalLibro          from '@/components/dashboard/modals/ModalLibro';
 import ModalFichaLibro     from '@/components/dashboard/modals/ModalFichaLibro';
 import ModalBusquedaAsistida from '@/components/dashboard/modals/ModalBusquedaAsistida';
@@ -20,15 +20,12 @@ import ModalPrestamo       from '@/components/dashboard/modals/ModalPrestamo';
 import ModalDevolucion     from '@/components/dashboard/modals/ModalDevolucion';
 import ModalDano           from '@/components/dashboard/modals/ModalDano';
 import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
-import type { Socio, Libro } from '@/types';
+import type { Libro } from '@/types';
 import styles from './page.module.css';
-
 
 /* ── Estado de modales ── */
 type ModalState =
   | { type: 'none' }
-  | { type: 'nuevaSocio' }
-  | { type: 'editarSocio'; socio: Socio }
   | { type: 'nuevoLibro' }
   | { type: 'editarLibro'; libro: Libro }
   | { type: 'fichaLibro'; libro: Libro }
@@ -90,15 +87,7 @@ export default function DashboardPage() {
             onDevolucion={() => setModal({ type: 'devolucion' })}
           />
         );
-      case 'viewSocios':
-        return (
-          <ViewSocios
-            socios={dash.socios}
-            onNuevo={() => setModal({ type: 'nuevaSocio' })}
-            onEditar={(s) => setModal({ type: 'editarSocio', socio: s })}
-            onEliminar={(id) => dash.eliminarSocio(id)}
-          />
-        );
+
       case 'viewDanos':
         return (
           <ViewDanos
@@ -133,18 +122,7 @@ export default function DashboardPage() {
 
       {/* ── Modales ── */}
 
-      <ModalSocio
-        open={modal.type === 'nuevaSocio' || modal.type === 'editarSocio'}
-        onClose={closeModal}
-        socioEditar={modal.type === 'editarSocio' ? modal.socio : null}
-        onGuardar={(data) => {
-          if (modal.type === 'editarSocio') {
-            dash.editarSocio(modal.socio.id, data);
-          } else {
-            dash.crearSocio(data);
-          }
-        }}
-      />
+
 
       {/* Modal básico de creación/edición rápida */}
       <ModalLibro
@@ -164,7 +142,7 @@ export default function DashboardPage() {
       <ModalFichaLibro
         open={modal.type === 'fichaLibro'}
         onClose={closeModal}
-        libro={modal.type === 'fichaLibro' ? modal.libro : null}
+        libro={modal.type === 'fichaLibro' ? (dash.libros.find((l) => l.id === modal.libro.id) ?? modal.libro) : null}
         prestamos={dash.prestamos}
         onGuardar={(libroId, data) => dash.editarLibro(libroId, data)}
         onIncrementarCopia={(libroId) => dash.incrementarCopia(libroId)}

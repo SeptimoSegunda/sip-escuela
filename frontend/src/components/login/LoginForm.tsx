@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUser, faLock, faCircleExclamation, faCheck, faArrowRight,
+  faUser,
+  faLock,
+  faCircleExclamation,
+  faCheck,
+  faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import InputField from './InputField';
 import { guardarSesion } from '@/hooks/useAuth';
@@ -12,6 +16,19 @@ import { api } from '@/lib/api';
 import styles from './LoginForm.module.css';
 
 type Turno = 'Turno Mañana' | 'Turno Tarde';
+
+function resolverTurno(usuario: string, contrasena: string): Turno | null {
+  const u = usuario.trim().toLowerCase();
+  const p = contrasena.trim();
+
+  if ((u === 'adminmañana' || u === 'adminmanana') && p === '1234') {
+    return 'Turno Mañana';
+  }
+  if (u === 'admintarde' && p === '1234') {
+    return 'Turno Tarde';
+  }
+  return null;
+}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -21,13 +38,6 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [assignedTurno, setAssignedTurno] = useState<Turno | null>(null);
-
-  const resolverTurno = (usuario: string): Turno | null => {
-    const u = usuario.trim().toLowerCase();
-    if (u.includes('mañana') || u.includes('manana')) return 'Turno Mañana';
-    if (u.includes('tarde')) return 'Turno Tarde';
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,12 +52,13 @@ export default function LoginForm() {
       return;
     }
 
-    const turno = resolverTurno(username);
+    const turno = resolverTurno(username, password);
     if (!turno) {
       setError('Credenciales incorrectas. Consulta los datos de acceso al pie.');
       return;
     }
 
+    setAssignedTurno(turno);
     setIsLoading(true);
 
     try {
@@ -81,7 +92,7 @@ export default function LoginForm() {
         id="inputUsername"
         label="Usuario"
         type="text"
-        placeholder="Ej: adminmañana / admintarde"
+        placeholder="Usuario"
         value={username}
         onChange={(e) => {
           setUsername(e.target.value);
@@ -114,7 +125,7 @@ export default function LoginForm() {
         {isLoading ? (
           <>
             <span className={styles.spinner} aria-hidden="true" />
-            <span>Verificando turno...</span>
+            <span>Verificando credenciales...</span>
           </>
         ) : isSuccess ? (
           <>

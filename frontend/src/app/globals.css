@@ -37,7 +37,7 @@
   --primary:         var(--blue);
   --primary-hover:   var(--blue-hover);
   --border-radius:   12px;
-  --font-family:     'Inter', system-ui, -apple-system, sans-serif;
+  --font-family:     'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   /* Dashboard específicos */
   --sidebar-width:   220px;
@@ -81,9 +81,15 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 button {
   cursor: pointer;
-  font-family: inherit;
 }
 
 /* ── 3. Utility Classes ────────────────────────────────────── */

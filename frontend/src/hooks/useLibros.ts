@@ -283,8 +283,16 @@ export function useLibros(
   /* ── Cambiar estado de copia ── */
   const cambiarEstadoCopia = useCallback(
     async (libroId: string, copiaId: string, estado: EstadoCopia): Promise<void> => {
+      const copiaBackendId = toBackendId(copiaId);
+      if (copiaBackendId <= 0) {
+        console.error(
+          `[useLibros] copiaId inválido ("${copiaId}"); se omite el cambio de estado.`
+        );
+        return;
+      }
+
       try {
-        await api.updateCopia(toBackendId(copiaId), { estado });
+        await api.updateCopia(copiaBackendId, { estado });
 
         setLibros((prev) =>
           prev.map((l) => {

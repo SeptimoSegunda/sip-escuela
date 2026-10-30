@@ -283,9 +283,10 @@ def crear_prestamo(
     usuario: Usuario = Depends(get_turno_actual),   # ← inyecta el usuario del turno actual
     db: Session = Depends(get_db)
 ):
-    # data.id_usuario viene del frontend, pero lo sobrescribimos con el turno real
-    prestamo_data = data.model_dump()
+    # data.id_usuario y turno vienen del frontend, pero los sobrescribimos con el turno real del header
+    prestamo_data = data.model_dump(exclude_unset=True)
     prestamo_data["id_usuario"] = usuario.id
+    prestamo_data["turno"] = usuario.turno
     prestamo = Prestamo(**prestamo_data)
     db.add(prestamo)
     db.commit()
@@ -295,13 +296,16 @@ def crear_prestamo(
 
 @app.put("/api/prestamos/{prestamo_id}", response_model=PrestamoResponse)
 def actualizar_prestamo(prestamo_id: int, data: PrestamoUpdate, db: Session = Depends(get_db)):
+    print(f">>> [DEVOLUCION] Llegó petición para prestamo_id={prestamo_id}, datos={data.model_dump(exclude_unset=True)}")
     prestamo = db.query(Prestamo).filter(Prestamo.id == prestamo_id).first()
     if not prestamo:
+        print(f">>> [DEVOLUCION] Préstamo {prestamo_id} NO encontrado en BD")
         raise HTTPException(status_code=404, detail="Prestamo no encontrado")
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(prestamo, key, value)
     db.commit()
     db.refresh(prestamo)
+    print(f">>> [DEVOLUCION] Éxito: prestamo_id={prestamo.id} estado={prestamo.estado} fecha_devolucion={prestamo.fecha_devolucion}")
     return prestamo
 
 
@@ -447,4 +451,5 @@ def validar_cambio(turno_nuevo: str, usuario_actual: Usuario = Depends(get_turno
 
 @app.on_event("startup")
 def startup():
+    print(">>> [STARTUP] SIP-Escuela API arrancada y escuchando")
     Base.metadata.create_all(bind=engine)
