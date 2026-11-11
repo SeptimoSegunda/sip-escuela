@@ -113,6 +113,7 @@ export default function DashboardPage() {
         return (
           <ViewSocios
             socios={dash.socios}
+            prestamos={dash.prestamos}
             onNuevo={() => setModal({ type: 'nuevaSocio' })}
             onEditar={(s) => setModal({ type: 'editarSocio', socio: s })}
             onEliminar={(id) => dash.eliminarSocio(id)}
@@ -206,6 +207,7 @@ export default function DashboardPage() {
         open={modal.type === 'nuevoDano'}
         onClose={closeModal}
         libros={dash.libros}
+        socios={dash.socios}
         onRegistrar={(data) => dash.registrarDano(data)}
       />
 
@@ -228,6 +230,7 @@ export default function DashboardPage() {
         socioId={modal.type === 'expedienteSocio' ? modal.socioId : null}
         socios={dash.socios}
         danos={dash.danos}
+        prestamos={dash.prestamos}
       />
 
     </div>

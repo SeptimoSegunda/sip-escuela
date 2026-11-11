@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import type { Libro, SeveridadDano } from '@/types';
+import type { Libro, Socio, SeveridadDano } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
 
@@ -11,11 +11,13 @@ interface ModalDanoProps {
   open: boolean;
   onClose: () => void;
   libros: Libro[];
+  socios: Socio[];
   onRegistrar: (data: {
     libroId: string;
     libroTitulo: string;
     copiaId: string;
     responsable: string;
+    socioId?: string;
     severidad: SeveridadDano;
     descripcion: string;
     estadoPosterior: 'mantenimiento' | 'disponible';
@@ -28,23 +30,25 @@ const NIVELES: { value: SeveridadDano; label: string }[] = [
   { value: 'catastrofico', label: '🔴 CATASTRÓFICO! (Páginas rotas, mojado, inutilizado)' },
 ];
 
-export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalDanoProps) {
+export default function ModalDano({ open, onClose, libros, socios, onRegistrar }: ModalDanoProps) {
   const [libroQ,       setLibroQ]       = useState('');
-  const [responsable,  setResponsable]  = useState('');
+  const [socioQ,       setSocioQ]       = useState('');
   const [libroSel,     setLibroSel]     = useState<Libro | null>(null);
+  const [socioSel,     setSocioSel]     = useState<Socio | null>(null);
   const [copiaSel,     setCopiaSel]     = useState('');
   const [severidad,    setSeveridad]    = useState<SeveridadDano>('leve');
   const [descripcion,  setDescripcion]  = useState('');
   const [estadoPosterior, setEstadoPosterior] = useState<'mantenimiento' | 'disponible'>('mantenimiento');
   const [showLibros,   setShowLibros]   = useState(false);
+  const [showSocios,   setShowSocios]   = useState(false);
   const [error,        setError]        = useState('');
 
   useEffect(() => {
     if (open) {
-      setLibroQ(''); setResponsable(''); setLibroSel(null);
+      setLibroQ(''); setSocioQ(''); setLibroSel(null); setSocioSel(null);
       setCopiaSel(''); setSeveridad('leve'); setDescripcion('');
       setEstadoPosterior('mantenimiento');
-      setShowLibros(false); setError('');
+      setShowLibros(false); setShowSocios(false); setError('');
     }
   }, [open]);
 
@@ -55,6 +59,7 @@ export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalD
     if (copias.length > 0) setCopiaSel(copias[0].id);
   }, [copias]);
 
+  /* Sugerencias de libro */
   const sugerenciasLibro = useMemo(() => {
     if (!libroQ.trim()) return [];
     const q = libroQ.toLowerCase();
@@ -63,20 +68,34 @@ export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalD
     ).slice(0, 8);
   }, [libroQ, libros]);
 
+  /* Sugerencias de socios activos */
+  const sociosActivos = useMemo(() => socios.filter((s) => s.estado === 'activo'), [socios]);
+
+  const sugerenciasSocio = useMemo(() => {
+    if (!socioQ.trim()) return [];
+    const q = socioQ.toLowerCase();
+    return sociosActivos.filter((s) =>
+      s.apellido.toLowerCase().includes(q) ||
+      s.nombre.toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [socioQ, sociosActivos]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!libroSel)            { setError('Selecciona un libro.'); return; }
-    if (!copiaSel)            { setError('Selecciona una copia.'); return; }
-    if (!responsable.trim())  { setError('Ingresá el nombre del responsable.'); return; }
-    if (!descripcion.trim())  { setError('Describe el daño.'); return; }
+    if (!libroSel)           { setError('Selecciona un libro.'); return; }
+    if (!copiaSel)           { setError('Selecciona una copia.'); return; }
+    if (!socioSel)           { setError('Selecciona un socio registrado activo.'); return; }
+    if (!descripcion.trim()) { setError('Describe el daño.'); return; }
 
     onRegistrar({
-      libroId:     libroSel.id,
-      libroTitulo: libroSel.titulo,
-      copiaId:     copiaSel,
-      responsable: responsable.trim(),
+      libroId:        libroSel.id,
+      libroTitulo:    libroSel.titulo,
+      copiaId:        copiaSel,
+      responsable:    `${socioSel.apellido}, ${socioSel.nombre}`,
+      socioId:        socioSel.id,
       severidad,
-      descripcion: descripcion.trim(),
+      descripcion:    descripcion.trim(),
       estadoPosterior,
     });
     onClose();
@@ -92,7 +111,6 @@ export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalD
           <input
             id="inputDanoLibro"
             className={f.input}
-            placeholder="Busca título de libro..."
             value={libroQ}
             onChange={(e) => { setLibroQ(e.target.value); setLibroSel(null); setShowLibros(true); }}
             onFocus={() => setShowLibros(true)}
@@ -127,19 +145,41 @@ export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalD
           </div>
         )}
 
-        {/* Responsable (texto libre) */}
-        <div className={f.formGroup} style={{ marginBottom: '1rem' }}>
+        {/* Responsable — solo socios registrados */}
+        <div className={f.formGroup} style={{ position: 'relative', marginBottom: '1rem' }}>
           <label htmlFor="inputDanoResponsable" className={f.label}>
-            Responsable del Daño *
+            Responsable del Daño (Socio Registrado) *
           </label>
           <input
             id="inputDanoResponsable"
             className={f.input}
-            placeholder="Ej: García, Juan"
-            value={responsable}
-            onChange={(e) => { setResponsable(e.target.value); setError(''); }}
+            value={socioQ}
+            onChange={(e) => { setSocioQ(e.target.value); setSocioSel(null); setShowSocios(true); setError(''); }}
+            onFocus={() => setShowSocios(true)}
             required
           />
+          {showSocios && sugerenciasSocio.length > 0 && (
+            <ul className={f.suggestionList}>
+              {sugerenciasSocio.map((s) => (
+                <li key={s.id} className={f.suggestionItem} onMouseDown={() => {
+                  setSocioSel(s);
+                  setSocioQ(`${s.apellido}, ${s.nombre}`);
+                  setShowSocios(false);
+                  setError('');
+                }}>
+                  <strong>{s.apellido}, {s.nombre}</strong>
+                  <span className={f.suggestionSub}> — {s.id} · {s.tipo}{s.anio ? ` ${s.anio}` : ''}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {showSocios && socioQ.trim().length > 0 && sugerenciasSocio.length === 0 && (
+            <ul className={f.suggestionList}>
+              <li className={f.suggestionItem} style={{ color: 'var(--text-muted)', cursor: 'default' }}>
+                Sin socios activos que coincidan
+              </li>
+            </ul>
+          )}
         </div>
 
         {/* Nivel de daño */}
@@ -157,7 +197,6 @@ export default function ModalDano({ open, onClose, libros, onRegistrar }: ModalD
             Descripción del Daño *
           </label>
           <textarea id="inputDescripcionDanoDirecto" className={f.textarea} rows={2}
-            placeholder="Especifica qué daño tiene el ejemplar..."
             value={descripcion} required
             onChange={(e) => { setDescripcion(e.target.value); setError(''); }}
           />

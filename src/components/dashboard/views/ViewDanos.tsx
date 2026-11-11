@@ -252,7 +252,6 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
             <input
               id="antecedentesSearchInput"
               type="text"
-              placeholder={modoBorrado ? 'Buscar por responsable, libro o ID...' : 'Buscar responsable por nombre...'}
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className={styles.searchInput}

@@ -118,7 +118,6 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
                       id="inputDescripcionDanoDevolucion"
                       className={f.textarea}
                       rows={2}
-                      placeholder="Ej: Presenta 4 hojas rotas con tinta y mancha en la contratapa"
                       value={descripcion}
                       onChange={(e) => { setDescripcion(e.target.value); setError(''); }}
                     />

@@ -21,7 +21,7 @@ export interface NuevoSocioData {
   nombre: string;
   tipo: Socio['tipo'];
   anio?: string;
-  turno?: 'mañana' | 'tarde';
+  dni: string;
   email?: string;
 }
 
@@ -41,7 +41,7 @@ export function useSocios(
         nombre:          data.nombre.trim(),
         tipo:            data.tipo,
         anio:            data.anio?.trim(),
-        turno:           data.turno,
+        dni:             data.dni.trim(),
         email:           data.email?.trim(),
         estado:          'activo',
         prestamosActivos: 0,

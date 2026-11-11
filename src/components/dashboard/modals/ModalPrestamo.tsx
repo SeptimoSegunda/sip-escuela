@@ -128,7 +128,6 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
           <input
             id="inputLibro"
             className={f.input}
-            placeholder={mode === 'titulo' ? 'Busca libro disponible...' : 'Ej: INV-102030'}
             value={libroQ}
             onChange={(e) => { setLibroQ(e.target.value); setLibroSel(null); setShowLibros(true); }}
             onFocus={() => setShowLibros(true)}
@@ -166,7 +165,6 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
           <input
             id="inputPrestatario"
             className={f.input}
-            placeholder="Busca por apellido, nombre o ID..."
             value={socioQ}
             onChange={(e) => { setSocioQ(e.target.value); setSocioSel(null); setShowSocios(true); setError(''); }}
             onFocus={() => setShowSocios(true)}

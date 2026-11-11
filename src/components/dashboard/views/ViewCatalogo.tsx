@@ -134,7 +134,6 @@ export default function ViewCatalogo({
               <input
                 id="catalogSearchInput"
                 type="text"
-                placeholder="Buscar por título, autor, materia, ISBN o inventario..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className={styles.searchInput}

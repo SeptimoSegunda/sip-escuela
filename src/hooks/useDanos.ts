@@ -20,8 +20,10 @@ export interface NuevoDanoData {
   libroId: string;
   libroTitulo: string;
   copiaId: string;
-  /** Nombre libre del responsable (sin necesidad de socio registrado) */
+  /** Nombre del responsable (apellido, nombre del socio seleccionado) */
   responsable: string;
+  /** Referencia al socio registrado */
+  socioId?: string;
   severidad: SeveridadDano;
   descripcion: string;
 }
@@ -43,6 +45,7 @@ export function useDanos(
         libroTitulo: data.libroTitulo,
         copiaId:     data.copiaId,
         responsable: data.responsable,
+        socioId:     data.socioId,
         severidad:   data.severidad,
         descripcion: data.descripcion,
         fecha:       new Date().toISOString(),

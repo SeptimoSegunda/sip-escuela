@@ -120,88 +120,46 @@ export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: Mo
       <form id="formNuevoLibro" onSubmit={handleSubmit}>
         <div className={f.formGrid}>
 
-          {/* ══ Sección 1: Información Principal y Portada ══ */}
-          <div className={f.sectionTitle}>Información Principal y Portada</div>
-
-          {/* Portada — upload local */}
-          <div className={`${f.formGroupFull} ${styles.portadaGroup}`}>
-            <label htmlFor="inputPortadaLibro" className={f.label}>
-              Foto de Portada (Imagen del Libro)
-            </label>
-            <input
-              ref={fileRef}
-              id="inputPortadaLibro"
-              type="file"
-              accept="image/*"
-              className={styles.fileInput}
-              onChange={handlePortadaChange}
-            />
-            {form.portadaUrl && (
-              <div className={styles.portadaPreview}>
-                <img
-                  id="imgPreviewPortada"
-                  src={form.portadaUrl}
-                  alt="Vista previa de portada"
-                  className={styles.portadaImg}
-                />
-                <button
-                  type="button"
-                  className={styles.btnClearPortada}
-                  onClick={() => { set('portadaUrl', ''); if (fileRef.current) fileRef.current.value = ''; }}
-                  title="Quitar imagen"
-                >
-                  ✕ Quitar
-                </button>
-              </div>
-            )}
-          </div>
+          {/* ══ Sección 1: Información Principal ══ */}
+          <div className={f.sectionTitle}>Información Principal</div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputTituloLibro" className={f.label}>Título *</label>
             <input id="inputTituloLibro" className={f.input}
-              placeholder="Ej: Rayuela" required
+              required
               value={form.titulo} onChange={(e) => set('titulo', e.target.value)} />
-          </div>
-
-          <div className={f.formGroup}>
-            <label htmlFor="inputSubtituloLibro" className={f.labelOptional}>Subtítulo</label>
-            <input id="inputSubtituloLibro" className={f.input}
-              placeholder="Ej: Novela experimental"
-              value={form.subtitulo} onChange={(e) => set('subtitulo', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputAutorLibro" className={f.label}>Autor *</label>
             <input id="inputAutorLibro" className={f.input}
-              placeholder="Ej: Julio Cortázar" required
+              required
               value={form.autor} onChange={(e) => set('autor', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputCategoriaLibro" className={f.label}>Categoría Temática *</label>
             <input id="inputCategoriaLibro" className={f.input}
-              placeholder="Ej: Novela" required
+              required
               value={form.categoria} onChange={(e) => set('categoria', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputIsbn" className={f.label}>Código ISBN *</label>
             <input id="inputIsbn" className={f.input}
-              placeholder="Ej: 978-950-511-356-9" required
+              required
               value={form.isbn} onChange={(e) => set('isbn', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputEdicion" className={f.labelOptional}>Edición</label>
             <input id="inputEdicion" className={f.input}
-              placeholder="Ej: 1ª Edición"
               value={form.edicion} onChange={(e) => set('edicion', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputExtension" className={f.labelOptional}>Extensión (Páginas)</label>
             <input id="inputExtension" className={f.input} type="number" min="1"
-              placeholder="Ej: 600"
               value={form.extension} onChange={(e) => set('extension', e.target.value)} />
           </div>
 
@@ -211,35 +169,31 @@ export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: Mo
           <div className={f.formGroup}>
             <label htmlFor="inputLibristica" className={f.labelOptional}>Librística</label>
             <input id="inputLibristica" className={f.input}
-              placeholder="Ej: LIBR-EXP"
               value={form.libristica} onChange={(e) => set('libristica', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputInventario" className={f.labelOptional}>Número de Inventario</label>
             <input id="inputInventario" className={f.input}
-              placeholder="Ej: INV-74839"
               value={form.inventario} onChange={(e) => set('inventario', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputUbicacion" className={f.label}>Ubicación Física *</label>
             <input id="inputUbicacion" className={f.input}
-              placeholder="Ej: Estante 4, Sector B" required
+              required
               value={form.ubicacion} onChange={(e) => set('ubicacion', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputClasificacion" className={f.labelOptional}>Clasificación CDU</label>
             <input id="inputClasificacion" className={f.input}
-              placeholder="Ej: 863 C828r"
               value={form.clasificacion} onChange={(e) => set('clasificacion', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputNumero" className={f.labelOptional}>Tomo o Identificador</label>
             <input id="inputNumero" className={f.input}
-              placeholder="Ej: Tomo 1"
               value={form.tomo} onChange={(e) => set('tomo', e.target.value)} />
           </div>
 
@@ -249,21 +203,18 @@ export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: Mo
           <div className={f.formGroup}>
             <label htmlFor="inputEditorial" className={f.labelOptional}>Editorial</label>
             <input id="inputEditorial" className={f.input}
-              placeholder="Ej: Sudamericana"
               value={form.editorial} onChange={(e) => set('editorial', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputFechaPublicacion" className={f.labelOptional}>Año de Publicación</label>
             <input id="inputFechaPublicacion" className={f.input}
-              placeholder="Ej: 1963"
               value={form.fechaPublicacion} onChange={(e) => set('fechaPublicacion', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputLugarPublicacion" className={f.labelOptional}>Lugar de Publicación</label>
             <input id="inputLugarPublicacion" className={f.input}
-              placeholder="Ej: Buenos Aires"
               value={form.lugarPublicacion} onChange={(e) => set('lugarPublicacion', e.target.value)} />
           </div>
 
@@ -273,28 +224,24 @@ export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: Mo
           <div className={f.formGroup}>
             <label htmlFor="inputTemas" className={f.labelOptional}>Temas clave</label>
             <input id="inputTemas" className={f.input}
-              placeholder="Separados por coma"
               value={form.temas} onChange={(e) => set('temas', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputTerminoMateria" className={f.labelOptional}>Término Materia</label>
             <input id="inputTerminoMateria" className={f.input}
-              placeholder="Ej: Narrativa Argentina"
               value={form.terminoMateria} onChange={(e) => set('terminoMateria', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputColeccionPersonal" className={f.labelOptional}>Colección Personal</label>
             <input id="inputColeccionPersonal" className={f.input}
-              placeholder="Ej: Bib. Privada"
               value={form.coleccionPersonal} onChange={(e) => set('coleccionPersonal', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputColeccionInstitucional" className={f.labelOptional}>Colección Institucional</label>
             <input id="inputColeccionInstitucional" className={f.input}
-              placeholder="Ej: Fondo Histórico"
               value={form.coleccionInstitucional} onChange={(e) => set('coleccionInstitucional', e.target.value)} />
           </div>
 

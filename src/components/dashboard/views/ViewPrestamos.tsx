@@ -213,7 +213,6 @@ export default function ViewPrestamos({
                 <FontAwesomeIcon icon={faMagnifyingGlass} className={styles.searchIcon} />
                 <input
                   type="text"
-                  placeholder="Buscar por libro, prestatario o ID..."
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   className={styles.searchInput}

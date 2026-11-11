@@ -50,7 +50,7 @@ export interface Socio {
   nombre: string;
   tipo: TipoSocio;
   anio?: string;        // e.g. "3°A"
-  turno?: 'mañana' | 'tarde';
+  dni: string;
   email?: string;
   estado: EstadoSocio;
   prestamosActivos: number;

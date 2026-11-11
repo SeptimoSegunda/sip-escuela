@@ -162,7 +162,6 @@ export default function ModalBusquedaAsistida({
               <input
                 type="text"
                 className={`${f.input} ${styles.queryInput}`}
-                placeholder="Escribí un término..."
                 value={fila.query}
                 onChange={(e) => setFila(i, { query: e.target.value })}
                 id={`asistidaQuery${i + 1}`}

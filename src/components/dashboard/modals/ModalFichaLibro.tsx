@@ -194,18 +194,6 @@ export default function ModalFichaLibro({
               <input id="editCopyTitulo" className={`${f.input} ${styles.inputTitulo}`}
                 value={form.titulo} onChange={(e) => set('titulo', e.target.value)} required />
             </div>
-            <div className={f.formGroup}>
-              <label htmlFor="editCopySubtitulo" className={f.labelOptional} style={{ fontSize: '0.75rem' }}>Subtítulo</label>
-              <input id="editCopySubtitulo" className={f.input}
-                placeholder="Subtítulo opcional"
-                value={form.subtitulo} onChange={(e) => set('subtitulo', e.target.value)} />
-            </div>
-            <div className={f.formGroup}>
-              <label htmlFor="inputPortadaUrl" className={f.labelOptional} style={{ fontSize: '0.75rem' }}>URL de Portada</label>
-              <input id="inputPortadaUrl" className={f.input} type="url"
-                placeholder="https://..."
-                value={form.portadaUrl} onChange={(e) => set('portadaUrl', e.target.value)} />
-            </div>
           </div>
         </div>
 
@@ -293,7 +281,7 @@ export default function ModalFichaLibro({
               </div>
               <div className={f.formGroup}>
                 <label htmlFor="editCopyTemas" className={f.labelOptional}>Palabras Clave</label>
-                <input id="editCopyTemas" className={f.input} placeholder="Separadas por coma"
+                <input id="editCopyTemas" className={f.input}
                   value={form.temas} onChange={(e) => set('temas', e.target.value)} />
               </div>
               <div className={f.formGroup}>

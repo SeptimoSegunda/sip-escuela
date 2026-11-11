@@ -15,7 +15,7 @@ interface ModalSocioProps {
     nombre: string;
     tipo: Socio['tipo'];
     anio?: string;
-    turno?: 'mañana' | 'tarde';
+    dni: string;
     email?: string;
   }) => void;
 }
@@ -26,12 +26,7 @@ const TIPOS: { value: TipoSocio; label: string }[] = [
   { value: 'otro',       label: 'Otro (Máx 1 libro)' },
 ];
 
-const TURNOS: { value: 'mañana' | 'tarde'; label: string }[] = [
-  { value: 'mañana', label: 'Mañana' },
-  { value: 'tarde',  label: 'Tarde' },
-];
-
-const empty = { apellido: '', nombre: '', tipo: 'estudiante' as TipoSocio, anio: '', turno: undefined as 'mañana' | 'tarde' | undefined, email: '' };
+const empty = { apellido: '', nombre: '', tipo: 'estudiante' as TipoSocio, anio: '', dni: '', email: '' };
 
 export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: ModalSocioProps) {
   const [form, setForm] = useState(empty);
@@ -41,7 +36,7 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
     if (open) {
       setForm(
         socioEditar
-          ? { apellido: socioEditar.apellido, nombre: socioEditar.nombre, tipo: socioEditar.tipo, anio: socioEditar.anio ?? '', turno: socioEditar.turno, email: socioEditar.email ?? '' }
+          ? { apellido: socioEditar.apellido, nombre: socioEditar.nombre, tipo: socioEditar.tipo, anio: socioEditar.anio ?? '', dni: socioEditar.dni ?? '', email: socioEditar.email ?? '' }
           : empty
       );
     }
@@ -56,7 +51,7 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
       nombre:   form.nombre.trim(),
       tipo:     form.tipo,
       anio:     form.anio?.trim() || undefined,
-      turno:    form.turno,
+      dni:      form.dni.trim(),
       email:    form.email?.trim() || undefined,
     });
     onClose();
@@ -75,13 +70,13 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
         <div className={f.formGrid}>
           <div className={f.formGroup}>
             <label htmlFor="inputSocioApellido" className={f.label}>Apellido *</label>
-            <input id="inputSocioApellido" className={f.input} placeholder="Ej: Morales" required
+            <input id="inputSocioApellido" className={f.input} required
               value={form.apellido} onChange={(e) => set('apellido', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputSocioNombre" className={f.label}>Nombre *</label>
-            <input id="inputSocioNombre" className={f.input} placeholder="Ej: Valentina" required
+            <input id="inputSocioNombre" className={f.input} required
               value={form.nombre} onChange={(e) => set('nombre', e.target.value)} />
           </div>
 
@@ -94,24 +89,20 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
           </div>
 
           <div className={f.formGroup}>
+            <label htmlFor="inputSocioDni" className={f.label}>DNI *</label>
+            <input id="inputSocioDni" className={f.input} required
+              value={form.dni} onChange={(e) => set('dni', e.target.value)} />
+          </div>
+
+          <div className={f.formGroup}>
             <label htmlFor="inputSocioAnio" className={f.labelOptional}>Año o Grado (Opcional)</label>
-            <input id="inputSocioAnio" className={f.input} placeholder="Ej: 5° Año A"
+            <input id="inputSocioAnio" className={f.input}
               value={form.anio} onChange={(e) => set('anio', e.target.value)} />
           </div>
 
           <div className={f.formGroup}>
-            <label htmlFor="selectSocioTurno" className={f.labelOptional}>Turno (Opcional)</label>
-            <select id="selectSocioTurno" className={f.select}
-              value={form.turno ?? ''} onChange={(e) => setForm((p) => ({ ...p, turno: (e.target.value as 'mañana' | 'tarde') || undefined }))}>
-              <option value="">— Sin turno —</option>
-              {TURNOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-          </div>
-
-          <div className={f.formGroup}>
-          <label htmlFor="inputSocioEmail" className={f.label}>Email *</label>
-            <input id="inputSocioEmail" type="email" className={f.input} placeholder="Ej: valentina@email.com"
-              required
+            <label htmlFor="inputSocioEmail" className={f.labelOptional}>Email (Opcional)</label>
+            <input id="inputSocioEmail" type="email" className={f.input}
               value={form.email} onChange={(e) => set('email', e.target.value)} />
           </div>
         </div>

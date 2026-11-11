@@ -222,6 +222,50 @@
 .emptyTitle { font-weight: 700; color: #065f46; font-size: 1rem; margin: 0 0 0.3rem; }
 .emptySubtitle { font-size: 0.82rem; color: var(--text-muted); }
 
+/* Divisor entre secciones */
+.sectionDivider {
+  border: none;
+  border-top: 1.5px solid var(--beige-anchor);
+  margin: 1.2rem 0;
+}
+
+/* Contadores del historial de préstamos */
+.historialCountGroup {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.historialCountActivo {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.historialCountMoroso {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* Fila de préstamo moroso */
+.rowMoroso { background: #fff7ed; }
+
+/* Badges de estado de préstamo */
+.estadoBadge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+}
+
+.estadoPrestado  { background: #dbeafe; color: #1e40af; }
+.estadoDevuelto  { background: #d1fae5; color: #065f46; }
+.estadoMoroso    { background: #fee2e2; color: #991b1b; }
+
 /* Footer */
 .footerActions {
   display: flex;

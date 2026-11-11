@@ -89,7 +89,6 @@ export default function LoginForm() {
         id="inputUsername"
         label="Usuario"
         type="text"
-        placeholder="Usuario"
         value={username}
         onChange={(e) => {
           setUsername(e.target.value);
@@ -103,7 +102,6 @@ export default function LoginForm() {
         id="inputPassword"
         label="Contraseña"
         type="password"
-        placeholder="••••••••"
         value={password}
         onChange={(e) => {
           setPassword(e.target.value);

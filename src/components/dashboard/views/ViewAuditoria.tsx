@@ -173,7 +173,6 @@ export default function ViewAuditoria({ logs }: ViewAuditoriaProps) {
               <input
                 id="auditSearchInput"
                 type="text"
-                placeholder="Buscar en la bitácora..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className={styles.searchInput}

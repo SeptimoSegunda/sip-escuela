@@ -7,13 +7,14 @@ import {
   faPen,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Socio, EstadoSocio } from '@/types';
+import type { Socio, EstadoSocio, Prestamo } from '@/types';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import styles from './ViewSocios.module.css';
 
 interface ViewSociosProps {
   socios: Socio[];
+  prestamos: Prestamo[];
   onNuevo: () => void;
   onEditar: (socio: Socio) => void;
   onEliminar: (socioId: string) => void;
@@ -37,11 +38,23 @@ function estadoLabel(estado: EstadoSocio): string {
 
 export default function ViewSocios({
   socios,
+  prestamos,
   onNuevo,
   onEditar,
   onEliminar,
 }: ViewSociosProps) {
   const [busqueda, setBusqueda] = useState('');
+
+  /* ── Mapa socioId → préstamos activos (calculado desde préstamos reales) ── */
+  const prestamosActivosPorSocio = useMemo(() => {
+    const mapa: Record<string, number> = {};
+    for (const p of prestamos) {
+      if ((p.estado === 'prestado' || p.estado === 'moroso') && p.socioId) {
+        mapa[p.socioId] = (mapa[p.socioId] ?? 0) + 1;
+      }
+    }
+    return mapa;
+  }, [prestamos]);
 
   /* ── Filtrado ── */
   const sociosFiltrados = useMemo(() => {
@@ -74,12 +87,9 @@ export default function ViewSocios({
     },
     {
       key: 'anio',
-      header: 'Año y Turno',
+      header: 'Año / Grado',
       width: '130px',
-      render: (row) =>
-        row.anio
-          ? `${row.anio}${row.turno ? ` — ${row.turno}` : ''}`
-          : '—',
+      render: (row) => row.anio ?? '—',
     },
     {
       key: 'email',
@@ -90,11 +100,14 @@ export default function ViewSocios({
       key: 'prestamosActivos',
       header: 'Préstamos Activos',
       width: '140px',
-      render: (row) => (
-        <span className={row.prestamosActivos > 0 ? styles.prestamosActivos : styles.prestamosNone}>
-          {row.prestamosActivos}
-        </span>
-      ),
+      render: (row) => {
+        const activos = prestamosActivosPorSocio[row.id] ?? 0;
+        return (
+          <span className={activos > 0 ? styles.prestamosActivos : styles.prestamosNone}>
+            {activos}
+          </span>
+        );
+      },
     },
     {
       key: 'estado',
@@ -168,7 +181,6 @@ export default function ViewSocios({
             <div className={styles.searchBar}>
               <input
                 type="text"
-                placeholder="Buscar por nombre, ID, tipo..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className={styles.searchInput}

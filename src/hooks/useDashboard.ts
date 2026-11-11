@@ -77,29 +77,66 @@ export function useDashboard() {
     (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado)
   );
 
+  /* ── Crear préstamo + ajustar contador del socio ── */
+  const crearPrestamoConSocio = useCallback(
+    (data: Parameters<typeof crearPrestamo>[0]) => {
+      const resultado = crearPrestamo(data);
+      if (resultado && data.socioId) {
+        ajustarPrestamosActivos(data.socioId, 1);
+      }
+      return resultado;
+    },
+    [crearPrestamo, ajustarPrestamosActivos]
+  );
+
+  /* ── Eliminar préstamos + ajustar contador del socio ── */
+  const eliminarPrestamosConSocio = useCallback(
+    (ids: string[]) => {
+      const activos = storage.getPrestamos().filter(
+        (p) =>
+          ids.includes(p.id) &&
+          (p.estado === 'prestado' || p.estado === 'moroso') &&
+          p.socioId
+      );
+      eliminarPrestamos(ids);
+      activos.forEach((p) => ajustarPrestamosActivos(p.socioId!, -1));
+    },
+    [eliminarPrestamos, ajustarPrestamosActivos]
+  );
+
   /* ── Devolución con daño — orquesta préstamos + daños ── */
   const registrarDevolucionConDano = useCallback(
     (data: Parameters<typeof registrarDevolucion>[0]) => {
+      // Leer el préstamo ANTES de registrar la devolución
+      const prestamo = storage.getPrestamos().find((p) => p.id === data.prestamoId);
+
       // 1. Registrar la devolución (actualiza estado del préstamo y la copia)
       registrarDevolucion(data);
 
-      // 2. Si hay daño, crear el registro en el módulo de daños
-      if (data.dano) {
-        const prestamos_actual = storage.getPrestamos();
-        const prestamo = prestamos_actual.find((p) => p.id === data.prestamoId);
-        if (prestamo) {
+      if (prestamo) {
+        // 2. Decrementar contador del socio si el préstamo estaba activo/moroso
+        if (
+          (prestamo.estado === 'prestado' || prestamo.estado === 'moroso') &&
+          prestamo.socioId
+        ) {
+          ajustarPrestamosActivos(prestamo.socioId, -1);
+        }
+
+        // 3. Si hay daño, crear el registro en el módulo de daños
+        if (data.dano) {
           registrarDano({
             libroId:     prestamo.libroId,
             libroTitulo: prestamo.libroTitulo,
             copiaId:     prestamo.copiaId,
             responsable: prestamo.prestatario,
+            socioId:     prestamo.socioId,
             severidad:   data.dano.severidad,
             descripcion: data.dano.descripcion,
           });
         }
       }
     },
-    [registrarDevolucion, registrarDano]
+    [registrarDevolucion, registrarDano, ajustarPrestamosActivos]
   );
 
   return {
@@ -127,9 +164,9 @@ export function useDashboard() {
     eliminarSocio,
 
     /* Acciones — Préstamos */
-    crearPrestamo,
+    crearPrestamo: crearPrestamoConSocio,
     registrarDevolucion: registrarDevolucionConDano,
-    eliminarPrestamos,
+    eliminarPrestamos: eliminarPrestamosConSocio,
 
     /* Acciones — Daños */
     registrarDano,
