@@ -12,21 +12,26 @@ import {
   faMagnifyingGlass,
   faTrashCan,
   faTrash,
+  faFolderOpen,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Dano, SeveridadDano } from '@/types';
+import type { Dano, Socio, SeveridadDano } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import styles from './ViewDanos.module.css';
 
 interface ViewDanosProps {
   danos: Dano[];
+  socios: Socio[];
   onRegistrarDano: () => void;
   onEliminar: (ids: string[]) => void;
+  onVerDetalle: (socioId: string) => void;
 }
 
 /* ── Tipos derivados para la tabla de antecedentes ── */
 interface AntecedentePersona {
   responsable: string;
+  /** ID del socio registrado, si se encuentra en la lista de socios */
+  socioId?: string;
   totalIncidencias: number;
   severidadMax: SeveridadDano;
   desglose: { leve: number; moderado: number; catastrofico: number };
@@ -65,7 +70,7 @@ function formatFecha(iso: string): string {
   }
 }
 
-export default function ViewDanos({ danos, onRegistrarDano, onEliminar }: ViewDanosProps) {
+export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, onVerDetalle }: ViewDanosProps) {
   const [filtro, setFiltro] = useState<FiltroAntecedente>('all');
   const [busqueda, setBusqueda] = useState('');
   const [modoBorrado, setModoBorrado] = useState(false);
@@ -83,8 +88,14 @@ export default function ViewDanos({ danos, onRegistrarDano, onEliminar }: ViewDa
 
     danos.forEach((d) => {
       if (!map.has(d.responsable)) {
+        // Buscar si el responsable corresponde a un socio registrado
+        const socioMatch = d.socioId
+          ? socios.find((s) => s.id === d.socioId)
+          : socios.find((s) => `${s.apellido}, ${s.nombre}` === d.responsable);
+
         map.set(d.responsable, {
           responsable: d.responsable,
+          socioId: socioMatch?.id,
           totalIncidencias: 0,
           severidadMax: 'leve',
           desglose: { leve: 0, moderado: 0, catastrofico: 0 },
@@ -104,7 +115,7 @@ export default function ViewDanos({ danos, onRegistrarDano, onEliminar }: ViewDa
     return Array.from(map.values()).sort(
       (a, b) => ordenSeveridad(b.severidadMax) - ordenSeveridad(a.severidadMax)
     );
-  }, [danos]);
+  }, [danos, socios]);
 
   const personasConAntecedentes = antecedentes.length;
 
@@ -351,12 +362,13 @@ export default function ViewDanos({ danos, onRegistrarDano, onEliminar }: ViewDa
                   <th>Severidad Máxima</th>
                   <th>Desglose</th>
                   <th>Estado Disciplinario</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="antecedentesTableBody">
                 {antecedentesFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className={styles.emptyState}>
+                    <td colSpan={6} className={styles.emptyState}>
                       No hay registros de daños para mostrar.
                     </td>
                   </tr>
@@ -379,6 +391,18 @@ export default function ViewDanos({ danos, onRegistrarDano, onEliminar }: ViewDa
                         <Badge variant={a.esCritico ? 'low' : 'warning'}>
                           {a.esCritico ? 'Caso Crítico' : 'Con Antecedentes'}
                         </Badge>
+                      </td>
+                      <td>
+                        {a.socioId && (
+                          <button
+                            type="button"
+                            className={styles.btnVerDetalle}
+                            onClick={() => onVerDetalle(a.socioId!)}
+                            title="Ver expediente del socio"
+                          >
+                            <FontAwesomeIcon icon={faFolderOpen} /> Ver detalle
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

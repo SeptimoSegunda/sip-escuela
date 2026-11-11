@@ -23,8 +23,10 @@ export interface NuevoPrestamoData {
   libro: Libro;
   /** ID de la copia específica a prestar. Si es null, se usa la primera disponible. */
   copiaId: string | null;
-  /** Nombre libre del prestatario (sin necesidad de socio registrado) */
+  /** Nombre del prestatario (apellido, nombre del socio seleccionado) */
   prestatario: string;
+  /** Referencia al socio registrado */
+  socioId?: string;
 }
 
 export interface DevolucionData {
@@ -76,6 +78,7 @@ export function usePrestamos(
         libroTitulo:     libro.titulo,
         copiaId:         copia.id,
         prestatario,
+        socioId:         data.socioId,
         fechaPrestamo:   ahora.toISOString(),
         fechaLimite:     limite.toISOString(),
         estado:          'prestado',

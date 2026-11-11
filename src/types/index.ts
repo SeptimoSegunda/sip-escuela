@@ -67,6 +67,8 @@ export interface Prestamo {
   copiaId: string;
   /** Nombre libre del prestatario (sin necesidad de socio registrado) */
   prestatario: string;
+  /** Referencia opcional al socio registrado */
+  socioId?: string;
   fechaPrestamo: string;  // ISO date string
   fechaLimite: string;    // ISO date string
   fechaDevolucion?: string;
@@ -84,6 +86,8 @@ export interface Dano {
   copiaId: string;
   /** Nombre libre del responsable (sin necesidad de socio registrado) */
   responsable: string;
+  /** Referencia opcional al socio registrado */
+  socioId?: string;
   severidad: SeveridadDano;
   descripcion: string;
   fecha: string;          // ISO date string

@@ -12,6 +12,7 @@ import ViewPrestamos       from '@/components/dashboard/views/ViewPrestamos';
 
 import ViewDanos           from '@/components/dashboard/views/ViewDanos';
 import ViewAuditoria       from '@/components/dashboard/views/ViewAuditoria';
+import ViewSocios          from '@/components/dashboard/views/ViewSocios';
 
 import ModalLibro          from '@/components/dashboard/modals/ModalLibro';
 import ModalFichaLibro     from '@/components/dashboard/modals/ModalFichaLibro';
@@ -19,8 +20,10 @@ import ModalBusquedaAsistida from '@/components/dashboard/modals/ModalBusquedaAs
 import ModalPrestamo       from '@/components/dashboard/modals/ModalPrestamo';
 import ModalDevolucion     from '@/components/dashboard/modals/ModalDevolucion';
 import ModalDano           from '@/components/dashboard/modals/ModalDano';
+import ModalSocio          from '@/components/dashboard/modals/ModalSocio';
+import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
 
-import type { Libro } from '@/types';
+import type { Libro, Socio } from '@/types';
 import { loadSeedData } from '@/lib/seedData';
 import styles from './page.module.css';
 
@@ -37,7 +40,10 @@ type ModalState =
   | { type: 'busquedaAsistida' }
   | { type: 'nuevoPrestamo' }
   | { type: 'devolucion' }
-  | { type: 'nuevoDano' };
+  | { type: 'nuevoDano' }
+  | { type: 'nuevaSocio' }
+  | { type: 'editarSocio'; socio: Socio }
+  | { type: 'expedienteSocio'; socioId: string };
 
 export default function DashboardPage() {
   const sesion        = useRequireAuth();
@@ -97,8 +103,19 @@ export default function DashboardPage() {
         return (
           <ViewDanos
             danos={dash.danos}
+            socios={dash.socios}
             onRegistrarDano={() => setModal({ type: 'nuevoDano' })}
             onEliminar={(ids) => dash.eliminarDanos(ids)}
+            onVerDetalle={(socioId) => setModal({ type: 'expedienteSocio', socioId })}
+          />
+        );
+      case 'viewSocios':
+        return (
+          <ViewSocios
+            socios={dash.socios}
+            onNuevo={() => setModal({ type: 'nuevaSocio' })}
+            onEditar={(s) => setModal({ type: 'editarSocio', socio: s })}
+            onEliminar={(id) => dash.eliminarSocio(id)}
           />
         );
       case 'viewAuditoria':
@@ -169,9 +186,10 @@ export default function DashboardPage() {
         open={modal.type === 'nuevoPrestamo'}
         onClose={closeModal}
         libros={dash.libros}
-        onRegistrar={(libroId, copiaId, prestatario) => {
+        socios={dash.socios}
+        onRegistrar={(libroId, copiaId, prestatario, socioId) => {
           const libro = dash.libros.find((l) => l.id === libroId);
-          if (libro) dash.crearPrestamo({ libro, copiaId, prestatario });
+          if (libro) dash.crearPrestamo({ libro, copiaId, prestatario, socioId });
         }}
       />
 
@@ -191,6 +209,26 @@ export default function DashboardPage() {
         onRegistrar={(data) => dash.registrarDano(data)}
       />
 
+      <ModalSocio
+        open={modal.type === 'nuevaSocio' || modal.type === 'editarSocio'}
+        onClose={closeModal}
+        socioEditar={modal.type === 'editarSocio' ? modal.socio : null}
+        onGuardar={(data) => {
+          if (modal.type === 'editarSocio') {
+            dash.editarSocio(modal.socio.id, data);
+          } else {
+            dash.crearSocio(data);
+          }
+        }}
+      />
+
+      <ModalExpedienteSocio
+        open={modal.type === 'expedienteSocio'}
+        onClose={closeModal}
+        socioId={modal.type === 'expedienteSocio' ? modal.socioId : null}
+        socios={dash.socios}
+        danos={dash.danos}
+      />
 
     </div>
   );

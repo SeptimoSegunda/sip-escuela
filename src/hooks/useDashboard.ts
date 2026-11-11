@@ -77,6 +77,31 @@ export function useDashboard() {
     (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado)
   );
 
+  /* ── Devolución con daño — orquesta préstamos + daños ── */
+  const registrarDevolucionConDano = useCallback(
+    (data: Parameters<typeof registrarDevolucion>[0]) => {
+      // 1. Registrar la devolución (actualiza estado del préstamo y la copia)
+      registrarDevolucion(data);
+
+      // 2. Si hay daño, crear el registro en el módulo de daños
+      if (data.dano) {
+        const prestamos_actual = storage.getPrestamos();
+        const prestamo = prestamos_actual.find((p) => p.id === data.prestamoId);
+        if (prestamo) {
+          registrarDano({
+            libroId:     prestamo.libroId,
+            libroTitulo: prestamo.libroTitulo,
+            copiaId:     prestamo.copiaId,
+            responsable: prestamo.prestatario,
+            severidad:   data.dano.severidad,
+            descripcion: data.dano.descripcion,
+          });
+        }
+      }
+    },
+    [registrarDevolucion, registrarDano]
+  );
+
   return {
     /* Estado */
     turnoAdmin,
@@ -103,7 +128,7 @@ export function useDashboard() {
 
     /* Acciones — Préstamos */
     crearPrestamo,
-    registrarDevolucion,
+    registrarDevolucion: registrarDevolucionConDano,
     eliminarPrestamos,
 
     /* Acciones — Daños */

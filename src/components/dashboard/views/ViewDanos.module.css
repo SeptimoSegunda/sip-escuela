@@ -325,3 +325,25 @@
   text-overflow: ellipsis;
 }
 
+
+/* ── Botón "Ver detalle" en tabla agrupada ── */
+.btnVerDetalle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btnVerDetalle:hover {
+  background: var(--accent);
+  color: #fff;
+}

@@ -6,6 +6,7 @@ import {
   faBook,
   faRepeat,
   faTriangleExclamation,
+  faUsers,
   faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -16,6 +17,7 @@ export type ViewId =
   | 'viewCatalogo'
   | 'viewPrestamos'
   | 'viewDanos'
+  | 'viewSocios'
   | 'viewAuditoria';
 
 interface NavItem {
@@ -29,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'viewCatalogo',   label: 'Catálogo',             icon: faBook },
   { id: 'viewPrestamos',  label: 'Préstamos',            icon: faRepeat },
   { id: 'viewDanos',      label: 'Registro de Daños',    icon: faTriangleExclamation },
+  { id: 'viewSocios',     label: 'Sujetos Educativos',   icon: faUsers },
   { id: 'viewAuditoria',  label: 'Bitácora',             icon: faClipboardList },
 ];
 

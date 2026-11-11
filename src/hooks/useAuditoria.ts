@@ -10,8 +10,13 @@ import { storage } from '@/lib/storage';
    los demás hooks para registrar acciones.
 ──────────────────────────────────────── */
 
+let _logCounter = 0;
+
 function generarIdLog(): string {
-  return `LOG-${Date.now().toString().slice(-6)}`;
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const seq = (++_logCounter).toString().padStart(3, '0');
+  return `LOG-${ts}-${rand}-${seq}`;
 }
 
 export function useAuditoria() {

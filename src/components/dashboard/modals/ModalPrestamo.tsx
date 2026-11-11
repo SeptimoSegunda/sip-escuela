@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook, faBarcode } from '@fortawesome/free-solid-svg-icons';
-import type { Libro } from '@/types';
+import type { Libro, Socio } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
 
@@ -11,25 +11,28 @@ interface ModalPrestamoProps {
   open: boolean;
   onClose: () => void;
   libros: Libro[];
-  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string) => void;
+  socios: Socio[];
+  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string) => void;
 }
 
 type SearchMode = 'titulo' | 'inventario';
 
-export default function ModalPrestamo({ open, onClose, libros, onRegistrar }: ModalPrestamoProps) {
-  const [mode,         setMode]         = useState<SearchMode>('titulo');
-  const [libroQ,       setLibroQ]       = useState('');
-  const [prestatario,  setPrestatario]  = useState('');
-  const [libroSel,     setLibroSel]     = useState<Libro | null>(null);
-  const [copiaSel,     setCopiaSel]     = useState<string | null>(null);
-  const [showLibros,   setShowLibros]   = useState(false);
-  const [error,        setError]        = useState('');
+export default function ModalPrestamo({ open, onClose, libros, socios, onRegistrar }: ModalPrestamoProps) {
+  const [mode,          setMode]          = useState<SearchMode>('titulo');
+  const [libroQ,        setLibroQ]        = useState('');
+  const [socioQ,        setSocioQ]        = useState('');
+  const [libroSel,      setLibroSel]      = useState<Libro | null>(null);
+  const [socioSel,      setSocioSel]      = useState<Socio | null>(null);
+  const [copiaSel,      setCopiaSel]      = useState<string | null>(null);
+  const [showLibros,    setShowLibros]    = useState(false);
+  const [showSocios,    setShowSocios]    = useState(false);
+  const [error,         setError]         = useState('');
 
   useEffect(() => {
     if (open) {
-      setMode('titulo'); setLibroQ(''); setPrestatario('');
-      setLibroSel(null); setCopiaSel(null);
-      setShowLibros(false); setError('');
+      setMode('titulo'); setLibroQ(''); setSocioQ('');
+      setLibroSel(null); setSocioSel(null); setCopiaSel(null);
+      setShowLibros(false); setShowSocios(false); setError('');
     }
   }, [open]);
 
@@ -49,6 +52,19 @@ export default function ModalPrestamo({ open, onClose, libros, onRegistrar }: Mo
     ).slice(0, 8);
   }, [libroQ, librosDisp, mode]);
 
+  /* ── Socios activos como sugerencias ── */
+  const sociosActivos = useMemo(() => socios.filter((s) => s.estado === 'activo'), [socios]);
+
+  const sugerenciasSocio = useMemo(() => {
+    if (!socioQ.trim()) return [];
+    const q = socioQ.toLowerCase();
+    return sociosActivos.filter((s) =>
+      s.apellido.toLowerCase().includes(q) ||
+      s.nombre.toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [socioQ, sociosActivos]);
+
   const seleccionarLibro = (libro: Libro, copiaId?: string) => {
     setLibroSel(libro);
     setCopiaSel(copiaId ?? null);
@@ -57,11 +73,18 @@ export default function ModalPrestamo({ open, onClose, libros, onRegistrar }: Mo
     setError('');
   };
 
+  const seleccionarSocio = (socio: Socio) => {
+    setSocioSel(socio);
+    setSocioQ(`${socio.apellido}, ${socio.nombre}`);
+    setShowSocios(false);
+    setError('');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!libroSel)            { setError('Selecciona un libro disponible.'); return; }
-    if (!prestatario.trim())  { setError('Ingresá el nombre del prestatario.'); return; }
-    onRegistrar(libroSel.id, copiaSel, prestatario.trim());
+    if (!libroSel)         { setError('Selecciona un libro disponible.'); return; }
+    if (!socioSel)         { setError('Selecciona un socio registrado activo.'); return; }
+    onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id);
     onClose();
   };
 
@@ -135,19 +158,37 @@ export default function ModalPrestamo({ open, onClose, libros, onRegistrar }: Mo
           )}
         </div>
 
-        {/* Campo prestatario (texto libre) */}
-        <div className={f.formGroup} style={{ marginBottom: '1rem' }}>
+        {/* Campo prestatario — solo socios registrados */}
+        <div className={f.formGroup} style={{ position: 'relative', marginBottom: '1rem' }}>
           <label htmlFor="inputPrestatario" className={f.label}>
-            Nombre del Prestatario *
+            Prestatario (Socio Registrado) *
           </label>
           <input
             id="inputPrestatario"
             className={f.input}
-            placeholder="Ej: García, Juan"
-            value={prestatario}
-            onChange={(e) => { setPrestatario(e.target.value); setError(''); }}
+            placeholder="Busca por apellido, nombre o ID..."
+            value={socioQ}
+            onChange={(e) => { setSocioQ(e.target.value); setSocioSel(null); setShowSocios(true); setError(''); }}
+            onFocus={() => setShowSocios(true)}
             required
           />
+          {showSocios && sugerenciasSocio.length > 0 && (
+            <ul className={f.suggestionList}>
+              {sugerenciasSocio.map((s) => (
+                <li key={s.id} className={f.suggestionItem} onMouseDown={() => seleccionarSocio(s)}>
+                  <strong>{s.apellido}, {s.nombre}</strong>
+                  <span className={f.suggestionSub}> — {s.id} · {s.tipo}{s.anio ? ` ${s.anio}` : ''}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {showSocios && socioQ.trim().length > 0 && sugerenciasSocio.length === 0 && (
+            <ul className={f.suggestionList}>
+              <li className={f.suggestionItem} style={{ color: 'var(--text-muted)', cursor: 'default' }}>
+                Sin socios activos que coincidan
+              </li>
+            </ul>
+          )}
         </div>
 
         {error && <p className={f.errorMsg}>{error}</p>}

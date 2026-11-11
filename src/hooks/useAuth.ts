@@ -15,21 +15,30 @@ export interface SesionAdmin {
 
 /** Guarda la sesión en localStorage. */
 export function guardarSesion(turno: string, usuario: string): void {
-  localStorage.setItem(SIP_CURRENT_ADMIN_KEY, turno);
-  localStorage.setItem(SIP_AUTH_USER_KEY, usuario);
-  localStorage.setItem(SIP_AUTH_TIME_KEY, new Date().toISOString());
+  localStorage.setItem(SIP_CURRENT_ADMIN_KEY, JSON.stringify(turno));
+  localStorage.setItem(SIP_AUTH_USER_KEY, JSON.stringify(usuario));
+  localStorage.setItem(SIP_AUTH_TIME_KEY, JSON.stringify(new Date().toISOString()));
 }
 
 /** Obtiene la sesión activa, o null si no hay ninguna. */
 export function obtenerSesion(): SesionAdmin | null {
   if (typeof window === 'undefined') return null;
 
-  const turno = localStorage.getItem(SIP_CURRENT_ADMIN_KEY);
-  const usuario = localStorage.getItem(SIP_AUTH_USER_KEY);
-  const horaIngreso = localStorage.getItem(SIP_AUTH_TIME_KEY);
+  try {
+    const turnoRaw = localStorage.getItem(SIP_CURRENT_ADMIN_KEY);
+    const usuarioRaw = localStorage.getItem(SIP_AUTH_USER_KEY);
+    const horaIngresoRaw = localStorage.getItem(SIP_AUTH_TIME_KEY);
 
-  if (!turno || !usuario || !horaIngreso) return null;
-  return { turno, usuario, horaIngreso };
+    if (!turnoRaw || !usuarioRaw || !horaIngresoRaw) return null;
+
+    const turno = JSON.parse(turnoRaw) as string;
+    const usuario = JSON.parse(usuarioRaw) as string;
+    const horaIngreso = JSON.parse(horaIngresoRaw) as string;
+
+    return { turno, usuario, horaIngreso };
+  } catch {
+    return null;
+  }
 }
 
 /** Cierra la sesión limpiando localStorage. */
