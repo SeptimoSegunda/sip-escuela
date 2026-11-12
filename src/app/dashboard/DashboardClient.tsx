@@ -188,9 +188,9 @@ export default function DashboardPage() {
         onClose={closeModal}
         libros={dash.libros}
         socios={dash.socios}
-        onRegistrar={(libroId, copiaId, prestatario, socioId) => {
+        onRegistrar={(libroId, copiaId, prestatario, socioId, diasDevolucion) => {
           const libro = dash.libros.find((l) => l.id === libroId);
-          if (libro) dash.crearPrestamo({ libro, copiaId, prestatario, socioId });
+          if (libro) dash.crearPrestamo({ libro, copiaId, prestatario, socioId, diasDevolucion });
         }}
       />
 

@@ -98,7 +98,7 @@ Cambiar `useState(() => storage.getX())` por `useSWR('/api/x', fetcher)`. Las mu
 Instalar NextAuth.js, configurar el provider de credenciales contra la tabla de admins en DB.
 
 ### Etapa 5 — Limpieza
-Eliminar `src/lib/storage.ts`, `src/lib/seedData.ts` y la dependencia de `localStorage`.
+Eliminar `src/lib/storage.ts` y la dependencia de `localStorage`.
 
 ---
 

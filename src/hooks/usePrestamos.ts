@@ -27,6 +27,8 @@ export interface NuevoPrestamoData {
   prestatario: string;
   /** Referencia al socio registrado */
   socioId?: string;
+  /** Días hasta vencimiento (por defecto 7) */
+  diasDevolucion?: number;
 }
 
 export interface DevolucionData {
@@ -69,7 +71,8 @@ export function usePrestamos(
       if (!copia || copia.estado !== 'disponible') return null;
 
       const ahora = new Date();
-      const limite = new Date(ahora.getTime() + DIAS_LIMITE_PRESTAMO * 24 * 60 * 60 * 1000);
+      const dias = data.diasDevolucion && data.diasDevolucion > 0 ? data.diasDevolucion : DIAS_LIMITE_PRESTAMO;
+      const limite = new Date(ahora.getTime() + dias * 24 * 60 * 60 * 1000);
 
       const actual = storage.getPrestamos();
       const nuevo: Prestamo = {

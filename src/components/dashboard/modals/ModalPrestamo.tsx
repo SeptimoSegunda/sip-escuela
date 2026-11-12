@@ -12,7 +12,7 @@ interface ModalPrestamoProps {
   onClose: () => void;
   libros: Libro[];
   socios: Socio[];
-  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string) => void;
+  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string, diasDevolucion?: number) => void;
 }
 
 type SearchMode = 'titulo' | 'inventario';
@@ -26,13 +26,14 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
   const [copiaSel,      setCopiaSel]      = useState<string | null>(null);
   const [showLibros,    setShowLibros]    = useState(false);
   const [showSocios,    setShowSocios]    = useState(false);
+  const [dias,          setDias]          = useState(7);
   const [error,         setError]         = useState('');
 
   useEffect(() => {
     if (open) {
       setMode('titulo'); setLibroQ(''); setSocioQ('');
       setLibroSel(null); setSocioSel(null); setCopiaSel(null);
-      setShowLibros(false); setShowSocios(false); setError('');
+      setShowLibros(false); setShowSocios(false); setDias(7); setError('');
     }
   }, [open]);
 
@@ -61,7 +62,8 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
     return sociosActivos.filter((s) =>
       s.apellido.toLowerCase().includes(q) ||
       s.nombre.toLowerCase().includes(q) ||
-      s.id.toLowerCase().includes(q)
+      s.id.toLowerCase().includes(q) ||
+      s.dni.toLowerCase().includes(q)
     ).slice(0, 8);
   }, [socioQ, sociosActivos]);
 
@@ -84,7 +86,8 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
     e.preventDefault();
     if (!libroSel)         { setError('Selecciona un libro disponible.'); return; }
     if (!socioSel)         { setError('Selecciona un socio registrado activo.'); return; }
-    onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id);
+    if (!dias || dias < 1) { setError('El plazo de devolución debe ser al menos 1 día.'); return; }
+    onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id, dias);
     onClose();
   };
 
@@ -187,6 +190,26 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
               </li>
             </ul>
           )}
+        </div>
+
+        {/* Plazo de devolución */}
+        <div className={f.formGroup} style={{ marginBottom: '1rem' }}>
+          <label htmlFor="inputDiasPrestamo" className={f.label}>
+            Plazo de devolución (días) *
+          </label>
+          <input
+            id="inputDiasPrestamo"
+            type="number"
+            min={1}
+            max={365}
+            className={f.input}
+            value={dias}
+            onChange={(e) => setDias(Math.max(1, parseInt(e.target.value) || 1))}
+            style={{ width: '120px' }}
+          />
+          <p style={{ margin: '0.3rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            El préstamo pasará a moroso al superar este plazo.
+          </p>
         </div>
 
         {error && <p className={f.errorMsg}>{error}</p>}

@@ -77,7 +77,8 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
     return sociosActivos.filter((s) =>
       s.apellido.toLowerCase().includes(q) ||
       s.nombre.toLowerCase().includes(q) ||
-      s.id.toLowerCase().includes(q)
+      s.id.toLowerCase().includes(q) ||
+      s.dni.toLowerCase().includes(q)
     ).slice(0, 8);
   }, [socioQ, sociosActivos]);
 

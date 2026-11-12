@@ -61,7 +61,7 @@ export default function ViewSocios({
     const q = busqueda.toLowerCase();
     if (!q) return socios;
     return socios.filter((s) =>
-      `${s.id} ${s.apellido} ${s.nombre} ${s.tipo} ${s.anio ?? ''} ${s.email ?? ''}`
+      `${s.id} ${s.apellido} ${s.nombre} ${s.tipo} ${s.dni} ${s.anio ?? ''} ${s.email ?? ''}`
         .toLowerCase()
         .includes(q)
     );
@@ -74,6 +74,12 @@ export default function ViewSocios({
       key: 'apellido',
       header: 'Apellido y Nombre',
       render: (row) => `${row.apellido}, ${row.nombre}`,
+    },
+    {
+      key: 'dni',
+      header: 'DNI',
+      width: '110px',
+      render: (row) => row.dni ?? '—',
     },
     {
       key: 'tipo',

@@ -14,14 +14,22 @@ erDiagram
     string id PK
     string isbn
     string titulo
+    string subtitulo
     string autor
     string categoria
     string ubicacion
-    string fechaAgregado
+    string portadaUrl
     string edicion
+    string extension
     string editorial
     string clasificacion
     string fechaPublicacion
+    string lugarPublicacion
+    string temas
+    string tomo
+    string notaGeneral
+    string notaContenido
+    string fechaAgregado
   }
 
   COPIA {
@@ -46,11 +54,11 @@ erDiagram
 
   PRESTAMO {
     string id PK
-    string libroId     FK
+    string libroId      FK
     string libroTitulo
-    string copiaId     FK
+    string copiaId      FK
     string prestatario
-    string socioId     FK
+    string socioId      FK
     string fechaPrestamo
     string fechaLimite
     string fechaDevolucion
@@ -108,6 +116,7 @@ Una copia puede haber sido prestada **varias veces** a lo largo del tiempo.
 | `libroId` | `Libro.id` |
 | `copiaId` | `Copia.id` (dentro de `Libro.copias`) |
 | `libroTitulo` | Desnormalizado (snapshot al momento del préstamo) |
+| `fechaLimite` | Calculada al crear el préstamo según el plazo configurado (default: 7 días) |
 
 ---
 
@@ -131,6 +140,10 @@ Un préstamo puede estar vinculado a un socio registrado **o no**.
 |---|---|
 | `socioId?` | Referencia a `Socio.id` (nullable) |
 | `prestatario` | Nombre textual del receptor (siempre presente) |
+| `fechaLimite` | Fecha de vencimiento; al superarse el préstamo pasa a **moroso** automáticamente |
+
+> [!NOTE]
+> El plazo de devolución se configura por préstamo al momento de registrarlo (campo `diasDevolucion`, por defecto 7 días). Solo se persiste la fecha resultante `fechaLimite`; el número de días no se guarda como campo propio.
 
 ---
 
@@ -198,11 +211,17 @@ Todos los datos persisten en **`localStorage`** mediante `storage.ts`. Las colec
 
 | Clave localStorage | Entidad |
 |---|---|
-| `sipnr_libros` | `Libro[]` (incluye `copias[]` embebidas) |
-| `sipnr_socios` | `Socio[]` |
-| `sipnr_prestamos` | `Prestamo[]` |
-| `sipnr_danos` | `Dano[]` |
-| `sipnr_audit` | `AuditLog[]` |
+| `SIP_LIBROS` | `Libro[]` (incluye `copias[]` embebidas) |
+| `SIP_SOCIOS` | `Socio[]` |
+| `SIP_PRESTAMOS` | `Prestamo[]` |
+| `SIP_DANOS` | `Dano[]` |
+| `SIP_AUDIT_LOG` | `AuditLog[]` |
+| `SIP_CURRENT_ADMIN` | Turno del admin activo |
+| `SIP_AUTH_USER` | Usuario del admin activo |
+| `SIP_AUTH_TIME` | Hora de ingreso de la sesión |
+
+> [!NOTE]
+> `Socio.prestamosActivos` se mantiene como campo persistido para compatibilidad, pero en la UI se **calcula dinámicamente** contando los préstamos en estado `prestado` o `moroso` vinculados al socio. En una migración a DB, este campo puede eliminarse del modelo y reemplazarse por una consulta derivada.
 
 > Para migrar a una base de datos externa, cada clave corresponde a una tabla.  
 > Ver `db-migration-analysis.md` para el plan completo de migración.
