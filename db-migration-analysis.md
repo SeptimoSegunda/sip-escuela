@@ -82,7 +82,7 @@ flowchart LR
     A["Etapa 1\nCrear API Routes\nen Next.js"] --> B["Etapa 2\nConectar DB\ncon Prisma"]
     B --> C["Etapa 3\nReemplazar hooks\n(SWR + fetch)"]
     C --> D["Etapa 4\nAutenticación\nreal (NextAuth)"]
-    D --> E["Etapa 5\nEliminar\nstorage.ts / seedData.ts"]
+    D --> E["Etapa 5\nEliminar\nstorage.ts"]
 ```
 
 ### Etapa 1 — API Routes (sin DB todavía)
@@ -118,5 +118,5 @@ Eliminar `src/lib/storage.ts` y la dependencia de `localStorage`.
 | Crear API Routes + Prisma schema | Media |
 | Migrar hooks a SWR/fetch | Media |
 | Autenticación con NextAuth | Media-Alta |
-| Testing y migración de datos seed | Baja |
+| Testing e integración end-to-end | Baja |
 | **Total estimado** | **1–2 semanas** de desarrollo |
