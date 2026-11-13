@@ -144,6 +144,12 @@ Un préstamo puede estar vinculado a un socio registrado **o no**.
 
 > [!NOTE]
 > El plazo de devolución se configura por préstamo al momento de registrarlo (campo `diasDevolucion`, por defecto 7 días). Solo se persiste la fecha resultante `fechaLimite`; el número de días no se guarda como campo propio.
+> 
+> **Límites de préstamos activos por tipo de socio (`LIMITES_PRESTAMOS`):**
+> - `estudiante`: Máximo **1** libro simultáneo.
+> - `docente`: Máximo **3** libros simultáneos.
+> - `otro`: Máximo **1** libro simultáneo.
+> El sistema valida en tiempo real la cantidad de préstamos activos (`prestado` o `moroso`) y bloquea el registro con un popup de alerta informativa si el socio alcanza o supera su cupo.
 
 ---
 

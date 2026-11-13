@@ -64,7 +64,13 @@ export function useLibros(
         categoria:            data.categoria.trim(),
         ubicacion:            data.ubicacion.trim() || 'Estante Principal',
         portadaUrl:           data.portadaUrl || undefined,
-        copias:               [],
+        copias: [
+          {
+            id:           `C-${Date.now()}`,
+            inventarioNum: data.inventario?.trim() || 'INV-1001',
+            estado:       'disponible' as EstadoCopia,
+          },
+        ],
         fechaAgregado:        new Date().toISOString(),
         edicion:              data.edicion?.trim() || undefined,
         extension:            data.extension?.trim() || undefined,

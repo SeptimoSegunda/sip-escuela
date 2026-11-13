@@ -107,7 +107,8 @@
 }
 
 .btnEdit,
-.btnDelete {
+.btnDelete,
+.btnExpediente {
   width: 30px;
   height: 30px;
   border: none;
@@ -118,6 +119,15 @@
   justify-content: center;
   font-size: 0.8rem;
   transition: all 0.15s ease;
+}
+
+.btnExpediente {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+.btnExpediente:hover {
+  background-color: #e9d5ff;
 }
 
 .btnEdit {

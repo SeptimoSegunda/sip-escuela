@@ -44,6 +44,12 @@ export interface Libro {
 export type TipoSocio = 'estudiante' | 'docente' | 'otro';
 export type EstadoSocio = 'activo' | 'suspendido' | 'inactivo';
 
+export const LIMITES_PRESTAMOS: Record<TipoSocio, number> = {
+  estudiante: 1,
+  docente:    3,
+  otro:       1,
+};
+
 export interface Socio {
   id: string;
   apellido: string;

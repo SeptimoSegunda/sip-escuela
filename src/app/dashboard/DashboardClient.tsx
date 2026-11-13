@@ -117,6 +117,7 @@ export default function DashboardPage() {
             onNuevo={() => setModal({ type: 'nuevaSocio' })}
             onEditar={(s) => setModal({ type: 'editarSocio', socio: s })}
             onEliminar={(id) => dash.eliminarSocio(id)}
+            onVerDetalle={(id) => setModal({ type: 'expedienteSocio', socioId: id })}
           />
         );
       case 'viewAuditoria':
@@ -188,6 +189,7 @@ export default function DashboardPage() {
         onClose={closeModal}
         libros={dash.libros}
         socios={dash.socios}
+        prestamos={dash.prestamos}
         onRegistrar={(libroId, copiaId, prestatario, socioId, diasDevolucion) => {
           const libro = dash.libros.find((l) => l.id === libroId);
           if (libro) dash.crearPrestamo({ libro, copiaId, prestatario, socioId, diasDevolucion });

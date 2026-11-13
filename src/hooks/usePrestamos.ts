@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { Prestamo, Libro, TurnoAdmin, SeveridadDano } from '@/types';
+import { LIMITES_PRESTAMOS } from '@/types';
 import { storage } from '@/lib/storage';
 
 /* ────────────────────────────────────────
@@ -70,11 +71,26 @@ export function usePrestamos(
 
       if (!copia || copia.estado !== 'disponible') return null;
 
+      const actual = storage.getPrestamos();
+
+      // Validar límite de préstamos por tipo de socio
+      if (data.socioId) {
+        const socio = storage.getSocios().find((s) => s.id === data.socioId);
+        if (socio) {
+          const limiteMax = LIMITES_PRESTAMOS[socio.tipo] ?? 1;
+          const activos = actual.filter(
+            (p) => p.socioId === data.socioId && (p.estado === 'prestado' || p.estado === 'moroso')
+          ).length;
+          if (activos >= limiteMax) {
+            return null;
+          }
+        }
+      }
+
       const ahora = new Date();
       const dias = data.diasDevolucion && data.diasDevolucion > 0 ? data.diasDevolucion : DIAS_LIMITE_PRESTAMO;
       const limite = new Date(ahora.getTime() + dias * 24 * 60 * 60 * 1000);
 
-      const actual = storage.getPrestamos();
       const nuevo: Prestamo = {
         id:              generarIdPrestamo(actual),
         libroId:         libro.id,

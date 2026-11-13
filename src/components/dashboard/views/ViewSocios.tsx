@@ -6,6 +6,7 @@ import {
   faUserPlus,
   faPen,
   faTrash,
+  faFolderOpen,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Socio, EstadoSocio, Prestamo } from '@/types';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
@@ -18,6 +19,7 @@ interface ViewSociosProps {
   onNuevo: () => void;
   onEditar: (socio: Socio) => void;
   onEliminar: (socioId: string) => void;
+  onVerDetalle: (socioId: string) => void;
 }
 
 function estadoToBadge(estado: EstadoSocio): BadgeVariant {
@@ -42,6 +44,7 @@ export default function ViewSocios({
   onNuevo,
   onEditar,
   onEliminar,
+  onVerDetalle,
 }: ViewSociosProps) {
   const [busqueda, setBusqueda] = useState('');
 
@@ -128,9 +131,17 @@ export default function ViewSocios({
     {
       key: 'acciones',
       header: 'Acciones',
-      width: '100px',
+      width: '135px',
       render: (row) => (
         <div className={styles.actionBtns}>
+          <button
+            className={styles.btnExpediente}
+            title="Ver expediente e historial de préstamos"
+            onClick={() => onVerDetalle(row.id)}
+            aria-label={`Ver expediente de ${row.apellido}`}
+          >
+            <FontAwesomeIcon icon={faFolderOpen} />
+          </button>
           <button
             className={styles.btnEdit}
             title="Editar socio"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Libro } from '@/types';
 import type { NuevoLibroData } from '@/hooks/useLibros';
 import Modal from '@/components/ui/Modal';
@@ -57,13 +57,26 @@ function libroToForm(l: Libro): FormState {
 
 export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: ModalLibroProps) {
   const [form, setForm] = useState<FormState>(empty);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   /* Reset al abrir */
   useEffect(() => {
-    if (open) setForm(libroEditar ? libroToForm(libroEditar) : empty);
+    if (open) {
+      setForm(libroEditar ? libroToForm(libroEditar) : empty);
+      if (fileRef.current) fileRef.current.value = '';
+    }
   }, [open, libroEditar]);
 
   const set = (k: keyof FormState, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  /* Portada local → base64 */
+  const handlePortadaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => set('portadaUrl', (ev.target?.result as string) ?? '');
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +122,39 @@ export default function ModalLibro({ open, onClose, libroEditar, onGuardar }: Mo
 
           {/* ══ Sección 1: Información Principal ══ */}
           <div className={f.sectionTitle}>Información Principal</div>
+
+          {/* Portada — upload local */}
+          <div className={`${f.formGroupFull} ${styles.portadaGroup}`}>
+            <label htmlFor="inputPortadaLibro" className={f.labelOptional}>
+              Foto de Portada (Opcional)
+            </label>
+            <input
+              ref={fileRef}
+              id="inputPortadaLibro"
+              type="file"
+              accept="image/*"
+              className={styles.fileInput}
+              onChange={handlePortadaChange}
+            />
+            {form.portadaUrl && (
+              <div className={styles.portadaPreview}>
+                <img
+                  id="imgPreviewPortada"
+                  src={form.portadaUrl}
+                  alt="Vista previa de portada"
+                  className={styles.portadaImg}
+                />
+                <button
+                  type="button"
+                  className={styles.btnClearPortada}
+                  onClick={() => { set('portadaUrl', ''); if (fileRef.current) fileRef.current.value = ''; }}
+                  title="Quitar imagen"
+                >
+                  ✕ Quitar
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className={f.formGroup}>
             <label htmlFor="inputTituloLibro" className={f.label}>Título *</label>

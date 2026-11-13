@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook, faBarcode } from '@fortawesome/free-solid-svg-icons';
-import type { Libro, Socio } from '@/types';
+import { faBook, faBarcode, faTriangleExclamation, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import type { Libro, Socio, Prestamo } from '@/types';
+import { LIMITES_PRESTAMOS } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
 
@@ -12,12 +13,13 @@ interface ModalPrestamoProps {
   onClose: () => void;
   libros: Libro[];
   socios: Socio[];
+  prestamos: Prestamo[];
   onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string, diasDevolucion?: number) => void;
 }
 
 type SearchMode = 'titulo' | 'inventario';
 
-export default function ModalPrestamo({ open, onClose, libros, socios, onRegistrar }: ModalPrestamoProps) {
+export default function ModalPrestamo({ open, onClose, libros, socios, prestamos, onRegistrar }: ModalPrestamoProps) {
   const [mode,          setMode]          = useState<SearchMode>('titulo');
   const [libroQ,        setLibroQ]        = useState('');
   const [socioQ,        setSocioQ]        = useState('');
@@ -28,14 +30,31 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
   const [showSocios,    setShowSocios]    = useState(false);
   const [dias,          setDias]          = useState(7);
   const [error,         setError]         = useState('');
+  const [bloqueoAlerta, setBloqueoAlerta] = useState<{
+    socio: Socio;
+    activos: number;
+    limite: number;
+  } | null>(null);
 
   useEffect(() => {
     if (open) {
       setMode('titulo'); setLibroQ(''); setSocioQ('');
       setLibroSel(null); setSocioSel(null); setCopiaSel(null);
       setShowLibros(false); setShowSocios(false); setDias(7); setError('');
+      setBloqueoAlerta(null);
     }
   }, [open]);
+
+  /* ── Mapa de préstamos activos por socio ── */
+  const prestamosActivosPorSocio = useMemo(() => {
+    const mapa: Record<string, number> = {};
+    for (const p of prestamos) {
+      if ((p.estado === 'prestado' || p.estado === 'moroso') && p.socioId) {
+        mapa[p.socioId] = (mapa[p.socioId] ?? 0) + 1;
+      }
+    }
+    return mapa;
+  }, [prestamos]);
 
   /* ── Libros disponibles ── */
   const librosDisp = useMemo(() => libros.filter((l) =>
@@ -76,6 +95,18 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
   };
 
   const seleccionarSocio = (socio: Socio) => {
+    const activos = prestamosActivosPorSocio[socio.id] ?? 0;
+    const limite = LIMITES_PRESTAMOS[socio.tipo] ?? 1;
+
+    if (activos >= limite) {
+      setBloqueoAlerta({ socio, activos, limite });
+      setShowSocios(false);
+      setSocioSel(null);
+      setSocioQ('');
+      setError(`No se puede otorgar el préstamo: ${socio.apellido}, ${socio.nombre} ya tiene ${activos} de ${limite} préstamo(s) activos permitidos.`);
+      return;
+    }
+
     setSocioSel(socio);
     setSocioQ(`${socio.apellido}, ${socio.nombre}`);
     setShowSocios(false);
@@ -86,6 +117,16 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
     e.preventDefault();
     if (!libroSel)         { setError('Selecciona un libro disponible.'); return; }
     if (!socioSel)         { setError('Selecciona un socio registrado activo.'); return; }
+    
+    // Doble validación en submit por seguridad
+    const activos = prestamosActivosPorSocio[socioSel.id] ?? 0;
+    const limite = LIMITES_PRESTAMOS[socioSel.tipo] ?? 1;
+    if (activos >= limite) {
+      setBloqueoAlerta({ socio: socioSel, activos, limite });
+      setError(`Límite alcanzado: el socio ya posee ${activos} de ${limite} préstamos permitidos.`);
+      return;
+    }
+
     if (!dias || dias < 1) { setError('El plazo de devolución debe ser al menos 1 día.'); return; }
     onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id, dias);
     onClose();
@@ -175,12 +216,42 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
           />
           {showSocios && sugerenciasSocio.length > 0 && (
             <ul className={f.suggestionList}>
-              {sugerenciasSocio.map((s) => (
-                <li key={s.id} className={f.suggestionItem} onMouseDown={() => seleccionarSocio(s)}>
-                  <strong>{s.apellido}, {s.nombre}</strong>
-                  <span className={f.suggestionSub}> — {s.id} · {s.tipo}{s.anio ? ` ${s.anio}` : ''}</span>
-                </li>
-              ))}
+              {sugerenciasSocio.map((s) => {
+                const activos = prestamosActivosPorSocio[s.id] ?? 0;
+                const limite = LIMITES_PRESTAMOS[s.tipo] ?? 1;
+                const lleno = activos >= limite;
+
+                return (
+                  <li
+                    key={s.id}
+                    className={f.suggestionItem}
+                    onMouseDown={() => seleccionarSocio(s)}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: lleno ? '#fef2f2' : undefined,
+                    }}
+                  >
+                    <div>
+                      <strong style={{ color: lleno ? '#991b1b' : undefined }}>{s.apellido}, {s.nombre}</strong>
+                      <span className={f.suggestionSub}> — {s.id} · {s.tipo}{s.anio ? ` ${s.anio}` : ''}</span>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        backgroundColor: lleno ? '#fee2e2' : '#e0f2fe',
+                        color: lleno ? '#b91c1c' : '#0369a1',
+                      }}
+                    >
+                      {lleno ? `Cupo lleno (${activos}/${limite})` : `${activos}/${limite} libros`}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
           {showSocios && socioQ.trim().length > 0 && sugerenciasSocio.length === 0 && (
@@ -219,6 +290,110 @@ export default function ModalPrestamo({ open, onClose, libros, socios, onRegistr
           <button type="submit" className={f.btnSubmit}>Registrar Préstamo</button>
         </div>
       </form>
+
+      {/* Popup / Alerta Emergente de Cupo Máximo */}
+      {bloqueoAlerta && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setBloqueoAlerta(null);
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '14px',
+              maxWidth: '450px',
+              width: '100%',
+              padding: '1.75rem',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              textAlign: 'center',
+              borderTop: '5px solid #dc2626',
+              animation: 'fadeIn 0.15s ease-out',
+            }}
+          >
+            <div
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '50%',
+                backgroundColor: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.6rem',
+                margin: '0 auto 1rem',
+              }}
+            >
+              <FontAwesomeIcon icon={faTriangleExclamation} />
+            </div>
+
+            <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.2rem', color: '#111827', fontWeight: 700 }}>
+              Límite de Préstamos Alcanzado
+            </h3>
+
+            <p style={{ margin: '0 0 1rem', fontSize: '0.92rem', color: '#4b5563', lineHeight: '1.5' }}>
+              El socio <strong>{bloqueoAlerta.socio.apellido}, {bloqueoAlerta.socio.nombre}</strong> (categoría <em>{bloqueoAlerta.socio.tipo}</em>) ya tiene <strong>{bloqueoAlerta.activos}</strong> de <strong>{bloqueoAlerta.limite}</strong> préstamo(s) activos permitidos.
+            </p>
+
+            <div
+              style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '8px',
+                padding: '0.75rem 0.9rem',
+                fontSize: '0.84rem',
+                color: '#991b1b',
+                marginBottom: '1.25rem',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.5rem',
+                lineHeight: '1.4',
+              }}
+            >
+              <FontAwesomeIcon icon={faCircleExclamation} style={{ marginTop: '2px', flexShrink: 0 }} />
+              <span>
+                Para solicitar un nuevo ejemplar, este socio debe devolver primero los libros que tiene actualmente en préstamo.
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setBloqueoAlerta(null)}
+              style={{
+                background: 'var(--accent-brown, #5c2d16)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.65rem 1.25rem',
+                fontSize: '0.92rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                width: '100%',
+                transition: 'opacity 0.15s ease',
+              }}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }
