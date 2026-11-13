@@ -1,325 +1,445 @@
 #!/usr/bin/env python
-"""
-Test suite completo para SIP-Escuela API.
-Ejecuta: python test_api.py
-"""
-import requests
-import json
+"""Test suite de la API SIP-Escuela.
 
-BASE_URL = "http://127.0.0.1:8000"
+Ejecuta con el servidor levantado:
+    python -m uvicorn app.main:app --port 8000
+    python test_api.py
+"""
+import os
+import uuid
 
-def print_test(name, success, detail=""):
-    status = "[PASS]" if success else "[FAIL]"
-    print(f"{status} | {name}")
-    if detail:
-        print(f"       {detail}")
+import httpx
+
+BASE_URL = os.environ.get("SIP_API_URL", "http://127.0.0.1:8000")
+HEADERS = {"X-Active-Shift": "manana", "Content-Type": "application/json"}
+
+RESULTADOS: list[tuple[str, bool]] = []
+
+
+def req(method: str, path: str, **kwargs):
+    headers = kwargs.pop("headers", HEADERS)
+    return httpx.request(
+        method, f"{BASE_URL}{path}", headers=headers, timeout=15, **kwargs
+    )
+
+
+def check(nombre: str, condicion: bool, detalle: str = "") -> bool:
+    estado = "[PASS]" if condicion else "[FAIL]"
+    print(f"{estado} | {nombre}")
+    if detalle and not condicion:
+        print(f"       {detalle}")
+    RESULTADOS.append((nombre, condicion))
+    return condicion
+
+
+def _uid() -> str:
+    return uuid.uuid4().hex[:8]
+
+
+def _dni() -> str:
+    return "9" + str(uuid.uuid4().int)[:7]
+
+
+# ── Tests ───────────────────────────────────────────────
 
 def test_root():
-    r = requests.get(f"{BASE_URL}/")
-    return r.status_code == 200 and "funcionando" in r.json().get("message", "")
+    r = req("GET", "/")
+    check("Root responde", r.status_code == 200 and "funcionando" in r.json()["message"])
 
-def test_turno_endpoints():
-    """Tests del sistema de turnos"""
-    results = []
-    
-    # 1. GET /api/turno/actual con header válido (mañana)
-    r = requests.get(f"{BASE_URL}/api/turno/actual", headers={"X-Active-Shift": "mañana"})
-    success = r.status_code == 200 and r.json().get("turno") == "mañana"
-    results.append(("Turno actual - mañana", success, f"status={r.status_code}, data={r.json()}"))
-    
-    # 2. GET /api/turno/actual con header válido (tarde)
-    r = requests.get(f"{BASE_URL}/api/turno/actual", headers={"X-Active-Shift": "tarde"})
-    success = r.status_code == 200 and r.json().get("turno") == "tarde"
-    results.append(("Turno actual - tarde", success, f"status={r.status_code}, data={r.json()}"))
-    
-    # 3. GET /api/turno/actual SIN header (debe fallar 400/422)
-    r = requests.get(f"{BASE_URL}/api/turno/actual")
-    success = r.status_code in (400, 422)
-    results.append(("Turno actual - sin header", success, f"status={r.status_code}"))
-    
-    # 4. GET /api/turno/actual con header inválido
-    r = requests.get(f"{BASE_URL}/api/turno/actual", headers={"X-Active-Shift": "noche"})
-    success = r.status_code == 400
-    results.append(("Turno actual - header inválido", success, f"status={r.status_code}"))
-    
-    # 5. Validar cambio de turno
-    r = requests.get(f"{BASE_URL}/api/turno/validar?turno_nuevo=tarde", headers={"X-Active-Shift": "mañana"})
-    success = r.status_code == 200 and "permitido" in r.json()
-    results.append(("Validar cambio turno", success, f"status={r.status_code}, data={r.json()}"))
-    
-    return results
 
-def test_crud_socios():
-    """Tests CRUD Socios"""
-    results = []
-    headers = {"X-Active-Shift": "mañana", "Content-Type": "application/json"}
-    
-    # CREATE
+def test_turnos():
+    r = req("GET", "/api/turno/actual", headers={"X-Active-Shift": "manana"})
+    check("Turno actual mañana", r.status_code == 200 and r.json()["turno"] == "mañana")
+
+    r = req("GET", "/api/turno/actual", headers={"X-Active-Shift": "tarde"})
+    check("Turno actual tarde", r.status_code == 200 and r.json()["turno"] == "tarde")
+
+    r = req("GET", "/api/turno/actual", headers={})
+    check("Turno sin header -> 400", r.status_code == 400)
+
+    r = req("GET", "/api/turno/actual", headers={"X-Active-Shift": "noche"})
+    check("Turno inválido -> 400", r.status_code == 400)
+
+
+def test_socios():
+    dni = _dni()
     data = {
-        "nombre": "Juan",
-        "apellido": "Pérez",
-        "email": "juan.perez@test.com",
-        "tipo": "alumno",
-        "matricula": "12345",
-        "anio": "3",
-        "turno": "mañana"
+        "nombre": "Test",
+        "apellido": "Socio",
+        "dni": dni,
+        "email": f"test.{_uid()}@test.com",
+        "tipo": "estudiante",
     }
-    r = requests.post(f"{BASE_URL}/api/socios/", headers=headers, json=data)
-    success = r.status_code == 201
-    socio_id = r.json().get("id") if success else None
-    results.append(("Socio CREATE", success, f"status={r.status_code}, id={socio_id}"))
-    
-    if not socio_id:
-        return results
-    
-    # LIST
-    r = requests.get(f"{BASE_URL}/api/socios/", headers=headers)
-    success = r.status_code == 200 and isinstance(r.json(), list)
-    results.append(("Socio LIST", success, f"status={r.status_code}, count={len(r.json())}"))
-    
-    # GET ONE
-    r = requests.get(f"{BASE_URL}/api/socios/{socio_id}", headers=headers)
-    success = r.status_code == 200 and r.json().get("email") == data["email"]
-    results.append(("Socio GET ONE", success, f"status={r.status_code}"))
-    
-    # UPDATE
-    r = requests.put(f"{BASE_URL}/api/socios/{socio_id}", headers=headers, json={"apellido": "Gómez"})
-    success = r.status_code == 200 and r.json().get("apellido") == "Gómez"
-    results.append(("Socio UPDATE", success, f"status={r.status_code}"))
-    
-    # DELETE
-    r = requests.delete(f"{BASE_URL}/api/socios/{socio_id}", headers=headers)
-    success = r.status_code == 200
-    results.append(("Socio DELETE", success, f"status={r.status_code}"))
-    
-    return results
+    r = req("POST", "/api/socios/", json=data)
+    ok = check("Socio CREATE", r.status_code == 201, r.text)
+    if not ok:
+        return
+    socio_id = r.json()["id"]
 
-def test_crud_libros():
-    """Tests CRUD Libros"""
-    results = []
-    headers = {"X-Active-Shift": "mañana", "Content-Type": "application/json"}
-    
-    data = {
-        "titulo": "El Quijote",
-        "autor": "Cervantes",
-        "isbn": "978-84-376-0494-7",
-        "editorial": "Alfaguara",
-        "anio_publicacion": 2005,
-        "cantidad": 3
-    }
-    r = requests.post(f"{BASE_URL}/api/libros/", headers=headers, json=data)
-    success = r.status_code == 201
-    libro_id = r.json().get("id") if success else None
-    results.append(("Libro CREATE", success, f"status={r.status_code}, id={libro_id}"))
-    
-    if not libro_id:
-        return results
-    
-    r = requests.get(f"{BASE_URL}/api/libros/", headers=headers)
-    success = r.status_code == 200 and isinstance(r.json(), list)
-    results.append(("Libro LIST", success, f"status={r.status_code}, count={len(r.json())}"))
-    
-    r = requests.get(f"{BASE_URL}/api/libros/{libro_id}", headers=headers)
-    success = r.status_code == 200 and r.json().get("titulo") == "El Quijote"
-    results.append(("Libro GET ONE", success, f"status={r.status_code}"))
-    
-    r = requests.put(f"{BASE_URL}/api/libros/{libro_id}", headers=headers, json={"cantidad": 5})
-    success = r.status_code == 200 and r.json().get("cantidad") == 5
-    results.append(("Libro UPDATE", success, f"status={r.status_code}"))
-    
-    r = requests.delete(f"{BASE_URL}/api/libros/{libro_id}", headers=headers)
-    success = r.status_code == 200
-    results.append(("Libro DELETE", success, f"status={r.status_code}"))
-    
-    return results
+    r = req("POST", "/api/socios/", json={**data, "email": f"otro.{_uid()}@test.com"})
+    check("Socio DNI duplicado -> 409", r.status_code == 409)
 
-def test_prestamos_con_turno():
-    """Tests de Préstamos validando que se use el turno del header"""
-    results = []
-    headers_manana = {"X-Active-Shift": "mañana", "Content-Type": "application/json"}
-    headers_tarde = {"X-Active-Shift": "tarde", "Content-Type": "application/json"}
-    
-    # Usar IDs únicos para evitar colisiones con tests previos
-    import uuid
-    unique = str(uuid.uuid4())[:8]
-    
-    # Primero crear socio y libro necesarios (usar emails únicos para evitar duplicados)
-    socio_data = {"nombre": "Test", "apellido": "Socio", "email": f"test.socio.{unique}@test.com", "tipo": "alumno"}
-    r = requests.post(f"{BASE_URL}/api/socios/", headers=headers_manana, json=socio_data)
-    socio_id = r.json().get("id") if r.status_code == 201 else None
-    
-    libro_data = {"titulo": f"Test Libro {unique}", "autor": "Test Autor", "cantidad": 1}
-    r = requests.post(f"{BASE_URL}/api/libros/", headers=headers_manana, json=libro_data)
-    libro_id = r.json().get("id") if r.status_code == 201 else None
-    
-    if not socio_id or not libro_id:
-        results.append(("Prestamo SETUP", False, f"socio_id={socio_id}, libro_id={libro_id}"))
-        return results
-    
-    # 1. Crear préstamo con turno mañana
-    prestamo_data = {
-        "id_prestamo": f"PREST-{unique}-001",
-        "fecha_prestamo": "2024-10-01",
-        "fecha_limite": "2024-10-08",
-        "estado": "activo",
-        "id_libro": libro_id,
-        "id_socio": socio_id
-    }
-    r = requests.post(f"{BASE_URL}/api/prestamos/", headers=headers_manana, json=prestamo_data)
-    success = r.status_code == 201
-    prestamo_id = r.json().get("id") if success else None
-    id_usuario_guardado = r.json().get("id_usuario") if success else None
-    # Debe ser usuario.id = 1 (mañana)
-    results.append(("Prestamo CREATE (mañana)", success, f"status={r.status_code}, id_usuario={id_usuario_guardado} (esperado: 1)"))
-    
-    if not prestamo_id:
-        return results
-    
-    # 2. Crear préstamo con turno tarde
-    prestamo_data["id_prestamo"] = f"PREST-{unique}-002"
-    r = requests.post(f"{BASE_URL}/api/prestamos/", headers=headers_tarde, json=prestamo_data)
-    success = r.status_code == 201
-    id_usuario_guardado = r.json().get("id_usuario") if success else None
-    # Debe ser usuario.id = 2 (tarde)
-    results.append(("Prestamo CREATE (tarde)", success, f"status={r.status_code}, id_usuario={id_usuario_guardado} (esperado: 2)"))
-    
-    # 3. Listar préstamos
-    r = requests.get(f"{BASE_URL}/api/prestamos/", headers=headers_manana)
-    success = r.status_code == 200 and isinstance(r.json(), list)
-    results.append(("Prestamo LIST", success, f"status={r.status_code}, count={len(r.json())}"))
-    
-    # 4. Verificar que el id_usuario se ignora del body y usa el del header
-    prestamo_data["id_prestamo"] = f"PREST-{unique}-003"
-    prestamo_data["id_usuario"] = 999  # Valor falso en body
-    r = requests.post(f"{BASE_URL}/api/prestamos/", headers=headers_manana, json=prestamo_data)
-    success = r.status_code == 201 and r.json().get("id_usuario") == 1
-    results.append(("Prestamo ignora id_usuario del body", success, f"id_usuario guardado={r.json().get('id_usuario')} (esperado: 1)"))
-    
-    return results
+    r = req(
+        "POST",
+        "/api/socios/",
+        json={"nombre": "Sin", "apellido": "Email", "dni": _dni(), "tipo": "otro"},
+    )
+    check("Socio sin email (opcional)", r.status_code == 201, r.text)
+    if r.status_code == 201:
+        req("DELETE", f"/api/socios/{r.json()['id']}")
 
-def test_auditoria():
-    """Tests de auditoría automática"""
-    results = []
-    headers = {"X-Active-Shift": "mañana", "Content-Type": "application/json"}
-    
-    # Hacer algunas operaciones que generen auditoría
-    requests.post(f"{BASE_URL}/api/socios/", headers=headers, json={
-        "nombre": "Audit", "apellido": "Test", "email": "audit@test.com", "tipo": "alumno"
-    })
-    requests.post(f"{BASE_URL}/api/libros/", headers=headers, json={
-        "titulo": "Audit Libro", "autor": "Audit Autor", "cantidad": 1
-    })
-    
-    # Consultar auditoría
-    r = requests.get(f"{BASE_URL}/api/auditoria/", headers=headers)
-    success = r.status_code == 200 and isinstance(r.json(), list)
-    audits = r.json() if success else []
-    # Verificar que tiene campos esperados
-    if audits:
-        first = audits[0]
-        has_fields = all(k in first for k in ["endpoint", "metodo", "turno", "status_code", "duracion_ms"])
-        results.append(("Auditoria campos correctos", has_fields, f"campos: {list(first.keys())}"))
-    results.append(("Auditoria LIST", success, f"status={r.status_code}, count={len(audits)}"))
-    
-    # Verificar que registra el turno correcto (mañana o tarde)
-    if audits:
-        turnos_validos = {"mañana", "tarde", "desconocido"}
-        turno_correcto = all(a.get("turno") in turnos_validos for a in audits)
-        results.append(("Auditoria registra turno", turno_correcto, f"turnos únicos: {set(a.get('turno') for a in audits)}"))
-    
-    return results
+    r = req("GET", f"/api/socios/?q={dni}")
+    check(
+        "Socio LIST con filtro",
+        r.status_code == 200 and any(s["id"] == socio_id for s in r.json()),
+    )
+
+    r = req("GET", f"/api/socios/{socio_id}")
+    check("Socio GET ONE", r.status_code == 200 and r.json()["dni"] == dni)
+
+    r = req("PUT", f"/api/socios/{socio_id}", json={"nombre": "TestEditado"})
+    check(
+        "Socio UPDATE",
+        r.status_code == 200 and r.json()["nombre"] == "TestEditado",
+    )
+
+    r = req("DELETE", f"/api/socios/{socio_id}")
+    check("Socio DELETE", r.status_code == 200)
+
 
 def test_autores_editoriales():
-    """Tests rápidos de Autores y Editoriales"""
-    results = []
-    headers = {"X-Active-Shift": "mañana", "Content-Type": "application/json"}
-    
-    # Autor
-    r = requests.post(f"{BASE_URL}/api/autores/", headers=headers, json={"nombre_apellido": "Borges", "tipo_autor": "escritor"})
-    success = r.status_code == 201
-    results.append(("Autor CREATE", success, f"status={r.status_code}"))
-    
-    r = requests.get(f"{BASE_URL}/api/autores/", headers=headers)
-    success = r.status_code == 200
-    results.append(("Autor LIST", success, f"status={r.status_code}"))
-    
-    # Editorial
-    r = requests.post(f"{BASE_URL}/api/editoriales/", headers=headers, json={"nombre": "Planeta"})
-    success = r.status_code == 201
-    results.append(("Editorial CREATE", success, f"status={r.status_code}"))
-    
-    r = requests.get(f"{BASE_URL}/api/editoriales/", headers=headers)
-    success = r.status_code == 200
-    results.append(("Editorial LIST", success, f"status={r.status_code}"))
-    
-    return results
+    uid = _uid()
+    nombre_autor = f"Autor Test {uid}"
+    r = req("POST", "/api/autores/", json={"nombre_apellido": nombre_autor})
+    ok = check("Autor CREATE (201)", r.status_code == 201, r.text)
+    autor_id = r.json()["id"] if ok else None
+
+    r = req("POST", "/api/autores/", json={"nombre_apellido": nombre_autor})
+    check(
+        "Autor duplicado idempotente (200)",
+        r.status_code == 200 and r.json()["id"] == autor_id,
+    )
+
+    r = req("GET", f"/api/autores/?q={uid}")
+    check("Autor LIST con filtro", r.status_code == 200 and len(r.json()) == 1)
+
+    nombre_ed = f"Editorial Test {uid}"
+    r = req("POST", "/api/editoriales/", json={"nombre": nombre_ed})
+    ok = check("Editorial CREATE (201)", r.status_code == 201, r.text)
+    editorial_id = r.json()["id"] if ok else None
+
+    r = req("POST", "/api/editoriales/", json={"nombre": nombre_ed})
+    check(
+        "Editorial duplicada idempotente (200)",
+        r.status_code == 200 and r.json()["id"] == editorial_id,
+    )
+
+    r = req("GET", f"/api/editoriales/?q={uid}")
+    check("Editorial LIST con filtro", r.status_code == 200 and len(r.json()) == 1)
+
+    # Autor en uso -> 409
+    r = req(
+        "POST",
+        "/api/libros/",
+        json={"titulo": f"Libro uso {uid}", "id_autor": autor_id},
+    )
+    libro_id = r.json()["id"] if r.status_code == 201 else None
+    r = req("DELETE", f"/api/autores/{autor_id}")
+    check("Autor en uso -> 409", r.status_code == 409)
+
+    if libro_id:
+        req("DELETE", f"/api/libros/{libro_id}")
+    r = req("DELETE", f"/api/autores/{autor_id}")
+    check("Autor DELETE", r.status_code == 200)
+
+    if editorial_id:
+        r = req("DELETE", f"/api/editoriales/{editorial_id}")
+        check("Editorial DELETE", r.status_code == 200)
+
+
+def test_libros_copias():
+    uid = _uid()
+
+    autor = req("POST", "/api/autores/", json={"nombre_apellido": f"Cortázar {uid}"})
+    editorial = req("POST", "/api/editoriales/", json={"nombre": f"Sudamericana {uid}"})
+    autor_id = autor.json()["id"]
+    editorial_id = editorial.json()["id"]
+
+    data = {
+        "titulo": f"Rayuela {uid}",
+        "subtitulo": "Novela",
+        "id_autor": autor_id,
+        "id_editorial": editorial_id,
+        "anio_publicacion": 1963,
+        "isbn": f"978{uid}",
+        "paginas": 600,
+        "materias": "novela; latinoamericana",
+        "idioma": "español",
+    }
+    r = req("POST", "/api/libros/", json=data)
+    ok = check("Libro CREATE", r.status_code == 201, r.text)
+    if not ok:
+        return
+    libro = r.json()
+    libro_id = libro["id"]
+    check(
+        "Libro respuesta anidada autor/editorial",
+        libro["autor_detalle"]["id"] == autor_id
+        and libro["editorial_detalle"]["id"] == editorial_id,
+    )
+
+    r = req("POST", "/api/libros/", json={**data, "titulo": "Duplicado"})
+    check("Libro ISBN duplicado -> 409", r.status_code == 409)
+
+    r = req("POST", "/api/libros/", json={"titulo": "X", "id_autor": 999999})
+    check("Libro autor inexistente -> 404", r.status_code == 404)
+
+    r = req(
+        "POST",
+        "/api/libros/",
+        json={
+            "titulo": f"Atajo {uid}",
+            "autor": f"Otro Autor {uid}",
+            "editorial": f"Otra Editorial {uid}",
+        },
+    )
+    check(
+        "Libro con autor/editorial por nombre",
+        r.status_code == 201
+        and r.json()["id_autor"] is not None
+        and r.json()["id_editorial"] is not None,
+        r.text,
+    )
+    libro_atajo_id = r.json()["id"] if r.status_code == 201 else None
+
+    inv = f"INV-{uid}"
+    r = req(
+        "POST",
+        "/api/copias/",
+        json={"libro_id": libro_id, "inventario_num": inv, "modalidad": "domicilio"},
+    )
+    ok = check("Copia CREATE", r.status_code == 201, r.text)
+    copia_id = r.json()["id"] if ok else None
+
+    r = req(
+        "POST",
+        "/api/copias/",
+        json={"libro_id": libro_id, "inventario_num": inv},
+    )
+    check("Copia inventario duplicado -> 409", r.status_code == 409)
+
+    r = req("GET", f"/api/libros/{libro_id}")
+    check(
+        "Libro GET con copias",
+        r.status_code == 200 and len(r.json()["copias"]) == 1,
+    )
+
+    r = req("PUT", f"/api/libros/{libro_id}", json={"paginas": 601})
+    check("Libro UPDATE", r.status_code == 200 and r.json()["paginas"] == 601)
+
+    r = req("DELETE", f"/api/libros/{libro_id}")
+    check("Libro con copia no se elimina -> 409", r.status_code == 409)
+
+    r = req("PUT", f"/api/copias/{copia_id}", json={"estado": "dañado"})
+    check("Copia UPDATE", r.status_code == 200 and r.json()["estado"] == "dañado")
+
+    r = req("DELETE", f"/api/copias/{copia_id}")
+    check("Copia DELETE", r.status_code == 200)
+
+    r = req("DELETE", f"/api/libros/{libro_id}")
+    check("Libro DELETE", r.status_code == 200)
+
+    if libro_atajo_id:
+        req("DELETE", f"/api/libros/{libro_atajo_id}")
+
+    req("DELETE", f"/api/autores/{autor_id}")
+    req("DELETE", f"/api/editoriales/{editorial_id}")
+
+
+def _crear_base(uid: str):
+    socio = req(
+        "POST",
+        "/api/socios/",
+        json={
+            "nombre": "Base",
+            "apellido": uid,
+            "dni": _dni(),
+            "tipo": "estudiante",
+        },
+    ).json()
+    libro = req(
+        "POST",
+        "/api/libros/",
+        json={"titulo": f"Libro base {uid}", "autor": f"Autor base {uid}"},
+    ).json()
+    copia = req(
+        "POST",
+        "/api/copias/",
+        json={"libro_id": libro["id"], "inventario_num": f"BASE-{uid}"},
+    ).json()
+    return socio, libro, copia
+
+
+def _limpiar_base(socio, libro, copia):
+    req("DELETE", f"/api/copias/{copia['id']}")
+    req("DELETE", f"/api/libros/{libro['id']}")
+    req("DELETE", f"/api/socios/{socio['id']}")
+
+
+def test_prestamos():
+    uid = _uid()
+    socio, libro, copia = _crear_base(uid)
+
+    data = {
+        "id_prestamo": f"PRE-{uid}",
+        "fecha_prestamo": "2026-11-01",
+        "fecha_limite": "2026-11-15",
+        "id_socio": socio["id"],
+        "copia_id": copia["id"],
+    }
+    r = req("POST", "/api/prestamos/", json=data)
+    ok = check("Prestamo CREATE", r.status_code == 201, r.text)
+    if not ok:
+        _limpiar_base(socio, libro, copia)
+        return
+    prestamo = r.json()
+    prestamo_id = prestamo["id"]
+    check("Prestamo id_usuario inyectado", prestamo["id_usuario"] == 1)
+    check("Prestamo libro derivado de copia", prestamo["libro"]["id"] == libro["id"])
+
+    r = req("GET", f"/api/copias/?libro_id={libro['id']}")
+    check(
+        "Copia pasa a prestado",
+        r.status_code == 200 and r.json()[0]["estado"] == "prestado",
+    )
+
+    r = req("POST", "/api/prestamos/", json={**data, "id_prestamo": f"PRE2-{uid}"})
+    check("Copia no disponible -> 409", r.status_code == 409)
+
+    r = req(
+        "PUT",
+        f"/api/prestamos/{prestamo_id}",
+        json={"estado": "devuelto"},
+    )
+    check(
+        "Prestamo devolución",
+        r.status_code == 200
+        and r.json()["estado"] == "devuelto"
+        and r.json()["fecha_devolucion"] is not None,
+    )
+
+    r = req("GET", f"/api/copias/?libro_id={libro['id']}")
+    check(
+        "Copia vuelve a disponible",
+        r.status_code == 200 and r.json()[0]["estado"] == "disponible",
+    )
+
+    r = req("GET", "/api/prestamos/?estado=devuelto")
+    check(
+        "Prestamo LIST filtro estado",
+        r.status_code == 200 and any(p["id"] == prestamo_id for p in r.json()),
+    )
+
+    r = req("DELETE", f"/api/prestamos/{prestamo_id}")
+    check("Prestamo DELETE", r.status_code == 200)
+
+    _limpiar_base(socio, libro, copia)
+
+
+def test_danos():
+    uid = _uid()
+    socio, libro, copia = _crear_base(uid)
+
+    data = {
+        "copia_id": copia["id"],
+        "socio_id": socio["id"],
+        "severidad": "moderado",
+        "descripcion": "Página rota",
+    }
+    r = req("POST", "/api/danos/", json=data)
+    ok = check("Daño CREATE", r.status_code == 201, r.text)
+    if not ok:
+        _limpiar_base(socio, libro, copia)
+        return
+    dano = r.json()
+    check("Daño id_usuario inyectado", dano["id_usuario"] == 1)
+    check("Daño libro derivado de copia", dano["libro"]["id"] == libro["id"])
+    check("Daño fecha por defecto", dano["fecha"] is not None)
+
+    r = req("POST", "/api/danos/", json={**data, "severidad": "grave"})
+    check("Daño severidad inválida -> 422", r.status_code == 422)
+
+    r = req(
+        "PUT", f"/api/danos/{dano['id']}", json={"descripcion": "Página reparada"}
+    )
+    check(
+        "Daño UPDATE",
+        r.status_code == 200 and r.json()["descripcion"] == "Página reparada",
+    )
+
+    r = req("DELETE", f"/api/danos/{dano['id']}")
+    check("Daño DELETE", r.status_code == 200)
+
+    _limpiar_base(socio, libro, copia)
+
+
+def test_auditoria():
+    r = req("GET", "/api/auditoria/?limit=20")
+    ok = check("Auditoria LIST", r.status_code == 200 and len(r.json()) > 0)
+    if not ok:
+        return
+    primero = r.json()[0]
+    check(
+        "Auditoria campos nuevos",
+        {"endpoint", "metodo", "status_code", "duracion_ms", "id_usuario", "created_at"}
+        <= set(primero.keys()),
+    )
+    check("Auditoria sin turno", "turno" not in primero)
+    check(
+        "Auditoria guarda solo la ruta",
+        primero["endpoint"].startswith("/api/"),
+    )
+    check(
+        "Auditoria registra id_usuario",
+        any(a["id_usuario"] == 1 for a in r.json()),
+    )
+
 
 def main():
     print("=" * 60)
     print("TEST SUITE - SIP-Escuela API")
     print("=" * 60)
-    
-    all_results = []
-    
-    # Root
-    print("\n[ROOT]")
-    success = test_root()
-    print_test("Root endpoint", success)
-    all_results.append(("Root", success))
-    
-    # Turnos
-    print("\n[TURNOS]")
-    for name, success, detail in test_turno_endpoints():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # CRUD Socios
-    print("\n[CRUD SOCIOS]")
-    for name, success, detail in test_crud_socios():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # CRUD Libros
-    print("\n[CRUD LIBROS]")
-    for name, success, detail in test_crud_libros():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # Préstamos con turnos
-    print("\n[PRESTAMOS + TURNOS]")
-    for name, success, detail in test_prestamos_con_turno():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # Auditoría
-    print("\n[AUDITORIA]")
-    for name, success, detail in test_auditoria():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # Autores/Editoriales
-    print("\n[AUTORES / EDITORIALES]")
-    for name, success, detail in test_autores_editoriales():
-        print_test(name, success, detail)
-        all_results.append((name, success))
-    
-    # Resumen
+
+    for grupo, fn in (
+        ("ROOT", test_root),
+        ("TURNOS", test_turnos),
+        ("SOCIOS", test_socios),
+        ("AUTORES / EDITORIALES", test_autores_editoriales),
+        ("LIBROS / COPIAS", test_libros_copias),
+        ("PRESTAMOS", test_prestamos),
+        ("DANOS", test_danos),
+        ("AUDITORIA", test_auditoria),
+    ):
+        print(f"\n[{grupo}]")
+        try:
+            fn()
+        except Exception as exc:  # noqa: BLE001
+            check(f"{grupo} sin excepciones", False, repr(exc))
+
     print("\n" + "=" * 60)
-    print("RESUMEN")
+    pasaron = sum(1 for _, ok in RESULTADOS if ok)
+    total = len(RESULTADOS)
+    print(f"RESUMEN: {pasaron}/{total} OK")
     print("=" * 60)
-    passed = sum(1 for _, s in all_results if s)
-    total = len(all_results)
-    print(f"Total: {total} | Pass: {passed} | Fail: {total - passed}")
-    
-    if total - passed > 0:
-        print("\n[FAIL] FALLOS:")
-        for name, success in all_results:
-            if not success:
-                print(f"  - {name}")
+    fallidos = [n for n, ok in RESULTADOS if not ok]
+    if fallidos:
+        print("FALLOS:")
+        for nombre in fallidos:
+            print(f"  - {nombre}")
         return 1
-    else:
-        print("\n[OK] TODOS LOS TESTS PASARON")
-        return 0
+    print("[OK] TODOS LOS TESTS PASARON")
+    return 0
+
 
 if __name__ == "__main__":
-    exit(main())
+    raise SystemExit(main())

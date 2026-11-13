@@ -1,206 +1,231 @@
-# SIP-Escuela API - Documentación
+# SIP-Escuela API — Documentación
 
-## Qué es esto
-
-Una API REST para gestionar una biblioteca escolar: libros, préstamos a socios, autores, editoriales y usuarios del sistema.
-
-## Cómo funciona
+API REST para gestionar una biblioteca escolar: libros, ejemplares, préstamos, daños, socios y auditoría.
 
 ```
-Navegador/App → HTTP Request → FastAPI (routes) → SQLAlchemy (queries) → PostgreSQL
+Cliente → HTTP → FastAPI → SQLAlchemy → PostgreSQL
 ```
 
 ---
 
-## Los 4 archivos
+## Modelo de datos
 
-### `config.py` - Conexión a la DB
+| Tabla | Descripción |
+|---|---|
+| `usuarios` | Los 2 turnos fijos: `mañana` y `tarde`. |
+| `socios` | Personas que piden préstamos. `dni` obligatorio y único; `email` opcional. |
+| `autor` | Catálogo de autores (único por nombre, case-insensitive). |
+| `editorial` | Catálogo de editoriales (único por nombre, case-insensitive). |
+| `libros` | Metadatos del título (AGUAPEY). Autor y editorial por FK. |
+| `copias` | Ejemplares físicos de un libro: inventario, clasificación, signatura, modalidad y estado. |
+| `prestamo` | Préstamo de **una copia concreta** a un socio. |
+| `danos` | Daño registrado sobre **una copia concreta**. |
+| `auditoria` | Log automático de POST/PUT/PATCH/DELETE. |
 
-```python
-# Lee las variables del .env (DATABASE_URL, SECRET_KEY, DEBUG)
-settings = get_settings()
+### Relaciones
 
-# Crea la conexión a PostgreSQL
-engine = create_engine(settings.DATABASE_URL)
-
-# Fábrica de sesiones (cada request usa una)
-SessionLocal = sessionmaker(bind=engine)
-
-# Base para todos los modelos ORM
-class Base(DeclarativeBase): pass
-
-# Dependencia de FastAPI: abre sesión, la usa, la cierra
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db  # ← entrega la sesión al endpoint
-    finally:
-        db.close()  # ← siempre cierra
+```
+libros.id_autor      → autor.id
+libros.id_editorial  → editorial.id
+copias.libro_id      → libros.id
+prestamo.copia_id    → copias.id      (el libro se obtiene desde la copia)
+prestamo.id_socio    → socios.id
+prestamo.id_usuario  → usuarios.id
+danos.copia_id       → copias.id
+danos.socio_id       → socios.id
+danos.id_usuario     → usuarios.id
+auditoria.id_usuario → usuarios.id    (ON DELETE SET NULL)
 ```
 
-### `models.py` - Las tablas de la DB
+### Reglas de negocio
 
-Cada clase = una tabla. Los tipos `Mapped[T]` definen columnas:
-
-```python
-class Socio(Base):
-    __tablename__ = "socios"
-    id: Mapped[int]           # Columna entera, primary key
-    nombre: Mapped[str]       # Columna texto, obligatoria
-    email: Mapped[str]        # Columna texto, única
-    tipo: Mapped[str]         # docente | alumno | otro
-    created_at: Mapped[datetime]  # Se llena solo al crear
-    updated_at: Mapped[datetime]  # Se actualiza solo
-
-class Libro(Base):
-    __tablename__ = "libros"
-    titulo: Mapped[str]
-    id_editorial: Mapped[int | None] = mapped_column(ForeignKey("editorial.id"))
-    #  ↑ FK = referencia a otra tabla (nullable = puede ser null)
-```
-
-**Relaciones entre tablas:**
-```
-Libro ──id_autor──→ Autor
-Libro ──id_editorial──→ Editorial
-Prestamo ──id_libro──→ Libro (nullable)
-Prestamo ──id_usuario──→ Usuario
-Prestamo ──id_socio──→ Socio
-```
-
-
-### `schemas.py` - Validación de datos
-
-Define qué datos **entran** y **salen** de la API:
-
-```python
-class LibroCreate(BaseModel):
-    titulo: str          # Obligatorio
-    isbn: str | None     # Opcional
-    id_autor: int | None # Opcional
-
-class LibroResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)  # ← convierte ORM a JSON
-    id: int              # Siempre se incluye en la respuesta
-    titulo: str
-    # ... todos los campos
-```
-
-**Por qué 3 por entidad:** `Create` (POST), `Update` (PUT, todo opcional), `Response` (lo que devuelve la API).
-
-### `main.py` - La API completa
-
-Cada endpoint sigue el mismo patrón:
-
-```python
-@app.get("/api/libros/", response_model=list[LibroResponse])
-def listar_libros(db: Session = Depends(get_db)):
-    return db.query(Libro).all()
-#      ↑ query SQL     ↑ tabla    ↑ todos los registros
-
-@app.get("/api/libros/{libro_id}", response_model=LibroResponse)
-def obtener_libro(libro_id: int, db: Session = Depends(get_db)):
-    libro = db.query(Libro).filter(Libro.id == libro_id).first()
-    if not libro:
-        raise HTTPException(status_code=404, detail="Libro no encontrado")
-    return libro
-
-@app.post("/api/libros/", response_model=LibroResponse, status_code=201)
-def crear_libro(data: LibroCreate, db: Session = Depends(get_db)):
-    libro = Libro(**data.model_dump())  # ← desempaqueta el dict en columnas
-    db.add(libro)
-    db.commit()          # ← ejecuta el INSERT
-    db.refresh(libro)    # ← recarga el id y campos auto-generados
-    return libro
-
-@app.put("/api/libros/{libro_id}", ...)
-def actualizar_libro(libro_id: int, data: LibroUpdate, db: Session = Depends(get_db)):
-    libro = db.query(Libro).filter(Libro.id == libro_id).first()
-    if not libro:
-        raise HTTPException(status_code=404, detail="Libro no encontrado")
-    for key, value in data.model_dump(exclude_unset=True).items():
-        setattr(libro, key, value)  # ← solo actualiza campos enviados
-    db.commit()
-    db.refresh(libro)
-    return libro
-
-@app.delete("/api/libros/{libro_id}")
-def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
-    libro = db.query(Libro).filter(Libro.id == libro_id).first()
-    if not libro:
-        raise HTTPException(status_code=404, detail="Libro no encontrado")
-    db.delete(libro)
-    db.commit()
-    return {"detail": "Libro eliminado"}
-```
+- Un préstamo y un daño siempre apuntan a un **ejemplar** (`copia_id`), no a un título.
+- Al crear un préstamo, la copia pasa a `prestado`; al devolverlo, vuelve a `disponible`.
+- No se puede prestar una copia que no esté `disponible`.
+- `turno` **no se guarda** en préstamos, daños ni auditoría: se deriva de `id_usuario`.
+- El usuario responsable se obtiene del header `X-Active-Shift`.
+- `id_usuario` se inyecta automáticamente; no se envía en el body.
+- Los estados están validados con `CHECK` en la base y con `Literal` en Pydantic.
 
 ---
 
-## Endpoints disponibles (35 total)
+## Endpoints
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| `GET` | `/api/socios/` | Lista todos los socios |
+| `GET` | `/api/socios/` | Lista socios (`?q=` opcional) |
 | `GET` | `/api/socios/{id}` | Obtiene un socio |
 | `POST` | `/api/socios/` | Crea un socio |
 | `PUT` | `/api/socios/{id}` | Actualiza un socio |
 | `DELETE` | `/api/socios/{id}` | Elimina un socio |
-| `GET` | `/api/autores/` | Lista todos los autores |
+| `GET` | `/api/autores/` | Lista autores (`?q=` opcional) |
 | `GET` | `/api/autores/{id}` | Obtiene un autor |
-| `POST` | `/api/autores/` | Crea un autor |
+| `POST` | `/api/autores/` | Crea o reutiliza un autor (idempotente: 201 nuevo / 200 existente) |
 | `PUT` | `/api/autores/{id}` | Actualiza un autor |
-| `DELETE` | `/api/autores/{id}` | Elimina un autor |
-| `GET` | `/api/editoriales/` | Lista todas las editoriales |
+| `DELETE` | `/api/autores/{id}` | Elimina un autor (409 si está en uso) |
+| `GET` | `/api/editoriales/` | Lista editoriales (`?q=` opcional) |
 | `GET` | `/api/editoriales/{id}` | Obtiene una editorial |
-| `POST` | `/api/editoriales/` | Crea una editorial |
+| `POST` | `/api/editoriales/` | Crea o reutiliza una editorial (201/200) |
 | `PUT` | `/api/editoriales/{id}` | Actualiza una editorial |
-| `DELETE` | `/api/editoriales/{id}` | Elimina una editorial |
-| `GET` | `/api/libros/` | Lista todos los libros |
-| `GET` | `/api/libros/{id}` | Obtiene un libro |
+| `DELETE` | `/api/editoriales/{id}` | Elimina una editorial (409 si está en uso) |
+| `GET` | `/api/libros/` | Lista libros (`?q=` por título, autor, ISBN, serie o materias) |
+| `GET` | `/api/libros/{id}` | Obtiene un libro con autor, editorial y copias |
 | `POST` | `/api/libros/` | Crea un libro |
 | `PUT` | `/api/libros/{id}` | Actualiza un libro |
-| `DELETE` | `/api/libros/{id}` | Elimina un libro |
-| `GET` | `/api/prestamos/` | Lista todos los préstamos |
+| `DELETE` | `/api/libros/{id}` | Elimina un libro (409 si tiene copias) |
+| `GET` | `/api/copias/` | Lista copias (`?libro_id=` opcional) |
+| `POST` | `/api/copias/` | Crea una copia |
+| `PUT` | `/api/copias/{id}` | Actualiza una copia |
+| `DELETE` | `/api/copias/{id}` | Elimina una copia |
+| `GET` | `/api/prestamos/` | Lista préstamos (`?estado=`, `?socio_id=`) |
 | `GET` | `/api/prestamos/{id}` | Obtiene un préstamo |
 | `POST` | `/api/prestamos/` | Crea un préstamo |
-| `PUT` | `/api/prestamos/{id}` | Actualiza un préstamo |
+| `PUT` | `/api/prestamos/{id}` | Actualiza / devuelve un préstamo |
 | `DELETE` | `/api/prestamos/{id}` | Elimina un préstamo |
-| `GET` | `/api/usuarios/` | Lista todos los usuarios |
+| `GET` | `/api/danos/` | Lista daños |
+| `POST` | `/api/danos/` | Registra un daño |
+| `PUT` | `/api/danos/{id}` | Actualiza un daño |
+| `DELETE` | `/api/danos/{id}` | Elimina un daño |
+| `GET` | `/api/usuarios/` | Lista usuarios/turnos |
 | `GET` | `/api/usuarios/{id}` | Obtiene un usuario |
-| `POST` | `/api/usuarios/` | Crea un usuario |
+| `POST` | `/api/usuarios/` | Crea un usuario/turno |
 | `PUT` | `/api/usuarios/{id}` | Actualiza un usuario |
 | `DELETE` | `/api/usuarios/{id}` | Elimina un usuario |
+| `GET` | `/api/auditoria/` | Lista el log (`?skip=&limit=`) |
+| `GET` | `/api/turno/actual` | Devuelve el turno del header |
+| `GET` | `/api/turno/validar` | Valida un cambio de turno |
 
 ---
 
-## Ejemplos de requests
+## Flujo recomendado para crear un libro
 
-**Crear un libro:**
+El frontend debe:
+
+1. Llamar a `POST /api/autores/` con el nombre del autor.
+2. Llamar a `POST /api/editoriales/` con el nombre de la editorial.
+3. Usar los `id` devueltos en `POST /api/libros/`.
+
+Ambos endpoints son **idempotentes**: si el nombre ya existe devuelven `200` con el registro existente; si no, `201`.
+
+También se puede mandar `autor` y `editorial` como texto en el libro; el backend los crea/reutiliza automáticamente.
+
+---
+
+## Ejemplos
+
+### Crear socio
+```bash
+curl -X POST http://localhost:8000/api/socios/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Lucía",
+    "apellido": "González",
+    "dni": "40123456",
+    "email": "lucia@edu.ar",
+    "tipo": "estudiante"
+  }'
+```
+
+### Crear autor y editorial
+```bash
+curl -X POST http://localhost:8000/api/autores/ \
+  -H "Content-Type: application/json" \
+  -d '{"nombre_apellido": "Julio Cortázar"}'
+
+curl -X POST http://localhost:8000/api/editoriales/ \
+  -H "Content-Type: application/json" \
+  -d '{"nombre": "Sudamericana"}'
+```
+
+### Crear libro
 ```bash
 curl -X POST http://localhost:8000/api/libros/ \
   -H "Content-Type: application/json" \
   -d '{
-    "titulo": "Don Quijote de la Mancha",
-    "isbn": "978-84-376-0494-7",
-    "cantidad": 3,
+    "titulo": "Rayuela",
     "id_autor": 1,
-    "id_editorial": 1
+    "id_editorial": 1,
+    "anio_publicacion": 1963,
+    "isbn": "978-950-511-356-9",
+    "paginas": 600,
+    "idioma": "español"
   }'
 ```
 
-**Crear un préstamo (libro):**
+### Crear copia
+```bash
+curl -X POST http://localhost:8000/api/copias/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "libro_id": 1,
+    "inventario_num": "007242",
+    "clasificacion": "82-31",
+    "signatura": "COR",
+    "modalidad": "domicilio"
+  }'
+```
+
+### Crear préstamo
 ```bash
 curl -X POST http://localhost:8000/api/prestamos/ \
   -H "Content-Type: application/json" \
+  -H "X-Active-Shift: mañana" \
   -d '{
     "id_prestamo": "PRE-001",
-    "fecha_prestamo": "2026-08-26",
-    "fecha_limite": "2026-09-10",
-    "estado": "activo",
-    "id_usuario": 1,
-    "id_libro": 1,
-    "id_socio": 1
+    "fecha_prestamo": "2026-11-12",
+    "fecha_limite": "2026-11-26",
+    "id_socio": 1,
+    "copia_id": 1
   }'
 ```
 
-Swagger UI disponible en: `http://localhost:8000/docs`
+### Devolver préstamo
+```bash
+curl -X PUT http://localhost:8000/api/prestamos/1 \
+  -H "Content-Type: application/json" \
+  -d '{"estado": "devuelto"}'
+```
+
+### Registrar daño
+```bash
+curl -X POST http://localhost:8000/api/danos/ \
+  -H "Content-Type: application/json" \
+  -H "X-Active-Shift: mañana" \
+  -d '{
+    "copia_id": 1,
+    "socio_id": 1,
+    "severidad": "leve",
+    "descripcion": "Rastro de agua en la página 10"
+  }'
+```
+
+---
+
+## Puesta en marcha
+
+```powershell
+cd backend
+
+# 1. Recrear el esquema (borra todos los datos)
+python reset_db.py
+
+# 2. Sembrar los 2 turnos
+python seed.py
+
+# 3. Importar el Excel AGUAPEY (709 libros, 2200 ejemplares)
+python import_aguapey.py
+
+# 4. Levantar la API
+python -m uvicorn app.main:app --reload --port 8000
+
+# 5. En otra terminal: tests
+python test_api.py
+```
+
+Swagger UI: `http://localhost:8000/docs`
+
+---
+
+## Nota sobre Alembic
+
+El esquema se crea desde `models.py` con `reset_db.py`, **no** con migraciones. La tabla `alembic_version` conserva la última revisión histórica (`2_add_prestamo_campos`) y queda desincronizada a propósito. Si en el futuro se retoman las migraciones, hay que generar una revisión baseline.

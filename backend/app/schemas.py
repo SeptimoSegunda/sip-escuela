@@ -1,6 +1,14 @@
-from datetime import datetime
+from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
+
+TipoSocio = Literal["estudiante", "docente", "otro"]
+Idioma = Literal["español", "inglés"]
+Modalidad = Literal["domicilio", "sala", "no disponible"]
+EstadoCopia = Literal["disponible", "prestado", "dañado", "perdido"]
+EstadoPrestamo = Literal["prestado", "devuelto", "moroso"]
+SeveridadDano = Literal["leve", "moderado", "catastrofico"]
 
 
 # ── Socio ───────────────────────────────────────────────
@@ -8,21 +16,17 @@ from pydantic import BaseModel, ConfigDict
 class SocioCreate(BaseModel):
     nombre: str
     apellido: str
+    dni: str
     email: str | None = None
-    tipo: str
-    matricula: str | None = None
-    anio: str | None = None
-    turno: str | None = None
+    tipo: TipoSocio
 
 
 class SocioUpdate(BaseModel):
     nombre: str | None = None
     apellido: str | None = None
+    dni: str | None = None
     email: str | None = None
-    tipo: str | None = None
-    matricula: str | None = None
-    anio: str | None = None
-    turno: str | None = None
+    tipo: TipoSocio | None = None
 
 
 class SocioResponse(BaseModel):
@@ -31,11 +35,9 @@ class SocioResponse(BaseModel):
     id: int
     nombre: str
     apellido: str
-    email: str
+    dni: str
+    email: str | None
     tipo: str
-    matricula: str | None
-    anio: str | None
-    turno: str | None
     created_at: datetime
     updated_at: datetime
 
@@ -44,7 +46,7 @@ class SocioResponse(BaseModel):
 
 class AutorCreate(BaseModel):
     nombre_apellido: str
-    tipo_autor: str
+    tipo_autor: str | None = "escritor"
 
 
 class AutorUpdate(BaseModel):
@@ -77,58 +79,84 @@ class EditorialResponse(BaseModel):
     nombre: str
 
 
+# ── Copia ───────────────────────────────────────────────
+
+class CopiaCreate(BaseModel):
+    libro_id: int
+    inventario_num: str | None = None
+    clasificacion: str | None = None
+    signatura: str | None = None
+    modalidad: Modalidad | None = None
+    estado: EstadoCopia = "disponible"
+
+
+class CopiaUpdate(BaseModel):
+    inventario_num: str | None = None
+    clasificacion: str | None = None
+    signatura: str | None = None
+    modalidad: Modalidad | None = None
+    estado: EstadoCopia | None = None
+
+
+class CopiaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    libro_id: int
+    inventario_num: str | None
+    clasificacion: str | None
+    signatura: str | None
+    modalidad: str | None
+    estado: str
+    created_at: datetime
+
+
 # ── Libro ───────────────────────────────────────────────
 
 class LibroCreate(BaseModel):
-    titulo: str # si
-    subtitulo: str | None = None #si
-    autor: str | None = None #si
-    isbn: str | None = None #si
-    editorial: str | None = None #si
-    anio_publicacion: int | None = None #si
-    cantidad: int = 1 # falta
-    libristica: str | None = None #si
-    numero_de_inventario: str | None = None #si
-    ubicacion: str | None = None #si 
-    publicacion: str | None = None #si pero es año?
-    colleccion: str | None = None
-    edicion: str | None = None #si
-    lugar_publicacion: str | None = None #si
-    temas: str | None = None # no front \, se llama temas clave
-    numero: str | None = None # tomo?
-    termino_material: str | None = None #si
-    clasificacion: str | None = None #si
-    extension: int | None = None #si
-    nota_general: str | None = None #si
-    nota_contenido: str | None = None #si
-    id_editorial: int | None = None #si
-    id_autor: int | None = None #si
+    titulo: str
+    subtitulo: str | None = None
+    id_autor: int | None = None
+    autor: str | None = None  # atajo: se crea/reutiliza el autor por nombre
+    mencion_responsabilidad: str | None = None
+    edicion: str | None = None
+    lugar_publicacion: str | None = None
+    id_editorial: int | None = None
+    editorial: str | None = None  # atajo: se crea/reutiliza la editorial por nombre
+    anio_publicacion: int | None = None
+    isbn: str | None = None
+    paginas: int | None = None
+    serie: str | None = None
+    materias: str | None = None
+    genero_clasificacion: str | None = None
+    colaboradores: str | None = None
+    nivel: str | None = None
+    resumen: str | None = None
+    contenido: str | None = None
+    idioma: Idioma | None = None
 
 
 class LibroUpdate(BaseModel):
     titulo: str | None = None
     subtitulo: str | None = None
+    id_autor: int | None = None
     autor: str | None = None
-    isbn: str | None = None
-    editorial: str | None = None
-    anio_publicacion: int | None = None
-    cantidad: int | None = None
-    libristica: str | None = None
-    numero_de_inventario: str | None = None
-    ubicacion: str | None = None
-    publicacion: str | None = None
-    colleccion: str | None = None
+    mencion_responsabilidad: str | None = None
     edicion: str | None = None
     lugar_publicacion: str | None = None
-    temas: str | None = None
-    numero: str | None = None
-    termino_material: str | None = None
-    clasificacion: str | None = None
-    extension: int | None = None
-    nota_general: str | None = None
-    nota_contenido: str | None = None
     id_editorial: int | None = None
-    id_autor: int | None = None
+    editorial: str | None = None
+    anio_publicacion: int | None = None
+    isbn: str | None = None
+    paginas: int | None = None
+    serie: str | None = None
+    materias: str | None = None
+    genero_clasificacion: str | None = None
+    colaboradores: str | None = None
+    nivel: str | None = None
+    resumen: str | None = None
+    contenido: str | None = None
+    idioma: Idioma | None = None
 
 
 class LibroResponse(BaseModel):
@@ -137,51 +165,47 @@ class LibroResponse(BaseModel):
     id: int
     titulo: str
     subtitulo: str | None
-    autor: str | None
-    isbn: str | None
-    editorial: str | None
-    anio_publicacion: int | None
-    cantidad: int
-    created_at: datetime
-    libristica: str | None
-    numero_de_inventario: str | None
-    ubicacion: str | None
-    publicacion: str | None
-    colleccion: str | None
+    id_autor: int | None
+    mencion_responsabilidad: str | None
     edicion: str | None
     lugar_publicacion: str | None
-    temas: str | None
-    numero: str | None
-    termino_material: str | None
-    clasificacion: str | None
-    extension: int | None
-    nota_general: str | None
-    nota_contenido: str | None
     id_editorial: int | None
-    id_autor: int | None
-    copias: list["CopiaResponse"] = []
+    anio_publicacion: int | None
+    isbn: str | None
+    paginas: int | None
+    serie: str | None
+    materias: str | None
+    genero_clasificacion: str | None
+    colaboradores: str | None
+    nivel: str | None
+    resumen: str | None
+    contenido: str | None
+    idioma: str | None
+    created_at: datetime
+    autor_detalle: AutorResponse | None = None
+    editorial_detalle: EditorialResponse | None = None
+    copias: list[CopiaResponse] = []
 
 
 # ── Prestamo ────────────────────────────────────────────
 
 class PrestamoCreate(BaseModel):
     id_prestamo: str
-    fecha_prestamo: str
-    fecha_limite: str
-    estado: str
-    id_usuario: int | None = None  # Se inyecta desde header X-Active-Shift
-    id_libro: int | None = None
+    fecha_prestamo: date
+    fecha_limite: date
+    estado: EstadoPrestamo = "prestado"
     id_socio: int
+    copia_id: int
 
 
 class PrestamoUpdate(BaseModel):
     id_prestamo: str | None = None
-    fecha_prestamo: str | None = None
-    fecha_limite: str | None = None
-    estado: str | None = None
-    id_usuario: int | None = None
-    id_libro: int | None = None
+    fecha_prestamo: date | None = None
+    fecha_limite: date | None = None
+    fecha_devolucion: date | None = None
+    estado: EstadoPrestamo | None = None
     id_socio: int | None = None
+    copia_id: int | None = None
 
 
 class PrestamoResponse(BaseModel):
@@ -189,19 +213,50 @@ class PrestamoResponse(BaseModel):
 
     id: int
     id_prestamo: str
-    fecha_prestamo: str
-    fecha_limite: str
-    fecha_devolucion: str | None = None
+    fecha_prestamo: date
+    fecha_limite: date
+    fecha_devolucion: date | None
     estado: str
-    turno: str = "mañana"
+    id_socio: int
+    copia_id: int
+    id_usuario: int
     created_at: datetime
     updated_at: datetime
+    socio: SocioResponse | None = None
+    copia: CopiaResponse | None = None
+    libro: LibroResponse | None = None
+
+
+# ── Dano ────────────────────────────────────────────────
+
+class DanoCreate(BaseModel):
+    copia_id: int
+    socio_id: int
+    severidad: SeveridadDano
+    descripcion: str
+    fecha: date | None = None
+
+
+class DanoUpdate(BaseModel):
+    severidad: SeveridadDano | None = None
+    descripcion: str | None = None
+    fecha: date | None = None
+
+
+class DanoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    copia_id: int
+    socio_id: int
+    severidad: str
+    descripcion: str
+    fecha: date
     id_usuario: int
-    id_libro: int | None
-    id_socio: int
-    copia_id: int | None = None
-    libro: "LibroResponse | None" = None
-    socio: "SocioResponse | None" = None
+    created_at: datetime
+    socio: SocioResponse | None = None
+    copia: CopiaResponse | None = None
+    libro: LibroResponse | None = None
 
 
 # ── Usuario ─────────────────────────────────────────────
@@ -225,8 +280,6 @@ class UsuarioResponse(BaseModel):
     activo: bool
 
 
-# ── Usuario (simplificado para turnos) ────────────────────
-
 class UsuarioTurnoResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -236,63 +289,7 @@ class UsuarioTurnoResponse(BaseModel):
     activo: bool
 
 
-# ── Copia ─────────────────────────────────────────────────
-
-class CopiaCreate(BaseModel):
-    inventario_num: str
-    estado: str = "disponible"
-    libro_id: int
-
-
-class CopiaUpdate(BaseModel):
-    inventario_num: str | None = None
-    estado: str | None = None
-
-
-class CopiaResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    inventario_num: str
-    estado: str
-    libro_id: int
-    created_at: datetime
-
-
-# ── Dano ──────────────────────────────────────────────────
-
-class DanoCreate(BaseModel):
-    libro_id: int
-    copia_id: int | None = None
-    socio_id: int
-    severidad: str
-    descripcion: str
-    fecha: str
-    turno: str
-
-
-class DanoUpdate(BaseModel):
-    severidad: str | None = None
-    descripcion: str | None = None
-
-
-class DanoResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    libro_id: int
-    copia_id: int | None
-    socio_id: int
-    severidad: str
-    descripcion: str
-    fecha: str
-    turno: str
-    created_at: datetime
-    libro: "LibroResponse | None" = None
-    socio: "SocioResponse | None" = None
-
-
-# ── Auditoria ─────────────────────────────────────────────
+# ── Auditoria ───────────────────────────────────────────
 
 class AuditoriaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -300,8 +297,7 @@ class AuditoriaResponse(BaseModel):
     id: int
     endpoint: str
     metodo: str
-    turno: str
     status_code: int
     duracion_ms: int
-    created_at: datetime
     id_usuario: int | None
+    created_at: datetime

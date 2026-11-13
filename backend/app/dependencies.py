@@ -1,10 +1,24 @@
+import unicodedata
+
 from fastapi import Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.config import get_db
 from app.models import Usuario
 
-TURNOS_VALIDOS = {"mañana": 1, "tarde": 2}
+TURNOS_VALIDOS = {"mañana", "tarde"}
+
+
+def normalizar_turno(valor: str) -> str:
+    """Acepta 'mañana' o 'manana' (sin acento) y devuelve el valor canónico."""
+    sin_acentos = (
+        unicodedata.normalize("NFKD", valor)
+        .encode("ascii", "ignore")
+        .decode("ascii")
+        .lower()
+        .strip()
+    )
+    return "mañana" if sin_acentos == "manana" else sin_acentos
 
 
 def get_turno_actual(
@@ -23,7 +37,7 @@ def get_turno_actual(
             detail="Falta header X-Active-Shift. Iniciá sesión para establecer el turno."
         )
 
-    turno = x_active_shift.lower().strip()
+    turno = normalizar_turno(x_active_shift)
     print(f">>> [TURNOS] Header X-Active-Shift recibido: '{turno}'")
     if turno not in TURNOS_VALIDOS:
         print(f">>> [TURNOS] Turno inválido: '{turno}'")
