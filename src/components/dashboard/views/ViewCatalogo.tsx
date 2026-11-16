@@ -10,21 +10,30 @@ import {
   faTrash,
   faPen,
   faEye,
+  faBook,
+  faUser,
+  faBuilding,
+  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Libro } from '@/types';
+import type { Libro, Editorial, Autor } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import styles from './ViewCatalogo.module.css';
 
 interface ViewCatalogoProps {
   libros: Libro[];
   onNuevoLibro: () => void;
+  onNuevoAutor: () => void;
+  onNuevoEditorial: () => void;
   onEditar: (libro: Libro) => void;
   onVerDetalle: (libro: Libro) => void;
   onEliminar: (libroIds: string[]) => void;
   onBusquedaAsistida: () => void;
   filtroActivo?: boolean;
   onLimpiarFiltro?: () => void;
+  readOnly?: boolean;
 }
+
+type VistaCatalogo = 'libros' | 'editoriales' | 'autores';
 
 function estadoDisponibilidad(libro: Libro): { label: string; variant: BadgeVariant } {
   const total = libro.copias.length;
@@ -38,16 +47,20 @@ function estadoDisponibilidad(libro: Libro): { label: string; variant: BadgeVari
 export default function ViewCatalogo({
   libros,
   onNuevoLibro,
+  onNuevoAutor,
+  onNuevoEditorial,
   onEditar,
   onVerDetalle,
   onEliminar,
   onBusquedaAsistida,
   filtroActivo = false,
   onLimpiarFiltro,
+  readOnly = false,
 }: ViewCatalogoProps) {
   const [busqueda, setBusqueda] = useState('');
   const [modoBorradoGrupal, setModoBorradoGrupal] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
+  const [vistaActiva, setVistaActiva] = useState<VistaCatalogo>('libros');
 
   /* ── Filtrado ── */
   const librosFiltrados = useMemo(() => {
@@ -92,17 +105,128 @@ export default function ViewCatalogo({
       {/* Encabezado */}
       <section className={styles.welcomeSection}>
         <div>
-          <h1 className={styles.viewTitle}>Catálogo Completo de Libros</h1>
-          <p className={styles.viewSubtitle}>Inventario general de títulos disponibles y en préstamo.</p>
+          <h1 className={styles.viewTitle}>Catálogo Completo</h1>
+          <p className={styles.viewSubtitle}>
+            {vistaActiva === 'libros' && 'Inventario general de títulos disponibles y en préstamo.'}
+            {vistaActiva === 'editoriales' && 'Listado de editoriales registradas en el sistema.'}
+            {vistaActiva === 'autores' && 'Listado de autores registrados en el sistema.'}
+          </p>
         </div>
-        <button
-          id="btnAgregarNuevoLibro"
-          className={styles.btnPrimary}
-          onClick={onNuevoLibro}
-        >
-          <FontAwesomeIcon icon={faPlus} /> Añadir Nuevo Libro
-        </button>
+        {!readOnly && (
+          <div style={{ position: 'relative' }}>
+            <button
+              id="btnAgregarDropdown"
+              className={styles.btnPrimary}
+              onClick={() => {
+                const sel = document.getElementById('dropdownMenu');
+                if (sel) sel.style.display = sel.style.display === 'block' ? 'none' : 'block';
+              }}
+            >
+              <FontAwesomeIcon icon={faPlus} />
+              Añadir <FontAwesomeIcon icon={faChevronDown} style={{ marginLeft: '0.3rem', fontSize: '0.7em' }} />
+            </button>
+            {/* Menú desplegable */}
+            <div
+              id="dropdownMenu"
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: '0',
+                marginTop: '0.5rem',
+                padding: '0.5rem',
+                backgroundColor: 'var(--bg-surface)',
+                border: '1px solid var(--beige-dark)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                zIndex: 100,
+                display: 'none',
+                minWidth: '180px',
+              }}
+            >
+              <button
+                type="button"
+                className={styles.btnSecondarySmall}
+                style={{ width: '100%', justifyContent: 'flex-start' }}
+                onClick={() => { document.getElementById('dropdownMenu')!.style.display = 'none'; onNuevoLibro(); }}
+              >
+                <FontAwesomeIcon icon={faBook} style={{ marginRight: '0.5rem' }} /> Libro
+              </button>
+              <hr style={{ margin: '0.5rem 0', border: 'none', borderTop: '1px solid var(--beige-dark)' }} />
+              <button
+                type="button"
+                className={styles.btnSecondarySmall}
+                style={{ width: '100%', justifyContent: 'flex-start' }}
+                onClick={() => { document.getElementById('dropdownMenu')!.style.display = 'none'; onNuevoAutor(); }}
+              >
+                <FontAwesomeIcon icon={faUser} style={{ marginRight: '0.5rem' }} /> Autor
+              </button>
+              <button
+                type="button"
+                className={styles.btnSecondarySmall}
+                style={{ width: '100%', justifyContent: 'flex-start' }}
+                onClick={() => { document.getElementById('dropdownMenu')!.style.display = 'none'; onNuevoEditorial(); }}
+              >
+                <FontAwesomeIcon icon={faBuilding} style={{ marginRight: '0.5rem' }} /> Editorial
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
+      {/* Selector de vista */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <button
+          type="button"
+          onClick={() => setVistaActiva('libros')}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            border: `1.5px solid ${vistaActiva === 'libros' ? 'var(--accent-brown)' : 'var(--beige-dark)'}`,
+            background: vistaActiva === 'libros' ? 'var(--beige-anchor)' : 'var(--bg-base)',
+            color: vistaActiva === 'libros' ? 'var(--accent-brown)' : 'var(--text-muted)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <FontAwesomeIcon icon={faBook} /> Libros
+        </button>
+        <button
+          type="button"
+          onClick={() => setVistaActiva('editoriales')}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            border: `1.5px solid ${vistaActiva === 'editoriales' ? 'var(--accent-brown)' : 'var(--beige-dark)'}`,
+            background: vistaActiva === 'editoriales' ? 'var(--beige-anchor)' : 'var(--bg-base)',
+            color: vistaActiva === 'editoriales' ? 'var(--accent-brown)' : 'var(--text-muted)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <FontAwesomeIcon icon={faBuilding} /> Editoriales
+        </button>
+        <button
+          type="button"
+          onClick={() => setVistaActiva('autores')}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            border: `1.5px solid ${vistaActiva === 'autores' ? 'var(--accent-brown)' : 'var(--beige-dark)'}`,
+            background: vistaActiva === 'autores' ? 'var(--beige-anchor)' : 'var(--bg-base)',
+            color: vistaActiva === 'autores' ? 'var(--accent-brown)' : 'var(--text-muted)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <FontAwesomeIcon icon={faUser} /> Autores
+        </button>
+      </div>
 
       {/* Sección catálogo */}
       <section className={styles.catalogSection}>
@@ -118,7 +242,7 @@ export default function ViewCatalogo({
             {filtroActivo && (
               <div className={styles.filtroActivoBanner}>
                 <span>🔍 Filtro activo: {libros.length} resultado{libros.length !== 1 ? 's' : ''}</span>
-                {onLimpiarFiltro && (
+                {!readOnly && onLimpiarFiltro && (
                   <button
                     type="button"
                     className={styles.btnLimpiarFiltro}
@@ -139,52 +263,56 @@ export default function ViewCatalogo({
                 className={styles.searchInput}
               />
             </div>
-            <button
-              id="btnAbrirBusquedaAsistida"
-              className={styles.btnAssistedSearch}
-              onClick={onBusquedaAsistida}
-              type="button"
-            >
-              <FontAwesomeIcon icon={faSliders} /> Búsqueda asistida
-            </button>
+            {!readOnly && (
+              <button
+                id="btnAbrirBusquedaAsistida"
+                className={styles.btnAssistedSearch}
+                onClick={onBusquedaAsistida}
+                type="button"
+              >
+                <FontAwesomeIcon icon={faSliders} /> Búsqueda asistida
+              </button>
+            )}
           </div>
         </div>
 
         {/* Barra de acciones de catálogo */}
-        <div className={styles.actionsBar}>
-          <button
-            id="btnToggleModoBorradoGrupal"
-            className={styles.btnSecondary}
-            onClick={() => setModoBorradoGrupal((v) => !v)}
-            type="button"
-          >
-            <FontAwesomeIcon icon={faTrashCan} /> Modo Borrado Grupal
-          </button>
+        {!readOnly && (
+          <div className={styles.actionsBar}>
+            <button
+              id="btnToggleModoBorradoGrupal"
+              className={styles.btnSecondary}
+              onClick={() => setModoBorradoGrupal((v) => !v)}
+              type="button"
+            >
+              <FontAwesomeIcon icon={faTrashCan} /> Modo Borrado Grupal
+            </button>
 
-          {modoBorradoGrupal && seleccionados.size > 0 && (
-            <div className={styles.groupDeleteBar} id="groupDeleteActionBar">
-              <span id="groupDeleteCountText" className={styles.groupDeleteCount}>
-                {seleccionados.size} libro{seleccionados.size !== 1 ? 's' : ''} seleccionado{seleccionados.size !== 1 ? 's' : ''}
-              </span>
-              <button
-                id="btnConfirmarBorradoGrupal"
-                className={styles.btnDanger}
-                onClick={handleEliminarGrupal}
-                type="button"
-              >
-                <FontAwesomeIcon icon={faTrash} /> Eliminar Seleccionados
-              </button>
-              <button
-                id="btnCancelarModoGrupal"
-                className={styles.btnSecondarySmall}
-                onClick={handleCancelarGrupal}
-                type="button"
-              >
-                Cancelar
-              </button>
-            </div>
-          )}
-        </div>
+            {modoBorradoGrupal && seleccionados.size > 0 && (
+              <div className={styles.groupDeleteBar} id="groupDeleteActionBar">
+                <span id="groupDeleteCountText" className={styles.groupDeleteCount}>
+                  {seleccionados.size} libro{seleccionados.size !== 1 ? 's' : ''} seleccionado{seleccionados.size !== 1 ? 's' : ''}
+                </span>
+                <button
+                  id="btnConfirmarBorradoGrupal"
+                  className={styles.btnDanger}
+                  onClick={handleEliminarGrupal}
+                  type="button"
+                >
+                  <FontAwesomeIcon icon={faTrash} /> Eliminar Seleccionados
+                </button>
+                <button
+                  id="btnCancelarModoGrupal"
+                  className={styles.btnSecondarySmall}
+                  onClick={handleCancelarGrupal}
+                  type="button"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tabla */}
         <div className={styles.tableWrapper}>
@@ -268,14 +396,16 @@ export default function ViewCatalogo({
                           >
                             <FontAwesomeIcon icon={faEye} />
                           </button>
-                          <button
-                            className={styles.btnEdit}
-                            onClick={() => onEditar(libro)}
-                            title="Editar libro"
-                            aria-label={`Editar ${libro.titulo}`}
-                          >
-                            <FontAwesomeIcon icon={faPen} />
-                          </button>
+                          {!readOnly && (
+                            <button
+                              className={styles.btnEdit}
+                              onClick={() => onEditar(libro)}
+                              title="Editar libro"
+                              aria-label={`Editar ${libro.titulo}`}
+                            >
+                              <FontAwesomeIcon icon={faPen} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

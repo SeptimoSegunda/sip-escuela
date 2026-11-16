@@ -10,7 +10,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { Socio, EstadoSocio, Prestamo } from '@/types';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
-import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
+import Badge from '@/components/dashboard/ui/Badge';
+import { estadoSocioToBadge, estadoSocioLabel } from '@/lib/utils';
 import styles from './ViewSocios.module.css';
 
 interface ViewSociosProps {
@@ -20,22 +21,6 @@ interface ViewSociosProps {
   onEditar: (socio: Socio) => void;
   onEliminar: (socioId: string) => void;
   onVerDetalle: (socioId: string) => void;
-}
-
-function estadoToBadge(estado: EstadoSocio): BadgeVariant {
-  switch (estado) {
-    case 'activo':     return 'available';
-    case 'suspendido': return 'low';
-    case 'inactivo':   return 'neutral';
-  }
-}
-
-function estadoLabel(estado: EstadoSocio): string {
-  switch (estado) {
-    case 'activo':     return 'Activo';
-    case 'suspendido': return 'Suspendido';
-    case 'inactivo':   return 'Inactivo';
-  }
 }
 
 export default function ViewSocios({
@@ -64,7 +49,7 @@ export default function ViewSocios({
     const q = busqueda.toLowerCase();
     if (!q) return socios;
     return socios.filter((s) =>
-      `${s.id} ${s.apellido} ${s.nombre} ${s.tipo} ${s.dni} ${s.anio ?? ''} ${s.email ?? ''}`
+      `${s.id} ${s.apellido} ${s.nombre} ${s.tipo} ${s.dni} ${s.email ?? ''}`
         .toLowerCase()
         .includes(q)
     );
@@ -95,12 +80,6 @@ export default function ViewSocios({
       ),
     },
     {
-      key: 'anio',
-      header: 'Año / Grado',
-      width: '130px',
-      render: (row) => row.anio ?? '—',
-    },
-    {
       key: 'email',
       header: 'Email',
       render: (row) => row.email ?? '—',
@@ -123,8 +102,8 @@ export default function ViewSocios({
       header: 'Estado',
       width: '110px',
       render: (row) => (
-        <Badge variant={estadoToBadge(row.estado)}>
-          {estadoLabel(row.estado)}
+        <Badge variant={estadoSocioToBadge(row.estado)}>
+          {estadoSocioLabel(row.estado)}
         </Badge>
       ),
     },

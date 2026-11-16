@@ -194,22 +194,28 @@
 }
 
 .desglose {
-  display: flex;
-  gap: 0.4rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+  padding: 0.25rem 0;
 }
 
 .desgloseItem {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 600;
   background: var(--beige-anchor);
-  padding: 0.15rem 0.45rem;
-  border-radius: 8px;
+  padding: 0.12rem 0.4rem;
+  border-radius: 10px;
   color: var(--text-muted);
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .desgloseRed {
-  background: #fee2e2;
+  background: #fef2f2;
   color: #991b1b;
+  border-color: #fca5a5;
 }
 
 .btnDetalle {

@@ -16,7 +16,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { Dano, Socio, SeveridadDano } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
-import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
+import Badge from '@/components/dashboard/ui/Badge';
+import type { BadgeVariant } from '@/components/dashboard/ui/Badge';
+import { severidadToBadge, severidadLabel, ordenSeveridad, formatFecha } from '@/lib/utils';
 import styles from './ViewDanos.module.css';
 
 interface ViewDanosProps {
@@ -39,36 +41,6 @@ interface AntecedentePersona {
 }
 
 type FiltroAntecedente = 'all' | 'criticos';
-
-function severidadToBadge(s: SeveridadDano): BadgeVariant {
-  switch (s) {
-    case 'leve':         return 'available';
-    case 'moderado':     return 'warning';
-    case 'catastrofico': return 'low';
-  }
-}
-
-function severidadLabel(s: SeveridadDano): string {
-  switch (s) {
-    case 'leve':         return 'Leve';
-    case 'moderado':     return 'Moderado';
-    case 'catastrofico': return 'CATASTRÓFICO';
-  }
-}
-
-function ordenSeveridad(s: SeveridadDano): number {
-  return s === 'catastrofico' ? 3 : s === 'moderado' ? 2 : 1;
-}
-
-function formatFecha(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
-}
 
 export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, onVerDetalle }: ViewDanosProps) {
   const [filtro, setFiltro] = useState<FiltroAntecedente>('all');

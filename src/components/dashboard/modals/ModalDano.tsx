@@ -87,6 +87,7 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
     if (!libroSel)           { setError('Selecciona un libro.'); return; }
     if (!copiaSel)           { setError('Selecciona una copia.'); return; }
     if (!socioSel)           { setError('Selecciona un socio registrado activo.'); return; }
+    if (!socioSel.id)        { setError('Socio no válido.'); return; }
     if (!descripcion.trim()) { setError('Describe el daño.'); return; }
 
     onRegistrar({
@@ -169,7 +170,7 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
                   setError('');
                 }}>
                   <strong>{s.apellido}, {s.nombre}</strong>
-                  <span className={f.suggestionSub}> — {s.id} · {s.tipo}{s.anio ? ` ${s.anio}` : ''}</span>
+                  <span className={f.suggestionSub}> — {s.id} · {s.tipo}</span>
                 </li>
               ))}
             </ul>

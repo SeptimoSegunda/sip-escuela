@@ -6,6 +6,8 @@ import { useLibros }     from './useLibros';
 import { useSocios }     from './useSocios';
 import { usePrestamos }  from './usePrestamos';
 import { useDanos }      from './useDanos';
+import { useAutores }    from './useAutores';
+import { useEditoriales } from './useEditoriales';
 import { storage }       from '@/lib/storage';
 import type { TurnoAdmin } from '@/types';
 
@@ -74,7 +76,19 @@ export function useDashboard() {
   const { danos, registrarDano, eliminarDanos } = useDanos(
     turnoAdmin,
     (_, accion, desc) => logDanos(accion, desc),
-    (libroId, copiaId, estado) => cambiarEstadoCopia(libroId, copiaId, estado)
+    cambiarEstadoCopia
+  );
+
+  /* ── Autores ── */
+  const { autores, crearAutor, editarAutor, eliminarAutor } = useAutores(
+    turnoAdmin,
+    (_, accion, desc) => logLibros(accion, desc)
+  );
+
+  /* ── Editoriales ── */
+  const { editoriales, crearEditorial, editarEditorial, eliminarEditorial } = useEditoriales(
+    turnoAdmin,
+    (_, accion, desc) => logLibros(accion, desc)
   );
 
   /* ── Crear préstamo + ajustar contador del socio ── */
@@ -171,6 +185,16 @@ export function useDashboard() {
     /* Acciones — Daños */
     registrarDano,
     eliminarDanos,
+
+    /* Acciones — Autores y Editoriales */
+    autores,
+    editoriales,
+    crearAutor,
+    editarAutor,
+    eliminarAutor,
+    crearEditorial,
+    editarEditorial,
+    eliminarEditorial,
 
     /* Auditoría */
     exportarAuditoria,

@@ -14,6 +14,8 @@ const KEYS = {
   PRESTAMOS:    'SIP_PRESTAMOS',
   DANOS:        'SIP_DANOS',
   AUDIT_LOG:    'SIP_AUDIT_LOG',
+  AUTORES:      'SIP_AUTORES',
+  EDITORIALES:  'SIP_EDITORIALES',
 } as const;
 
 export type StorageKey = keyof typeof KEYS;
@@ -63,6 +65,8 @@ import type {
   AuditLog,
   SesionAdmin,
   TurnoAdmin,
+  Autor,
+  Editorial,
 } from '@/types';
 
 // Auth
@@ -117,4 +121,12 @@ export const storage = {
     log.unshift(entry); // más reciente primero
     setItem(KEYS.AUDIT_LOG, log);
   },
+
+  // Autores
+  getAutores():           Autor[]    { return getItem<Autor[]>(KEYS.AUTORES)    ?? []; },
+  setAutores(v: Autor[]): void       { setItem(KEYS.AUTORES, v); },
+
+  // Editoriales
+  getEditoriales():       Editorial[] { return getItem<Editorial[]>(KEYS.EDITORIALES) ?? []; },
+  setEditoriales(v: Editorial[]): void { setItem(KEYS.EDITORIALES, v); },
 };

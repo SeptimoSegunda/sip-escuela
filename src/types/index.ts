@@ -11,6 +11,13 @@ export interface Copia {
 
 export type EstadoCopia = 'disponible' | 'prestado' | 'dañado' | 'perdido';
 
+export type RolAutor = 'principal' | 'secundario' | 'institucional';
+
+export interface AutorEntry {
+  nombre: string;
+  rol: RolAutor;
+}
+
 export interface Libro {
   id: string;
   isbn: string;
@@ -21,6 +28,7 @@ export interface Libro {
   ubicacion: string;
   portadaUrl?: string;   // base64 data URL o URL externa
   copias: Copia[];
+  autores?:              AutorEntry[];
   fechaAgregado: string; // ISO date string
   /* Campos extendidos (compatibles con dashUpdate) */
   edicion?:              string;
@@ -29,6 +37,10 @@ export interface Libro {
   clasificacion?:        string; // CDU
   libristica?:           string;
   tomo?:                 string;
+  mencionResponsabilidad?: string;
+  colaboradores?:        string;
+  nivel?:                string;
+  idioma?:               string;
   editorial?:            string;
   fechaPublicacion?:     string;
   lugarPublicacion?:     string;
@@ -55,12 +67,12 @@ export interface Socio {
   apellido: string;
   nombre: string;
   tipo: TipoSocio;
-  anio?: string;        // e.g. "3°A"
   dni: string;
   email?: string;
   estado: EstadoSocio;
   prestamosActivos: number;
-  fechaRegistro: string; // ISO date string
+  fechaRegistro: string; // ISO date string - created_at
+  fechaUltimaActualizacion?: string; // ISO date string - updated_at
 }
 
 /* ── Préstamo ──────────────────────────────────────────────── */
@@ -138,4 +150,30 @@ export interface TopLibro {
   libroId: string;
   titulo: string;
   totalPrestamos: number;
+}
+
+/* ── Autor ────────────────────────────────────────────────────── */
+export interface Autor {
+  id: string;
+  nombre: string;
+  apellido: string;
+  fechaRegistro: string; // ISO date string
+  fechaUltimaActualizacion?: string;
+}
+
+export interface NuevoAutorData {
+  nombre: string;
+  apellido: string;
+}
+
+/* ── Editorial ────────────────────────────────────────────────── */
+export interface Editorial {
+  id: string;
+  nombre: string;
+  fechaRegistro: string; // ISO date string
+  fechaUltimaActualizacion?: string;
+}
+
+export interface NuevoEditorialData {
+  nombre: string;
 }

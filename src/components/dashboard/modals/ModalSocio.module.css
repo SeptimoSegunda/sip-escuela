@@ -1,0 +1,35 @@
+ ── Sección de auditoría ──
+.auditSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--beige-anchor);
+}
+
+.auditTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--text-main);
+}
+
+.auditItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.auditItem label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.auditValue {
+  color: var(--text-main);
+  font-family: monospace;
+  font-size: 0.9rem;
+}

@@ -20,7 +20,6 @@ export interface NuevoSocioData {
   apellido: string;
   nombre: string;
   tipo: Socio['tipo'];
-  anio?: string;
   dni: string;
   email?: string;
 }
@@ -40,12 +39,12 @@ export function useSocios(
         apellido:        data.apellido.trim(),
         nombre:          data.nombre.trim(),
         tipo:            data.tipo,
-        anio:            data.anio?.trim(),
         dni:             data.dni.trim(),
         email:           data.email?.trim(),
         estado:          'activo',
         prestamosActivos: 0,
         fechaRegistro:   new Date().toISOString(),
+        fechaUltimaActualizacion: new Date().toISOString(),
       };
 
       const actualizado = [nuevo, ...actual];
@@ -65,11 +64,12 @@ export function useSocios(
   );
 
   /* ── Editar ── */
+  type SocioEditable = Omit<Socio, 'id' | 'fechaRegistro' | 'prestamosActivos' | 'fechaUltimaActualizacion' | 'estado'> & { estado?: EstadoSocio };
   const editarSocio = useCallback(
-    (id: string, cambios: Partial<Omit<Socio, 'id' | 'fechaRegistro'>>): void => {
+    (id: string, cambios: Partial<SocioEditable> & { estado?: EstadoSocio }): void => {
       setSocios((prev) => {
         const actualizado = prev.map((s) =>
-          s.id === id ? { ...s, ...cambios } : s
+          s.id === id ? { ...s, ...cambios, fechaUltimaActualizacion: new Date().toISOString() } : s
         );
         storage.setSocios(actualizado);
 

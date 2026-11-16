@@ -130,7 +130,6 @@ export default function ModalExpedienteSocio({
               </h3>
               <div className={styles.socioMeta}>
                 <span className={styles.socioPill}>{socio.tipo.charAt(0).toUpperCase() + socio.tipo.slice(1)}</span>
-                {socio.anio && <span className={styles.socioPill}>{socio.anio}</span>}
                 {socio.dni && <span className={styles.socioPill}>DNI {socio.dni}</span>}
                 <span className={`${styles.socioPill} ${esCritico ? styles.socioPillCritico : styles.socioPillNormal}`}>
                   {esCritico ? '⚠ Caso Crítico' : totalDanos > 0 ? 'Con Antecedentes' : 'Sin Antecedentes'}

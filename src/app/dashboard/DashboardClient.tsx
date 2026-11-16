@@ -16,14 +16,16 @@ import ViewSocios          from '@/components/dashboard/views/ViewSocios';
 
 import ModalLibro          from '@/components/dashboard/modals/ModalLibro';
 import ModalFichaLibro     from '@/components/dashboard/modals/ModalFichaLibro';
+import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
 import ModalBusquedaAsistida from '@/components/dashboard/modals/ModalBusquedaAsistida';
 import ModalPrestamo       from '@/components/dashboard/modals/ModalPrestamo';
 import ModalDevolucion     from '@/components/dashboard/modals/ModalDevolucion';
 import ModalDano           from '@/components/dashboard/modals/ModalDano';
 import ModalSocio          from '@/components/dashboard/modals/ModalSocio';
-import ModalExpedienteSocio from '@/components/dashboard/modals/ModalExpedienteSocio';
+import ModalAutor          from '@/components/dashboard/modals/ModalAutor';
+import ModalEditorial      from '@/components/dashboard/modals/ModalEditorial';
 
-import type { Libro, Socio } from '@/types';
+import type { Libro, Socio, Autor, Editorial } from '@/types';
 import { loadSeedData } from '@/lib/seedData';
 import styles from './page.module.css';
 
@@ -36,6 +38,7 @@ type ModalState =
   | { type: 'none' }
   | { type: 'nuevoLibro' }
   | { type: 'editarLibro'; libro: Libro }
+  | { type: 'duplicarLibro'; libro: Libro }
   | { type: 'fichaLibro'; libro: Libro }
   | { type: 'busquedaAsistida' }
   | { type: 'nuevoPrestamo' }
@@ -43,7 +46,11 @@ type ModalState =
   | { type: 'nuevoDano' }
   | { type: 'nuevaSocio' }
   | { type: 'editarSocio'; socio: Socio }
-  | { type: 'expedienteSocio'; socioId: string };
+  | { type: 'expedienteSocio'; socioId: string }
+  | { type: 'nuevoAutor' }
+  | { type: 'editarAutor'; autor: Autor }
+  | { type: 'nuevaEditorial' }
+  | { type: 'editarEditorial'; editorial: Editorial };
 
 export default function DashboardPage() {
   const sesion        = useRequireAuth();
@@ -81,6 +88,8 @@ export default function DashboardPage() {
           <ViewCatalogo
             libros={catalogFilter ?? dash.libros}
             onNuevoLibro={() => setModal({ type: 'nuevoLibro' })}
+            onNuevoAutor={() => setModal({ type: 'nuevoAutor' })}
+            onNuevoEditorial={() => setModal({ type: 'nuevaEditorial' })}
             onEditar={(l) => setModal({ type: 'editarLibro', libro: l })}
             onVerDetalle={(l) => setModal({ type: 'fichaLibro', libro: l })}
             onEliminar={(ids) => { dash.eliminarLibros(ids); setCatalogFilter(null); }}
@@ -147,11 +156,12 @@ export default function DashboardPage() {
 
 
 
-      {/* Modal básico de creación/edición rápida */}
+      {/* Modal de creación/edición con control de copias y autores */}
       <ModalLibro
-        open={modal.type === 'nuevoLibro' || modal.type === 'editarLibro'}
+        open={modal.type === 'nuevoLibro' || modal.type === 'editarLibro' || modal.type === 'duplicarLibro'}
         onClose={closeModal}
         libroEditar={modal.type === 'editarLibro' ? modal.libro : null}
+        libroDuplicar={modal.type === 'duplicarLibro' ? modal.libro : null}
         onGuardar={(data) => {
           if (modal.type === 'editarLibro') {
             dash.editarLibro(modal.libro.id, data);
@@ -159,9 +169,12 @@ export default function DashboardPage() {
             dash.crearLibro(data);
           }
         }}
+        prestamos={dash.prestamos}
+        autoresDisponibles={dash.autores}
+        editorialesDisponibles={dash.editoriales}
       />
 
-      {/* Modal de ficha completa con control de copias e historial */}
+      {/* Modal de ficha completa (historial y duplicar) */}
       <ModalFichaLibro
         open={modal.type === 'fichaLibro'}
         onClose={closeModal}
@@ -170,7 +183,7 @@ export default function DashboardPage() {
         onGuardar={(libroId, data) => dash.editarLibro(libroId, data)}
         onIncrementarCopia={(libroId) => dash.incrementarCopia(libroId)}
         onDisminuirCopia={(libroId) => dash.disminuirCopia(libroId)}
-        onDuplicar={(libro) => { closeModal(); setModal({ type: 'nuevoLibro' }); void libro; }}
+        onDuplicar={(libro) => { closeModal(); setModal({ type: 'duplicarLibro', libro }); setCatalogFilter(null); }}
       />
 
       {/* Modal de búsqueda asistida Aguapey */}
@@ -219,7 +232,7 @@ export default function DashboardPage() {
         socioEditar={modal.type === 'editarSocio' ? modal.socio : null}
         onGuardar={(data) => {
           if (modal.type === 'editarSocio') {
-            dash.editarSocio(modal.socio.id, data);
+            dash.editarSocio(modal.socio.id, { ...data, estado: modal.socio.estado });
           } else {
             dash.crearSocio(data);
           }
@@ -233,6 +246,33 @@ export default function DashboardPage() {
         socios={dash.socios}
         danos={dash.danos}
         prestamos={dash.prestamos}
+      />
+
+      {/* Modales de creación múltiple */}
+      <ModalAutor
+        open={modal.type === 'nuevoAutor' || modal.type === 'editarAutor'}
+        onClose={closeModal}
+        autorEditar={modal.type === 'editarAutor' ? modal.autor : null}
+        onGuardar={(data) => {
+          if (modal.type === 'editarAutor') {
+            dash.editarAutor(modal.autor.id, data);
+          } else {
+            dash.crearAutor(data);
+          }
+        }}
+      />
+
+      <ModalEditorial
+        open={modal.type === 'nuevaEditorial' || modal.type === 'editarEditorial'}
+        onClose={closeModal}
+        editorialEditar={modal.type === 'editarEditorial' ? modal.editorial : null}
+        onGuardar={(data) => {
+          if (modal.type === 'editarEditorial') {
+            dash.editarEditorial(modal.editorial.id, data);
+          } else {
+            dash.crearEditorial(data);
+          }
+        }}
       />
 
     </div>

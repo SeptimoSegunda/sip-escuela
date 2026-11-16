@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Libro, Copia, EstadoCopia, TurnoAdmin } from '@/types';
+import type { Libro, Copia, EstadoCopia, TurnoAdmin, AutorEntry } from '@/types';
 import { storage } from '@/lib/storage';
 
 /* ────────────────────────────────────────
@@ -25,6 +25,7 @@ export interface NuevoLibroData {
   titulo: string;
   subtitulo?: string;
   autor: string;
+  autores?:             AutorEntry[];
   categoria: string;
   ubicacion: string;
   portadaUrl?: string;
@@ -34,6 +35,10 @@ export interface NuevoLibroData {
   clasificacion?: string;
   libristica?: string;
   tomo?: string;
+  mencionResponsabilidad?: string;
+  colaboradores?: string;
+  nivel?: string;
+  idioma?: string;
   editorial?: string;
   fechaPublicacion?: string;
   lugarPublicacion?: string;
@@ -59,34 +64,41 @@ export function useLibros(
         id:                   generarIdLibro(),
         isbn:                 data.isbn.trim(),
         titulo:               data.titulo.trim(),
-        subtitulo:            data.subtitulo?.trim() || undefined,
+        subtitulo:            data.subtitulo?.trim() ?? undefined,
         autor:                data.autor.trim(),
+        autores:              data.autores && data.autores.length > 0
+          ? data.autores
+          : [{ nombre: data.autor.trim(), rol: 'principal' }],
         categoria:            data.categoria.trim(),
-        ubicacion:            data.ubicacion.trim() || 'Estante Principal',
-        portadaUrl:           data.portadaUrl || undefined,
+        ubicacion:            data.ubicacion.trim() ?? 'Estante Principal',
+        portadaUrl:           data.portadaUrl ?? undefined,
         copias: [
           {
             id:           `C-${Date.now()}`,
-            inventarioNum: data.inventario?.trim() || 'INV-1001',
+            inventarioNum: data.inventario?.trim() ?? 'INV-1001',
             estado:       'disponible' as EstadoCopia,
           },
         ],
         fechaAgregado:        new Date().toISOString(),
-        edicion:              data.edicion?.trim() || undefined,
-        extension:            data.extension?.trim() || undefined,
-        inventario:           data.inventario?.trim() || undefined,
-        clasificacion:        data.clasificacion?.trim() || undefined,
-        libristica:           data.libristica?.trim() || undefined,
-        tomo:                 data.tomo?.trim() || undefined,
-        editorial:            data.editorial?.trim() || undefined,
-        fechaPublicacion:     data.fechaPublicacion?.trim() || undefined,
-        lugarPublicacion:     data.lugarPublicacion?.trim() || undefined,
-        temas:                data.temas?.trim() || undefined,
-        terminoMateria:       data.terminoMateria?.trim() || undefined,
-        coleccionPersonal:    data.coleccionPersonal?.trim() || undefined,
-        coleccionInstitucional: data.coleccionInstitucional?.trim() || undefined,
-        notaGeneral:          data.notaGeneral?.trim() || undefined,
-        notaContenido:        data.notaContenido?.trim() || undefined,
+        edicion:              data.edicion?.trim() ?? undefined,
+        extension:            data.extension?.trim() ?? undefined,
+        inventario:           data.inventario?.trim() ?? undefined,
+        clasificacion:        data.clasificacion?.trim() ?? undefined,
+        libristica:           data.libristica?.trim() ?? undefined,
+        tomo:                 data.tomo?.trim() ?? undefined,
+        mencionResponsabilidad: data.mencionResponsabilidad?.trim() ?? undefined,
+        colaboradores:        data.colaboradores?.trim() ?? undefined,
+        nivel:                data.nivel?.trim() ?? undefined,
+        idioma:               data.idioma?.trim() ?? undefined,
+        editorial:            data.editorial?.trim() ?? undefined,
+        fechaPublicacion:     data.fechaPublicacion?.trim() ?? undefined,
+        lugarPublicacion:     data.lugarPublicacion?.trim() ?? undefined,
+        temas:                data.temas?.trim() ?? undefined,
+        terminoMateria:       data.terminoMateria?.trim() ?? undefined,
+        coleccionPersonal:    data.coleccionPersonal?.trim() ?? undefined,
+        coleccionInstitucional: data.coleccionInstitucional?.trim() ?? undefined,
+        notaGeneral:          data.notaGeneral?.trim() ?? undefined,
+        notaContenido:        data.notaContenido?.trim() ?? undefined,
       };
 
       const actualizado = [nuevo, ...actual];
@@ -106,8 +118,9 @@ export function useLibros(
   );
 
   /* ── Editar libro ── */
+  type LibroEditable = Omit<Libro, 'id' | 'copias' | 'fechaAgregado' | 'autores'>;
   const editarLibro = useCallback(
-    (id: string, cambios: Partial<Omit<Libro, 'id' | 'copias' | 'fechaAgregado'>>): void => {
+    (id: string, cambios: Partial<LibroEditable>): void => {
       setLibros((prev) => {
         const actualizado = prev.map((l) =>
           l.id === id ? { ...l, ...cambios } : l

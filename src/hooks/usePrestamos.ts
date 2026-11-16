@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import type { Prestamo, Libro, TurnoAdmin, SeveridadDano } from '@/types';
+import type { Prestamo, Libro, TurnoAdmin, SeveridadDano, EstadoCopia } from '@/types';
 import { LIMITES_PRESTAMOS } from '@/types';
 import { storage } from '@/lib/storage';
 
@@ -44,7 +44,7 @@ export interface DevolucionData {
 export function usePrestamos(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Préstamos', accion: string, desc: string, turno: TurnoAdmin) => void,
-  onCopiaEstado: (libroId: string, copiaId: string, estado: 'prestado' | 'disponible' | 'dañado') => void,
+  onCopiaEstado: (libroId: string, copiaId: string, estado: EstadoCopia) => void,
 ) {
   const [prestamos, setPrestamos] = useState<Prestamo[]>(() => storage.getPrestamos());
 
@@ -88,7 +88,7 @@ export function usePrestamos(
       }
 
       const ahora = new Date();
-      const dias = data.diasDevolucion && data.diasDevolucion > 0 ? data.diasDevolucion : DIAS_LIMITE_PRESTAMO;
+      const dias = (data.diasDevolucion && data.diasDevolucion > 0) ? data.diasDevolucion : DIAS_LIMITE_PRESTAMO;
       const limite = new Date(ahora.getTime() + dias * 24 * 60 * 60 * 1000);
 
       const nuevo: Prestamo = {
@@ -137,8 +137,8 @@ export function usePrestamos(
         );
         storage.setPrestamos(actualizado);
 
-        // Marcar copia como disponible o dañada
-        const estadoCopia = data.dano ? 'dañado' : 'disponible';
+        // Marcar copia como disponible o dañado
+        const estadoCopia = data.dano?.severidad === 'catastrofico' ? 'dañado' : 'disponible';
         onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
 
         registrarAccion(

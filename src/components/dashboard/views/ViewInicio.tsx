@@ -17,6 +17,7 @@ import type { Libro, Prestamo, Dano, AuditLog } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import ReportCard, { BarChart, DonutChart } from '@/components/dashboard/ui/ReportCard';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
+import { formatFecha, estadoPrestamoToBadge } from '@/lib/utils';
 import styles from './ViewInicio.module.css';
 
 interface ViewInicioProps {
@@ -44,23 +45,6 @@ function matchPeriodo(isoDate: string, periodo: string): boolean {
     d.getMonth() + 1 === parseInt(mm) &&
     d.getFullYear() === parseInt(yyyy)
   );
-}
-
-function formatFecha(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function estadoToBadge(estado: string): BadgeVariant {
-  if (estado === 'prestado')  return 'borrowed';
-  if (estado === 'moroso')    return 'low';
-  if (estado === 'devuelto')  return 'available';
-  return 'neutral';
 }
 
 export default function ViewInicio({ libros, prestamos, danos, auditLogs }: ViewInicioProps) {
@@ -218,12 +202,11 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
       </div>
 
       {/* Fila inferior: Historial + Top libros */}
-      <div className={styles.dashGridBottom}>
-        {/* Historial de préstamos — span 2 */}
+      <div className={styles.dashGrid}>
+        {/* Historial de préstamos */}
         <ReportCard
           title="Historial de Préstamos"
           subtitle="Registro de movimientos en el período seleccionado"
-          span={2}
           id="repTableBody"
         >
           <div className={styles.historialHeader}>
@@ -264,7 +247,7 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
                           {vencido && ' ⚠'}
                         </td>
                         <td>
-                          <Badge variant={estadoToBadge(p.estado)}>
+                          <Badge variant={estadoPrestamoToBadge(p.estado)}>
                             {p.estado === 'prestado' ? 'Activo' : p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
                           </Badge>
                         </td>

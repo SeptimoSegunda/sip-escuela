@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Dano, SeveridadDano, TurnoAdmin } from '@/types';
+import type { Dano, SeveridadDano, TurnoAdmin, EstadoCopia } from '@/types';
 import { storage } from '@/lib/storage';
 
 /* ────────────────────────────────────────
@@ -31,7 +31,7 @@ export interface NuevoDanoData {
 export function useDanos(
   turnoAdmin: TurnoAdmin,
   registrarAccion: (cat: 'Daños', accion: string, desc: string, turno: TurnoAdmin) => void,
-  onCopiaEstado: (libroId: string, copiaId: string, estado: 'dañado' | 'disponible') => void
+  onCopiaEstado: (libroId: string, copiaId: string, estado: EstadoCopia) => void
 ) {
   const [danos, setDanos] = useState<Dano[]>(() => storage.getDanos());
 
@@ -107,5 +107,6 @@ function severidadLabel(s: SeveridadDano): string {
     case 'leve':        return 'Daño Leve';
     case 'moderado':    return 'Daño Moderado';
     case 'catastrofico': return 'CATASTRÓFICO';
+    default:            return 'Desconocido'; // Protección contra valores no mapeados
   }
 }

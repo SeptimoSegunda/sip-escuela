@@ -1,20 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarDay, faEdit } from '@fortawesome/free-solid-svg-icons';
 import type { Socio, TipoSocio } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
+import styles from './ModalSocio.module.css';
 
 interface ModalSocioProps {
   open: boolean;
   onClose: () => void;
-  /** Si se pasa un socio existente, el modal actúa en modo edición */
   socioEditar?: Socio | null;
   onGuardar: (data: {
     apellido: string;
     nombre: string;
     tipo: Socio['tipo'];
-    anio?: string;
     dni: string;
     email?: string;
   }) => void;
@@ -26,17 +27,21 @@ const TIPOS: { value: TipoSocio; label: string }[] = [
   { value: 'otro',       label: 'Otro (Máx 1 libro)' },
 ];
 
-const empty = { apellido: '', nombre: '', tipo: 'estudiante' as TipoSocio, anio: '', dni: '', email: '' };
+const empty = { apellido: '', nombre: '', tipo: 'estudiante' as TipoSocio, dni: '', email: '' };
+
+function formatFecha(iso: string): string {
+  try { return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  catch { return iso; }
+}
 
 export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: ModalSocioProps) {
   const [form, setForm] = useState(empty);
 
-  /* Rellenar con datos del socio al abrir en modo edición */
   useEffect(() => {
     if (open) {
       setForm(
         socioEditar
-          ? { apellido: socioEditar.apellido, nombre: socioEditar.nombre, tipo: socioEditar.tipo, anio: socioEditar.anio ?? '', dni: socioEditar.dni ?? '', email: socioEditar.email ?? '' }
+          ? { apellido: socioEditar.apellido, nombre: socioEditar.nombre, tipo: socioEditar.tipo, dni: socioEditar.dni ?? '', email: socioEditar.email ?? '' }
           : empty
       );
     }
@@ -46,13 +51,22 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación del DNI: máximo 8 caracteres numéricos
+    if (form.dni.length === 0) {
+      // Mantener comportamiento existente - DNI requerido
+    }
+    if (form.dni.length > 8) {
+      // Esto no debería ocurrir por la validación del input, pero por si acaso
+      return;
+    }
+
     onGuardar({
       apellido: form.apellido.trim(),
       nombre:   form.nombre.trim(),
       tipo:     form.tipo,
-      anio:     form.anio?.trim() || undefined,
       dni:      form.dni.trim(),
-      email:    form.email?.trim() || undefined,
+      email:    form.email?.trim() ?? undefined,
     });
     onClose();
   };
@@ -60,13 +74,9 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
   const isEdit = !!socioEditar;
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={isEdit ? 'Editar Socio' : 'Registrar Nuevo Socio'}
-      id="modalSocio"
-    >
+    <Modal open={open} onClose={onClose} title={isEdit ? 'Editar Socio' : 'Registrar Nuevo Socio'} id="modalSocio" size="md">
       <form id="formNuevoSocio" onSubmit={handleSubmit} autoComplete="off">
+        {/* ── Información del Socio ── */}
         <div className={f.formGrid}>
           <div className={f.formGroup}>
             <label htmlFor="inputSocioApellido" className={f.label}>Apellido *</label>
@@ -91,13 +101,15 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
           <div className={f.formGroup}>
             <label htmlFor="inputSocioDni" className={f.label}>DNI *</label>
             <input id="inputSocioDni" className={f.input} required
-              value={form.dni} onChange={(e) => set('dni', e.target.value)} />
-          </div>
-
-          <div className={f.formGroup}>
-            <label htmlFor="inputSocioAnio" className={f.labelOptional}>Año o Grado (Opcional)</label>
-            <input id="inputSocioAnio" className={f.input}
-              value={form.anio} onChange={(e) => set('anio', e.target.value)} />
+              value={form.dni}
+              onChange={(e) => {
+                // Validación: solo números, máximo 8 caracteres
+                const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                set('dni', value);
+              }}
+              maxLength={8}
+              pattern="[0-9]{1,8}"
+              title="Solo números, máximo 8 caracteres" />
           </div>
 
           <div className={f.formGroup}>
@@ -107,10 +119,29 @@ export default function ModalSocio({ open, onClose, socioEditar, onGuardar }: Mo
           </div>
         </div>
 
+        {/* ── Fechas de auditoría (solo lectura) ── */}
+        {isEdit && socioEditar && (
+          <div className={styles.auditSection}>
+            <h4 className={styles.auditTitle}>
+              <FontAwesomeIcon icon={faCalendarDay} /> Fechas de Auditoría
+            </h4>
+            <div className={styles.auditItem}>
+              <label>Fecha de creación:</label>
+              <span className={styles.auditValue}>{formatFecha(socioEditar.fechaRegistro)}</span>
+            </div>
+            <div className={styles.auditItem}>
+              <label>Última actualización:</label>
+              <span className={styles.auditValue}>
+                {socioEditar.fechaUltimaActualizacion ? formatFecha(socioEditar.fechaUltimaActualizacion) : '—'}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className={f.actions}>
           <button type="button" className={f.btnCancel} onClick={onClose}>Cancelar</button>
           <button type="submit" className={f.btnSubmit}>
-            {isEdit ? 'Guardar Cambios' : 'Registrar Socio'}
+            {isEdit ? <><FontAwesomeIcon icon={faEdit} /> Guardar Cambios</> : 'Registrar Socio'}
           </button>
         </div>
       </form>

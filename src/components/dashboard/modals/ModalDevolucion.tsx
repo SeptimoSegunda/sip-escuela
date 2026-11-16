@@ -42,7 +42,7 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!prestamoId) { setError('Selecciona un préstamo.'); return; }
-    if (conDano && !descripcion.trim()) { setError('Describe el daño antes de confirmar.'); return; }
+    if (conDano && (!descripcion || !descripcion.trim())) { setError('Describe el daño antes de confirmar.'); return; }
 
     onConfirmar(
       prestamoId,
@@ -120,6 +120,7 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
                       rows={2}
                       value={descripcion}
                       onChange={(e) => { setDescripcion(e.target.value); setError(''); }}
+                      style={{ resize: 'none' }}
                     />
                   </div>
 
