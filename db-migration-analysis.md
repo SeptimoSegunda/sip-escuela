@@ -29,6 +29,10 @@ Next.js App Router permite crear **API Routes** dentro del mismo proyecto en `sr
 src/app/api/
   libros/route.ts        → GET /api/libros, POST /api/libros
   libros/[id]/route.ts   → PUT /api/libros/:id, DELETE /api/libros/:id
+  autores/route.ts
+  autores/[id]/route.ts
+  editoriales/route.ts
+  editoriales/[id]/route.ts
   socios/route.ts
   prestamos/route.ts
   danos/route.ts
@@ -90,6 +94,12 @@ Crear los endpoints en `src/app/api/` que por ahora responden con datos hardcode
 
 ### Etapa 2 — Conectar Prisma + DB
 Instalar Prisma, definir el schema (que espeja los tipos de `src/types/index.ts`), hacer `prisma migrate`. Las API Routes empiezan a usar `prisma.libro.findMany()` etc.
+
+**Nuevas entidades a modelar:**
+- `Autor` con `id`, `nombre`, `apellido`, `fechaRegistro`, `fechaUltimaActualizacion`
+- `Editorial` con `id`, `nombre`, `fechaRegistro`, `fechaUltimaActualizacion`
+- Relación `Libro` ↔ `Editorial` (FK opcional)
+- Relación `Libro` ↔ `Autor` (N:M con tabla intermedia `LibroAutor` incluyendo campo `rol`)
 
 ### Etapa 3 — Reemplazar hooks
 Cambiar `useState(() => storage.getX())` por `useSWR('/api/x', fetcher)`. Las mutaciones pasan a `fetch` + `mutate()`.

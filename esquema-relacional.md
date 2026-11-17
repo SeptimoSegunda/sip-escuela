@@ -1,7 +1,7 @@
 # Esquema Relacional — SIPnr
 
 > Entidades principales: **Libro**, **Préstamo** y **Daño**.  
-> Entidades de soporte: **Copia**, **Socio** y **AuditLog**.
+> Entidades de soporte: **Copia**, **Socio**, **Autor**, **Editorial** y **AuditLog**.
 
 ---
 
@@ -21,7 +21,7 @@ erDiagram
     string portadaUrl
     string edicion
     string extension
-    string editorial
+    string editorialId FK
     string clasificacion
     string fechaPublicacion
     string lugarPublicacion
@@ -45,11 +45,11 @@ erDiagram
     string nombre
     string dni
     string tipo
-    string anio
     string email
     string estado
     int    prestamosActivos
     string fechaRegistro
+    string fechaUltimaActualizacion
   }
 
   PRESTAMO {
@@ -64,6 +64,21 @@ erDiagram
     string fechaDevolucion
     string estado
     string turnoAdmin
+  }
+
+  AUTOR {
+    string id PK
+    string nombre
+    string apellido
+    string fechaRegistro
+    string fechaUltimaActualizacion
+  }
+
+  EDITORIAL {
+    string id PK
+    string nombre
+    string fechaRegistro
+    string fechaUltimaActualizacion
   }
 
   DANO {
@@ -89,6 +104,8 @@ erDiagram
   }
 
   LIBRO       ||--o{ COPIA      : "tiene"
+  LIBRO       }o--|| EDITORIAL   : "publicado por"
+  LIBRO       }o--o{ AUTOR       : "escrito por (múltiple)"
   COPIA       ||--o{ PRESTAMO   : "es prestada en"
   COPIA       ||--o{ DANO       : "registra"
   LIBRO       ||--o{ PRESTAMO   : "referenciado en"
@@ -104,6 +121,16 @@ erDiagram
 ### `LIBRO` → `COPIA` *(1 a N)*
 Un libro puede tener **múltiples copias físicas** (cada una con su número de inventario y estado independiente).  
 Las copias se almacenan embebidas en el objeto `Libro` como array `copias[]`.
+
+---
+### `LIBRO` → `EDITORIAL` *(N a 1)*
+Un libro pertenece a una editorial. La relación es opcional (puede ser null).
+`Libro.editorialId` referencia a `Editorial.id`.
+
+---
+### `LIBRO` → `AUTOR` *(N a M)*
+Un libro puede tener múltiples autores (principal, secundario, institucional). 
+Actualmente `Libro.autor` mantiene un string descriptivo legacy y `Libro.autores[]` contiene la relación normalizada con roles.
 
 ---
 
@@ -219,6 +246,8 @@ Todos los datos persisten en **`localStorage`** mediante `storage.ts`. Las colec
 |---|---|
 | `SIP_LIBROS` | `Libro[]` (incluye `copias[]` embebidas) |
 | `SIP_SOCIOS` | `Socio[]` |
+| `SIP_AUTORES` | `Autor[]` |
+| `SIP_EDITORIALES` | `Editorial[]` |
 | `SIP_PRESTAMOS` | `Prestamo[]` |
 | `SIP_DANOS` | `Dano[]` |
 | `SIP_AUDIT_LOG` | `AuditLog[]` |
