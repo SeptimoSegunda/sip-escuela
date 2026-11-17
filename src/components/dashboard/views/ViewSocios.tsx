@@ -8,7 +8,7 @@ import {
   faTrash,
   faFolderOpen,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Socio, EstadoSocio, Prestamo } from '@/types';
+import type { Socio, Prestamo } from '@/types';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
 import Badge from '@/components/dashboard/ui/Badge';
 import { estadoSocioToBadge, estadoSocioLabel } from '@/lib/utils';

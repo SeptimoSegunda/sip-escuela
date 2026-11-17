@@ -9,14 +9,13 @@ import {
   faCalendarCheck,
   faTriangleExclamation,
   faCalendarDays,
-  faChartPie,
   faUserClock,
   faFire,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Libro, Prestamo, Dano, AuditLog } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import ReportCard, { BarChart, DonutChart } from '@/components/dashboard/ui/ReportCard';
-import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
+import Badge from '@/components/dashboard/ui/Badge';
 import { formatFecha, estadoPrestamoToBadge } from '@/lib/utils';
 import styles from './ViewInicio.module.css';
 
@@ -77,9 +76,6 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
   const accionesManana = auditPeriodo.filter((l) => l.admin === 'Turno Mañana').length;
   const accionesTarde  = auditPeriodo.filter((l) => l.admin === 'Turno Tarde').length;
   const maxAcciones    = Math.max(accionesManana, accionesTarde, 1);
-
-  /* ── Distribución de libros (donut simulado con barras) ── */
-  const totalDistribucion = prestadosPeriodo + devueltosPeriodo + danos.length || 1;
 
   /* ── Top 5 libros más solicitados en el período ── */
   const topLibros = useMemo(() => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Dano, SeveridadDano, TurnoAdmin, EstadoCopia } from '@/types';
+import type { Dano, SeveridadDano, TurnoAdmin, EstadoCopia, EstadoPosterior } from '@/types';
 import { storage } from '@/lib/storage';
 
 /* ────────────────────────────────────────
@@ -26,6 +26,8 @@ export interface NuevoDanoData {
   socioId?: string;
   severidad: SeveridadDano;
   descripcion: string;
+  /** Estado posterior del ejemplar tras registrar el daño */
+  estadoPosterior?: EstadoPosterior;
 }
 
 export function useDanos(
@@ -50,14 +52,19 @@ export function useDanos(
         descripcion: data.descripcion,
         fecha:       new Date().toISOString(),
         turnoAdmin,
+        estadoPosterior: data.estadoPosterior,
       };
 
       const actualizado = [nuevo, ...actual];
       storage.setDanos(actualizado);
       setDanos(actualizado);
 
-      // Si el daño es catastrófico, la copia queda fuera de circulación
-      if (data.severidad === 'catastrofico') {
+      // Determinar el nuevo estado de la copia según severidad o estadoPosterior
+      if (data.estadoPosterior === 'disponible') {
+        onCopiaEstado(data.libroId, data.copiaId, 'disponible');
+      } else if (data.estadoPosterior === 'mantenimiento') {
+        onCopiaEstado(data.libroId, data.copiaId, 'dañado');
+      } else if (data.severidad === 'catastrofico') {
         onCopiaEstado(data.libroId, data.copiaId, 'dañado');
       }
 

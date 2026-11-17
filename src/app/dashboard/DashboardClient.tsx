@@ -87,12 +87,16 @@ export default function DashboardPage() {
         return (
           <ViewCatalogo
             libros={catalogFilter ?? dash.libros}
+            autores={dash.autores}
+            editoriales={dash.editoriales}
             onNuevoLibro={() => setModal({ type: 'nuevoLibro' })}
             onNuevoAutor={() => setModal({ type: 'nuevoAutor' })}
             onNuevoEditorial={() => setModal({ type: 'nuevaEditorial' })}
             onEditar={(l) => setModal({ type: 'editarLibro', libro: l })}
             onVerDetalle={(l) => setModal({ type: 'fichaLibro', libro: l })}
             onEliminar={(ids) => { dash.eliminarLibros(ids); setCatalogFilter(null); }}
+            onEliminarAutor={(id) => dash.eliminarAutor(id)}
+            onEliminarEditorial={(id) => dash.eliminarEditorial(id)}
             onBusquedaAsistida={() => setModal({ type: 'busquedaAsistida' })}
             filtroActivo={catalogFilter !== null}
             onLimpiarFiltro={() => setCatalogFilter(null)}

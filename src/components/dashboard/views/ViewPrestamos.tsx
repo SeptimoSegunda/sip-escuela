@@ -12,6 +12,7 @@ import {
 import type { Prestamo, EstadoPrestamo } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
+import { formatFecha } from '@/lib/utils';
 import styles from './ViewPrestamos.module.css';
 
 interface ViewPrestamosProps {
@@ -36,16 +37,6 @@ function estadoLabel(estado: EstadoPrestamo): string {
     case 'prestado':  return 'Activo';
     case 'moroso':    return 'Moroso';
     case 'devuelto':  return 'Devuelto';
-  }
-}
-
-function formatFecha(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  } catch {
-    return iso;
   }
 }
 
@@ -87,7 +78,11 @@ export default function ViewPrestamos({
   };
 
   const toggleTodos = (checked: boolean) => {
-    setSeleccionados(checked ? new Set(prestamosFiltrados.map((p) => p.id)) : new Set());
+    if (checked) {
+      setSeleccionados(new Set(prestamosFiltrados.map((p) => p.id)));
+    } else {
+      setSeleccionados(new Set());
+    }
   };
 
   const handleCancelar = () => {

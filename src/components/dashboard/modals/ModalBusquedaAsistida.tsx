@@ -50,18 +50,28 @@ const defaultFilas: Fila[] = [
   { operador: 'AND', campo: 'inventario',query: '' },
 ];
 
-function matchCampo(libro: Libro, campo: Campo, q: string): boolean {
+function matchCampo(libro: Libro, campo: Campo, q: string, truncar: boolean): boolean {
   const lq = q.toLowerCase();
+  const valor = (str: string) => truncar ? str.toLowerCase().includes(lq) : str.toLowerCase() === lq;
+
   switch (campo) {
-    case 'nombre':    return libro.autor.toLowerCase().includes(lq);
-    case 'titulo':    return libro.titulo.toLowerCase().includes(lq);
-    case 'tema':      return libro.categoria.toLowerCase().includes(lq);
-    case 'inventario':return libro.copias.some((c) => c.inventarioNum.toLowerCase().includes(lq));
-    case 'isbn':      return libro.isbn.toLowerCase().includes(lq);
-    case 'categoria': return libro.categoria.toLowerCase().includes(lq);
+    case 'nombre':
+      return valor(libro.autor);
+    case 'titulo':
+      return valor(libro.titulo);
+    case 'tema':
+      return valor(libro.categoria);
+    case 'inventario':
+      return libro.copias.some((c) => truncar ?
+        c.inventarioNum.toLowerCase().includes(lq) :
+        c.inventarioNum.toLowerCase() === lq);
+    case 'isbn':
+      return valor(libro.isbn);
+    case 'categoria':
+      return valor(libro.categoria);
     case 'cualquiera':
-      return `${libro.titulo} ${libro.autor} ${libro.isbn} ${libro.categoria} ${libro.ubicacion}`
-        .toLowerCase().includes(lq);
+      const texto = `${libro.titulo} ${libro.autor} ${libro.isbn} ${libro.categoria} ${libro.ubicacion}`.toLowerCase();
+      return truncar ? texto.includes(lq) : texto === lq;
   }
 }
 
@@ -73,8 +83,8 @@ function aplicarFilas(libros: Libro[], filas: Fila[], truncar: boolean): Libro[]
     let resultado: boolean | null = null;
 
     for (const fila of filaActivas) {
-      const q = truncar ? fila.query.trim() : fila.query.trim();
-      const match = matchCampo(libro, fila.campo, q);
+      const q = fila.query.trim();
+      const match = matchCampo(libro, fila.campo, q, truncar);
 
       if (resultado === null) {
         resultado = match;

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
   faMagnifyingGlass,
-  faSliders,
+  faSearch,
   faTrashCan,
   faTrash,
   faPen,
@@ -17,17 +17,22 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { Libro, Editorial, Autor } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
+import { formatFecha } from '@/lib/utils';
 import styles from './ViewCatalogo.module.css';
 
 interface ViewCatalogoProps {
   libros: Libro[];
+  autores: Autor[];
+  editoriales: Editorial[];
   onNuevoLibro: () => void;
   onNuevoAutor: () => void;
   onNuevoEditorial: () => void;
   onEditar: (libro: Libro) => void;
   onVerDetalle: (libro: Libro) => void;
   onEliminar: (libroIds: string[]) => void;
-  onBusquedaAsistida: () => void;
+  onEliminarAutor: (autorId: string) => void;
+  onEliminarEditorial: (editorialId: string) => void;
+  onBusquedaAsistida?: () => void;
   filtroActivo?: boolean;
   onLimpiarFiltro?: () => void;
   readOnly?: boolean;
@@ -46,12 +51,16 @@ function estadoDisponibilidad(libro: Libro): { label: string; variant: BadgeVari
 
 export default function ViewCatalogo({
   libros,
+  autores,
+  editoriales,
   onNuevoLibro,
   onNuevoAutor,
   onNuevoEditorial,
   onEditar,
   onVerDetalle,
   onEliminar,
+  onEliminarAutor,
+  onEliminarEditorial,
   onBusquedaAsistida,
   filtroActivo = false,
   onLimpiarFiltro,
@@ -73,6 +82,22 @@ export default function ViewCatalogo({
     );
   }, [libros, busqueda]);
 
+  const autoresFiltrados = useMemo(() => {
+    const q = busqueda.toLowerCase();
+    if (!q) return autores;
+    return autores.filter(a =>
+      `${a.nombre} ${a.apellido}`.toLowerCase().includes(q)
+    );
+  }, [autores, busqueda]);
+
+  const editorialesFiltrados = useMemo(() => {
+    const q = busqueda.toLowerCase();
+    if (!q) return editoriales;
+    return editoriales.filter(e =>
+      e.nombre.toLowerCase().includes(q)
+    );
+  }, [editoriales, busqueda]);
+
   /* ── Selección grupal ── */
   const toggleSeleccion = (id: string) => {
     setSeleccionados((prev) => {
@@ -83,7 +108,13 @@ export default function ViewCatalogo({
   };
 
   const toggleTodos = (checked: boolean) => {
-    setSeleccionados(checked ? new Set(librosFiltrados.map((l) => l.id)) : new Set());
+    if (vistaActiva === 'autores') {
+      setSeleccionados(checked ? new Set(autoresFiltrados.map((a) => a.id)) : new Set());
+    } else if (vistaActiva === 'editoriales') {
+      setSeleccionados(checked ? new Set(editorialesFiltrados.map((e) => e.id)) : new Set());
+    } else {
+      setSeleccionados(checked ? new Set(librosFiltrados.map((l) => l.id)) : new Set());
+    }
   };
 
   const handleCancelarGrupal = () => {
@@ -93,12 +124,27 @@ export default function ViewCatalogo({
 
   const handleEliminarGrupal = () => {
     if (seleccionados.size === 0) return;
-    onEliminar(Array.from(seleccionados));
+    if (vistaActiva === 'autores') {
+      onEliminarAutor(Array.from(seleccionados)[0]);
+    } else if (vistaActiva === 'editoriales') {
+      onEliminarEditorial(Array.from(seleccionados)[0]);
+    } else {
+      onEliminar(Array.from(seleccionados));
+    }
     handleCancelarGrupal();
   };
 
-  const todosSeleccionados =
-    librosFiltrados.length > 0 && seleccionados.size === librosFiltrados.length;
+  const getTotalItems = () => {
+    if (vistaActiva === 'autores') return autoresFiltrados.length;
+    if (vistaActiva === 'editoriales') return editorialesFiltrados.length;
+    return librosFiltrados.length;
+  };
+
+  const getTodosSeleccionados = () => {
+    if (vistaActiva === 'autores') return autoresFiltrados.length > 0 && seleccionados.size === autoresFiltrados.length;
+    if (vistaActiva === 'editoriales') return editorialesFiltrados.length > 0 && seleccionados.size === editorialesFiltrados.length;
+    return librosFiltrados.length > 0 && seleccionados.size === librosFiltrados.length;
+  };
 
   return (
     <div className={styles.viewWrapper}>
@@ -233,15 +279,21 @@ export default function ViewCatalogo({
         {/* Cabecera: título + conteo + herramientas de búsqueda */}
         <div className={styles.sectionHeader}>
           <div>
-            <h2 className={styles.sectionTitle}>Listado del Fondo Editorial</h2>
+            <h2 className={styles.sectionTitle}>
+              {vistaActiva === 'libros' && 'Listado del Fondo Editorial'}
+              {vistaActiva === 'editoriales' && 'Editoriales Registradas'}
+              {vistaActiva === 'autores' && 'Autores Registrados'}
+            </h2>
             <span className={styles.sectionCount}>
-              Total Títulos: <strong id="totalLibrosCount">{librosFiltrados.length}</strong>
+              {vistaActiva === 'libros' && `Total Títulos: ${getTotalItems()}`}
+              {vistaActiva === 'editoriales' && `Total Editoriales: ${getTotalItems()}`}
+              {vistaActiva === 'autores' && `Total Autores: ${getTotalItems()}`}
             </span>
           </div>
           <div className={styles.searchTools}>
             {filtroActivo && (
               <div className={styles.filtroActivoBanner}>
-                <span>🔍 Filtro activo: {libros.length} resultado{libros.length !== 1 ? 's' : ''}</span>
+                <span>🔍 Filtro activo: {getTotalItems()} resultado{getTotalItems() !== 1 ? 's' : ''}</span>
                 {!readOnly && onLimpiarFiltro && (
                   <button
                     type="button"
@@ -253,6 +305,17 @@ export default function ViewCatalogo({
                 )}
               </div>
             )}
+            {!readOnly && onBusquedaAsistida && (
+              <button
+                type="button"
+                className={`${styles.btnSecondarySmall} ${styles.btnSearchIcon}`}
+                onClick={onBusquedaAsistida}
+                title="Búsqueda asistida"
+                aria-label="Búsqueda asistida"
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </button>
+            )}
             <div className={styles.searchBar}>
               <FontAwesomeIcon icon={faMagnifyingGlass} className={styles.searchIcon} />
               <input
@@ -261,18 +324,13 @@ export default function ViewCatalogo({
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className={styles.searchInput}
+                placeholder={
+                  vistaActiva === 'libros' ? 'Buscar por título, autor, ISBN...' :
+                  vistaActiva === 'autores' ? 'Buscar por nombre...' :
+                  'Buscar por nombre...'
+                }
               />
             </div>
-            {!readOnly && (
-              <button
-                id="btnAbrirBusquedaAsistida"
-                className={styles.btnAssistedSearch}
-                onClick={onBusquedaAsistida}
-                type="button"
-              >
-                <FontAwesomeIcon icon={faSliders} /> Búsqueda asistida
-              </button>
-            )}
           </div>
         </div>
 
@@ -291,7 +349,7 @@ export default function ViewCatalogo({
             {modoBorradoGrupal && seleccionados.size > 0 && (
               <div className={styles.groupDeleteBar} id="groupDeleteActionBar">
                 <span id="groupDeleteCountText" className={styles.groupDeleteCount}>
-                  {seleccionados.size} libro{seleccionados.size !== 1 ? 's' : ''} seleccionado{seleccionados.size !== 1 ? 's' : ''}
+                  {seleccionados.size} elemento{seleccionados.size !== 1 ? 's' : ''} seleccionado{seleccionados.size !== 1 ? 's' : ''}
                 </span>
                 <button
                   id="btnConfirmarBorradoGrupal"
@@ -314,107 +372,229 @@ export default function ViewCatalogo({
           </div>
         )}
 
-        {/* Tabla */}
-        <div className={styles.tableWrapper}>
-          <table className={styles.dataTable}>
-            <thead>
-              <tr>
-                {modoBorradoGrupal && (
-                  <th id="thSelectAllCopies" className={styles.thCheck}>
-                    <input
-                      type="checkbox"
-                      id="checkSelectAllNewCopies"
-                      title="Seleccionar todos los libros"
-                      checked={todosSeleccionados}
-                      onChange={(e) => toggleTodos(e.target.checked)}
-                    />
-                  </th>
-                )}
-                <th>Código ISBN</th>
-                <th>Título</th>
-                <th>Autor y Categoría</th>
-                <th>Ubicación Principal</th>
-                <th>Copias</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="catalogTableBody">
-              {librosFiltrados.length === 0 ? (
+        {/* Tabla de Libros */}
+        {vistaActiva === 'libros' && (
+          <div className={styles.tableWrapper}>
+            <table className={styles.dataTable}>
+              <thead>
                 <tr>
-                  <td colSpan={modoBorradoGrupal ? 8 : 7} className={styles.emptyState}>
-                    No hay libros que coincidan con la búsqueda.
-                  </td>
+                  {modoBorradoGrupal && (
+                    <th id="thSelectAllCopies" className={styles.thCheck}>
+                      <input
+                        type="checkbox"
+                        id="checkSelectAllNewCopies"
+                        title="Seleccionar todos los libros"
+                        checked={getTodosSeleccionados()}
+                        onChange={(e) => toggleTodos(e.target.checked)}
+                      />
+                    </th>
+                  )}
+                  <th>Código ISBN</th>
+                  <th>Título</th>
+                  <th>Autor y Categoría</th>
+                  <th>Ubicación Principal</th>
+                  <th>Copias</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
-              ) : (
-                librosFiltrados.map((libro) => {
-                  const { label, variant } = estadoDisponibilidad(libro);
-                  return (
-                    <tr key={libro.id}>
-                      {modoBorradoGrupal && (
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={seleccionados.has(libro.id)}
-                            onChange={() => toggleSeleccion(libro.id)}
-                            aria-label={`Seleccionar ${libro.titulo}`}
-                          />
-                        </td>
-                      )}
-                      <td className={styles.cellMono}>{libro.isbn}</td>
-                      <td>
-                        <div className={styles.tituloConPortada}>
-                          {libro.portadaUrl ? (
-                            <img
-                              src={libro.portadaUrl}
-                              alt={`Portada de ${libro.titulo}`}
-                              className={styles.portadaThumb}
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              </thead>
+              <tbody id="catalogTableBody">
+                {librosFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan={modoBorradoGrupal ? 8 : 7} className={styles.emptyState}>
+                      No hay libros que coincidan con la búsqueda.
+                    </td>
+                  </tr>
+                ) : (
+                  librosFiltrados.map((libro) => {
+                    const { label, variant } = estadoDisponibilidad(libro);
+                    return (
+                      <tr key={libro.id}>
+                        {modoBorradoGrupal && (
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={seleccionados.has(libro.id)}
+                              onChange={() => toggleSeleccion(libro.id)}
+                              aria-label={`Seleccionar ${libro.titulo}`}
                             />
-                          ) : (
-                            <div className={styles.portadaPlaceholder} title="Sin portada">📚</div>
-                          )}
-                          <span className={styles.bookTitle}>{libro.titulo}</span>
-                        </div>
-                      </td>
+                          </td>
+                        )}
+                        <td className={styles.cellMono}>{libro.isbn}</td>
+                        <td>
+                          <div className={styles.tituloConPortada}>
+                            {libro.portadaUrl ? (
+                              <img
+                                src={libro.portadaUrl}
+                                alt={`Portada de ${libro.titulo}`}
+                                className={styles.portadaThumb}
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <div className={styles.portadaPlaceholder} title="Sin portada">📚</div>
+                            )}
+                            <span className={styles.bookTitle}>{libro.titulo}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={styles.bookAuthor}>{libro.autor}</span>
+                          <span className={styles.bookCategory}>{libro.categoria}</span>
+                        </td>
+                        <td>{libro.ubicacion}</td>
+                        <td className={styles.copiesCount}>{libro.copias.length}</td>
+                        <td>
+                          <Badge variant={variant}>{label}</Badge>
+                        </td>
+                        <td>
+                          <div className={styles.actionBtns}>
+                            {!readOnly && (
+                              <button
+                                className={styles.btnEdit}
+                                onClick={() => onEditar(libro)}
+                                title="Editar libro"
+                                aria-label={`Editar ${libro.titulo}`}
+                              >
+                                <FontAwesomeIcon icon={faPen} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Tabla de Autores */}
+        {vistaActiva === 'autores' && (
+          <div className={styles.tableWrapper}>
+            <table className={styles.dataTable}>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Apellido</th>
+                  <th>Fecha de Registro</th>
+                  <th>Estado</th>
+                  {!readOnly && <th>Acciones</th>}
+                </tr>
+              </thead>
+              <tbody id="catalogTableBody">
+                {autoresFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan={!readOnly ? 5 : 4} className={styles.emptyState}>
+                      No hay autores que coincidan con la búsqueda.
+                    </td>
+                  </tr>
+                ) : (
+                  autoresFiltrados.map((autor) => (
+                    <tr key={autor.id}>
+                      <td>{autor.nombre}</td>
+                      <td>{autor.apellido}</td>
+                      <td className={styles.cellMono}>{formatFecha(autor.fechaRegistro)}</td>
                       <td>
-                        <span className={styles.bookAuthor}>{libro.autor}</span>
-                        <span className={styles.bookCategory}>{libro.categoria}</span>
+                        <Badge variant="available">Activo</Badge>
                       </td>
-                      <td>{libro.ubicacion}</td>
-                      <td className={styles.copiesCount}>{libro.copias.length}</td>
-                      <td>
-                        <Badge variant={variant}>{label}</Badge>
-                      </td>
-                      <td>
-                        <div className={styles.actionBtns}>
-                          <button
-                            className={styles.btnView}
-                            onClick={() => onVerDetalle(libro)}
-                            title="Ver detalle"
-                            aria-label={`Ver detalle de ${libro.titulo}`}
-                          >
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                          {!readOnly && (
+                      {!readOnly && (
+                        <td>
+                          <div className={styles.actionBtns}>
                             <button
                               className={styles.btnEdit}
-                              onClick={() => onEditar(libro)}
-                              title="Editar libro"
-                              aria-label={`Editar ${libro.titulo}`}
+                              onClick={() => {
+                                if (confirm(`¿Editar a ${autor.nombre} ${autor.apellido}?`)) {
+                                  // TODO: abrir modal de edición
+                                }
+                              }}
+                              title="Editar autor"
+                              aria-label={`Editar ${autor.nombre} ${autor.apellido}`}
                             >
                               <FontAwesomeIcon icon={faPen} />
                             </button>
-                          )}
-                        </div>
-                      </td>
+                            <button
+                              className={styles.btnDelete}
+                              onClick={() => {
+                                if (confirm(`¿Eliminar a ${autor.nombre} ${autor.apellido}?`)) {
+                                  onEliminarAutor(autor.id);
+                                }
+                              }}
+                              title="Eliminar autor"
+                              aria-label={`Eliminar ${autor.nombre} ${autor.apellido}`}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Tabla de Editoriales */}
+        {vistaActiva === 'editoriales' && (
+          <div className={styles.tableWrapper}>
+            <table className={styles.dataTable}>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Fecha de Registro</th>
+                  {!readOnly && <th>Acciones</th>}
+                </tr>
+              </thead>
+              <tbody id="catalogTableBody">
+                {editorialesFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan={!readOnly ? 3 : 2} className={styles.emptyState}>
+                      No hay editoriales que coincidan con la búsqueda.
+                    </td>
+                  </tr>
+                ) : (
+                  editorialesFiltrados.map((editorial) => (
+                    <tr key={editorial.id}>
+                      <td>{editorial.nombre}</td>
+                      <td className={styles.cellMono}>{formatFecha(editorial.fechaRegistro)}</td>
+                      {!readOnly && (
+                        <td>
+                          <div className={styles.actionBtns}>
+                            <button
+                              className={styles.btnEdit}
+                              onClick={() => {
+                                if (confirm(`¿Editar a ${editorial.nombre}?`)) {
+                                  // TODO: abrir modal de edición
+                                }
+                              }}
+                              title="Editar editorial"
+                              aria-label={`Editar ${editorial.nombre}`}
+                            >
+                              <FontAwesomeIcon icon={faPen} />
+                            </button>
+                            <button
+                              className={styles.btnDelete}
+                              onClick={() => {
+                                if (confirm(`¿Eliminar a ${editorial.nombre}?`)) {
+                                  onEliminarEditorial(editorial.id);
+                                }
+                              }}
+                              title="Eliminar editorial"
+                              aria-label={`Eliminar ${editorial.nombre}`}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

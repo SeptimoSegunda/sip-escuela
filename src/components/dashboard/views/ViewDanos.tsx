@@ -17,7 +17,6 @@ import {
 import type { Dano, Socio, SeveridadDano } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import Badge from '@/components/dashboard/ui/Badge';
-import type { BadgeVariant } from '@/components/dashboard/ui/Badge';
 import { severidadToBadge, severidadLabel, ordenSeveridad, formatFecha } from '@/lib/utils';
 import styles from './ViewDanos.module.css';
 
@@ -27,6 +26,7 @@ interface ViewDanosProps {
   onRegistrarDano: () => void;
   onEliminar: (ids: string[]) => void;
   onVerDetalle: (socioId: string) => void;
+  onBusquedaAsistida?: () => void;
 }
 
 /* ── Tipos derivados para la tabla de antecedentes ── */
@@ -49,10 +49,10 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
 
   /* ── Métricas ── */
-  const totalDanos     = danos.length;
-  const danosLeves     = danos.filter((d) => d.severidad === 'leve').length;
+  const totalDanos = danos.length;
+  const danosLeves = danos.filter((d) => d.severidad === 'leve').length;
   const danosModerados = danos.filter((d) => d.severidad === 'moderado').length;
-  const danosCat       = danos.filter((d) => d.severidad === 'catastrofico').length;
+  const danosCat = danos.filter((d) => d.severidad === 'catastrofico').length;
 
   /* ── Antecedentes agrupados por responsable ── */
   const antecedentes = useMemo<AntecedentePersona[]>(() => {
@@ -116,13 +116,21 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
   const toggleSeleccion = (id: string) => {
     setSeleccionados((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
 
   const toggleTodos = (checked: boolean) => {
-    setSeleccionados(checked ? new Set(danosFiltrados.map((d) => d.id)) : new Set());
+    if (checked) {
+      setSeleccionados(new Set(danosFiltrados.map((d) => d.id)));
+    } else {
+      setSeleccionados(new Set());
+    }
   };
 
   const handleCancelar = () => {
@@ -136,7 +144,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
     handleCancelar();
   };
 
-  const todosSeleccionados =
+  const getTodosSeleccionados = () =>
     danosFiltrados.length > 0 && seleccionados.size === danosFiltrados.length;
 
   return (
@@ -278,7 +286,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
                     <input
                       type="checkbox"
                       title="Seleccionar todos"
-                      checked={todosSeleccionados}
+                      checked={getTodosSeleccionados()}
                       onChange={(e) => toggleTodos(e.target.checked)}
                     />
                   </th>

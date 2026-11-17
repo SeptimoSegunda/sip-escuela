@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import type { Prestamo, SeveridadDano } from '@/types';
+import type { Prestamo, SeveridadDano, EstadoPosterior } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
 
@@ -11,7 +11,7 @@ interface ModalDevolucionProps {
   open: boolean;
   onClose: () => void;
   prestamosActivos: Prestamo[];
-  onConfirmar: (prestamoId: string, dano?: { severidad: SeveridadDano; descripcion: string; estadoPosterior: 'mantenimiento' | 'disponible' }) => void;
+  onConfirmar: (prestamoId: string, dano?: { severidad: SeveridadDano; descripcion: string; estadoPosterior: EstadoPosterior }) => void;
 }
 
 const NIVELES: { value: SeveridadDano; label: string }[] = [
@@ -25,7 +25,7 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
   const [conDano,    setConDano]      = useState(false);
   const [severidad,  setSeveridad]    = useState<SeveridadDano>('leve');
   const [descripcion, setDescripcion] = useState('');
-  const [estadoPosterior, setEstadoPosterior] = useState<'mantenimiento' | 'disponible'>('mantenimiento');
+  const [estadoPosterior, setEstadoPosterior] = useState<EstadoPosterior>('mantenimiento');
   const [error, setError]             = useState('');
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function ModalDevolucion({ open, onClose, prestamosActivos, onCon
                       id="selectAccionCopiaDevolucion"
                       className={f.select}
                       value={estadoPosterior}
-                      onChange={(e) => setEstadoPosterior(e.target.value as 'mantenimiento' | 'disponible')}
+                      onChange={(e) => setEstadoPosterior(e.target.value as EstadoPosterior)}
                     >
                       <option value="disponible">Mantener Disponible (Apto para lectura)</option>
                       <option value="mantenimiento">Pasar a &quot;En Mantenimiento&quot; (Requiere restauración)</option>

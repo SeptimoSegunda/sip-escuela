@@ -199,14 +199,33 @@
 }
 
 .btnSecondarySmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.85rem;
-  padding: 0.35rem 0.75rem;
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  border: 1px solid var(--beige-dark);
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 0.45rem 0.9rem;
+  background: var(--bg-base);
+  color: var(--accent-brown);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 20px;
+  font-weight: 700;
   font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btnSecondarySmall:hover {
+  background: var(--beige-anchor);
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
+
+.btnSearchIcon {
+  padding: 0.45rem;
+  min-width: 32px;
+  justify-content: center;
+  font-size: 0.9rem;
 }
 
 /* ── Tabla ── */

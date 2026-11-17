@@ -13,6 +13,7 @@ import {
   faRepeat,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Dano, Prestamo, Socio, SeveridadDano } from '@/types';
+import { formatFecha, formatFechaHora } from '@/lib/utils';
 import Modal from '@/components/ui/Modal';
 import styles from './ModalExpedienteSocio.module.css';
 
@@ -25,33 +26,18 @@ interface ModalExpedienteSocioProps {
   prestamos: Prestamo[];
 }
 
-function ordenSeveridad(s: SeveridadDano): number {
+/* Helper local con emojis visuales — usa la lógica de utils pero con labels decorativos */
+function ordenSeveridadModal(s: SeveridadDano): number {
   return s === 'catastrofico' ? 3 : s === 'moderado' ? 2 : 1;
 }
 
-function severidadLabel(s: SeveridadDano): string {
+function sevLabelModal(s: SeveridadDano): string {
   switch (s) {
     case 'leve':        return '🟢 Leve';
     case 'moderado':    return '🟠 Moderado';
     case 'catastrofico': return '🔴 CATASTRÓFICO';
+    default:            return 'Desconocido';
   }
-}
-
-function formatFechaHora(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
-  } catch { return iso; }
-}
-
-function formatFecha(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  } catch { return iso; }
 }
 
 const ESTADO_PRESTAMO_LABEL: Record<string, string> = {
@@ -95,7 +81,7 @@ export default function ModalExpedienteSocio({
   const catastroficos = danosSocio.filter((d) => d.severidad === 'catastrofico').length;
   const esCritico     = catastroficos > 0;
   const severidadMax  = danosSocio.reduce<SeveridadDano | null>((max, d) =>
-    max === null || ordenSeveridad(d.severidad) > ordenSeveridad(max) ? d.severidad : max,
+    max === null || ordenSeveridadModal(d.severidad) > ordenSeveridadModal(max) ? d.severidad : max,
     null
   );
 
@@ -166,7 +152,7 @@ export default function ModalExpedienteSocio({
           {severidadMax && (
             <div className={styles.severidadMaxRow}>
               <span className={styles.severidadMaxLabel}>Severidad máxima registrada:</span>
-              <span className={styles.severidadMaxValue}>{severidadLabel(severidadMax)}</span>
+              <span className={styles.severidadMaxValue}>{sevLabelModal(severidadMax)}</span>
             </div>
           )}
 
@@ -212,7 +198,7 @@ export default function ModalExpedienteSocio({
                         <td>{d.libroTitulo}</td>
                         <td>
                           <span className={`${styles.sevBadge} ${styles['sev_' + d.severidad]}`}>
-                            {severidadLabel(d.severidad)}
+                            {sevLabelModal(d.severidad)}
                           </span>
                         </td>
                         <td className={styles.cellDesc}>{d.descripcion}</td>

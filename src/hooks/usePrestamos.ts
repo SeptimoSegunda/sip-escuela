@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import type { Prestamo, Libro, TurnoAdmin, SeveridadDano, EstadoCopia } from '@/types';
+import { useState, useCallback } from 'react';
+import type { Prestamo, Libro, TurnoAdmin, SeveridadDano, EstadoCopia, EstadoPosterior } from '@/types';
 import { LIMITES_PRESTAMOS } from '@/types';
 import { storage } from '@/lib/storage';
 
@@ -38,6 +38,8 @@ export interface DevolucionData {
   dano?: {
     severidad: SeveridadDano;
     descripcion: string;
+    /** Estado posterior del ejemplar tras la devolución */
+    estadoPosterior?: EstadoPosterior;
   };
 }
 
@@ -137,8 +139,15 @@ export function usePrestamos(
         );
         storage.setPrestamos(actualizado);
 
-        // Marcar copia como disponible o dañado
-        const estadoCopia = data.dano?.severidad === 'catastrofico' ? 'dañado' : 'disponible';
+        // Determinar el nuevo estado de la copia según daño o estadoPosterior
+        let estadoCopia: EstadoCopia = 'disponible';
+        if (data.dano?.estadoPosterior === 'disponible') {
+          estadoCopia = 'disponible';
+        } else if (data.dano?.estadoPosterior === 'mantenimiento') {
+          estadoCopia = 'dañado';
+        } else if (data.dano?.severidad === 'catastrofico') {
+          estadoCopia = 'dañado';
+        }
         onCopiaEstado(prestamo.libroId, prestamo.copiaId, estadoCopia);
 
         registrarAccion(

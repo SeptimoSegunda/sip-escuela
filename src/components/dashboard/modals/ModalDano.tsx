@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import type { Libro, Socio, SeveridadDano } from '@/types';
+import type { Libro, Socio, SeveridadDano, EstadoPosterior } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
 
@@ -20,7 +20,7 @@ interface ModalDanoProps {
     socioId?: string;
     severidad: SeveridadDano;
     descripcion: string;
-    estadoPosterior: 'mantenimiento' | 'disponible';
+    estadoPosterior: EstadoPosterior;
   }) => void;
 }
 
@@ -38,7 +38,7 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
   const [copiaSel,     setCopiaSel]     = useState('');
   const [severidad,    setSeveridad]    = useState<SeveridadDano>('leve');
   const [descripcion,  setDescripcion]  = useState('');
-  const [estadoPosterior, setEstadoPosterior] = useState<'mantenimiento' | 'disponible'>('mantenimiento');
+  const [estadoPosterior, setEstadoPosterior] = useState<EstadoPosterior>('mantenimiento');
   const [showLibros,   setShowLibros]   = useState(false);
   const [showSocios,   setShowSocios]   = useState(false);
   const [error,        setError]        = useState('');
@@ -213,7 +213,7 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
             id="selectAccionCopiaDirecto"
             className={f.select}
             value={estadoPosterior}
-            onChange={(e) => setEstadoPosterior(e.target.value as 'mantenimiento' | 'disponible')}
+            onChange={(e) => setEstadoPosterior(e.target.value as EstadoPosterior)}
           >
             <option value="mantenimiento">Pasar a &quot;En Mantenimiento&quot;</option>
             <option value="disponible">Mantener como &quot;Disponible&quot;</option>

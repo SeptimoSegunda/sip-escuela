@@ -96,6 +96,7 @@ export interface Prestamo {
 
 /* ── Daño ──────────────────────────────────────────────────── */
 export type SeveridadDano = 'leve' | 'moderado' | 'catastrofico';
+export type EstadoPosterior = 'disponible' | 'mantenimiento';
 
 export interface Dano {
   id: string;
@@ -110,6 +111,8 @@ export interface Dano {
   descripcion: string;
   fecha: string;          // ISO date string
   turnoAdmin: TurnoAdmin;
+  /** Estado posterior del ejemplar tras el daño (usado en devoluciones con daño) */
+  estadoPosterior?: EstadoPosterior;
 }
 
 /* ── Auditoría ─────────────────────────────────────────────── */
