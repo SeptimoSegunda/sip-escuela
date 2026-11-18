@@ -48,6 +48,7 @@ export interface NuevoLibroData {
   coleccionInstitucional?: string;
   notaGeneral?: string;
   notaContenido?: string;
+  copias?: Copia[];
 }
 
 export function useLibros(
@@ -65,14 +66,14 @@ export function useLibros(
         isbn:                 data.isbn.trim(),
         titulo:               data.titulo.trim(),
         subtitulo:            data.subtitulo?.trim() ?? undefined,
-        autor:                data.autor.trim(),
+        autor:                data.autores?.[0]?.nombre.trim() || data.autor.trim(),
         autores:              data.autores && data.autores.length > 0
           ? data.autores
           : [{ nombre: data.autor.trim(), rol: 'principal' }],
         categoria:            data.categoria.trim(),
         ubicacion:            data.ubicacion.trim() ?? 'Estante Principal',
         portadaUrl:           data.portadaUrl ?? undefined,
-        copias: [
+        copias:               data.copias ?? [
           {
             id:           `C-${Date.now()}`,
             inventarioNum: data.inventario?.trim() ?? 'INV-1001',

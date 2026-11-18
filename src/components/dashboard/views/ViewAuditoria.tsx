@@ -9,11 +9,15 @@ import {
   faUserShield,
   faFilter,
   faMagnifyingGlass,
+  faChevronLeft,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import type { AuditLog, CategoriaAudit, TurnoAdmin } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
 import styles from './ViewAuditoria.module.css';
+
+const PAGINACION_REGISTROS_POR_PAGINA = 10;
 
 interface ViewAuditoriaProps {
   logs: AuditLog[];
@@ -61,6 +65,18 @@ export default function ViewAuditoria({ logs }: ViewAuditoriaProps) {
       return true;
     });
   }, [logs, filtroTurno, filtroCategoria, busqueda]);
+
+  /* ── Paginación ── */
+  const [paginaActual, setPaginaActual] = useState(1);
+  const logsFiltradosPaginados = useMemo(() => {
+    const startIdx = (paginaActual - 1) * PAGINACION_REGISTROS_POR_PAGINA;
+    return logsFiltrados.slice(startIdx, startIdx + PAGINACION_REGISTROS_POR_PAGINA);
+  }, [logsFiltrados, paginaActual]);
+  const totalPaginas = Math.ceil(logsFiltrados.length / PAGINACION_REGISTROS_POR_PAGINA);
+
+  const irAPagina = (pagina: number) => {
+    setPaginaActual(Math.max(1, Math.min(pagina, totalPaginas)));
+  };
 
   /* ── Columnas ── */
   const columns: Column<AuditLog>[] = [
@@ -125,7 +141,7 @@ export default function ViewAuditoria({ logs }: ViewAuditoriaProps) {
       {/* Tabla con filtros */}
       <DataTable
         columns={columns}
-        rows={logsFiltrados}
+        rows={logsFiltradosPaginados}
         keyField="id"
         emptyMessage="No hay registros que coincidan con los filtros."
         id="tablaAuditoria"
@@ -181,6 +197,33 @@ export default function ViewAuditoria({ logs }: ViewAuditoriaProps) {
           </div>
         }
       />
+
+      {/* ── Controles de paginación ── */}
+      {totalPaginas > 1 && (
+        <div className={styles.paginaContainer}>
+          <span className={styles.paginaInfo}>
+            Página {paginaActual} de {totalPaginas}
+          </span>
+          <div className={styles.paginaControls}>
+            <button
+              type="button"
+              className={styles.paginaBtn}
+              onClick={() => setPaginaActual(paginaActual - 1)}
+              disabled={paginaActual === 1}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <button
+              type="button"
+              className={styles.paginaBtn}
+              onClick={() => setPaginaActual(paginaActual + 1)}
+              disabled={paginaActual === totalPaginas}
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

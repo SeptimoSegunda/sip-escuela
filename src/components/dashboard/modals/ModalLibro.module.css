@@ -77,91 +77,75 @@
 }
 
 /* ── Control de copias ── */
-.copiesBox {
+.copiesContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: var(--bg-base);
-  border: 1px solid var(--beige-anchor);
-  border-radius: 8px;
-}
-
-.copiesLeft {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.copiesIcon {
-  font-size: 1.5rem;
-  color: var(--accent-brown);
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .copiesLabel {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  margin: 0;
-  color: var(--text-main);
-}
-
-.copiesCountRow {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-}
-
-.copiesTotalBadge strong {
-  font-size: 1.3rem;
-  color: var(--text-main);
-}
-
-.copiesAvailable {
   color: var(--text-muted);
-}
-
-.copiesActions button {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  border-radius: 6px;
-  background: var(--accent-mustard);
-  color: #451e70;
+  gap: 0.25rem;
+}
+
+.copiesRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--beige-dark);
-  font-weight: 600;
+  border-radius: 8px;
+  background: var(--bg-surface);
+}
+
+.copiesNum {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  min-width: 32px;
+  text-align: center;
+}
+
+.btnCopiaMinus,
+.btnCopiaPlus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.1rem;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s;
+  border: 1px solid var(--beige-dark);
 }
 
-.copiesActions button:hover {
-  background: var(--beige-dark);
-}
-
-.copiesActions button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.copiesActions button:first-child {
-  background: var(--accent-salvia);
-  color: var(--navy);
-}
-
-.copiesActions button:first-child:hover {
-  opacity: 0.9;
-}
-
-.copiesActions button:last-child {
-  background: var(--background-terracotta);
+.btnCopiaMinus {
+  background: #fee2e2;
   color: #991b1b;
 }
 
-.copiesActions button:last-child:hover {
-  opacity: 0.9;
+.btnCopiaMinus:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.btnCopiaPlus {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.btnCopiaPlus:hover {
+  background: #bfdbfe;
+}
+
+.btnCopiaMinus:disabled,
+.btnCopiaPlus:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ── Autores ── */

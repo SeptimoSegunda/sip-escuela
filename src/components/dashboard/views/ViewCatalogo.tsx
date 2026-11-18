@@ -178,8 +178,7 @@ export default function ViewCatalogo({
                 position: 'absolute',
                 top: '100%',
                 right: '0',
-                marginTop: '0.5rem',
-                padding: '0.5rem',
+                marginTop: '0.75rem',
                 backgroundColor: 'var(--bg-surface)',
                 border: '1px solid var(--beige-dark)',
                 borderRadius: '8px',
@@ -187,6 +186,9 @@ export default function ViewCatalogo({
                 zIndex: 100,
                 display: 'none',
                 minWidth: '180px',
+                gap: '0.25rem',
+                padding: '0.5rem',
+                flexDirection: 'column',
               }}
             >
               <button
@@ -197,7 +199,6 @@ export default function ViewCatalogo({
               >
                 <FontAwesomeIcon icon={faBook} style={{ marginRight: '0.5rem' }} /> Libro
               </button>
-              <hr style={{ margin: '0.5rem 0', border: 'none', borderTop: '1px solid var(--beige-dark)' }} />
               <button
                 type="button"
                 className={styles.btnSecondarySmall}

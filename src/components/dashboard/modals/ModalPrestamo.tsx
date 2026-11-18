@@ -14,7 +14,7 @@ interface ModalPrestamoProps {
   libros: Libro[];
   socios: Socio[];
   prestamos: Prestamo[];
-  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string, diasDevolucion?: number) => void;
+  onRegistrar: (libroId: string, copiaId: string | null, prestatario: string, socioId?: string) => void;
 }
 
 export default function ModalPrestamo({ open, onClose, libros, socios, prestamos, onRegistrar }: ModalPrestamoProps) {
@@ -25,7 +25,6 @@ export default function ModalPrestamo({ open, onClose, libros, socios, prestamos
   const [copiaSel,    setCopiaSel]    = useState<string | null>(null);
   const [showLibros,  setShowLibros]  = useState(false);
   const [showSocios,  setShowSocios]  = useState(false);
-  const [dias,        setDias]        = useState(7);
   const [error,       setError]       = useState('');
   const [bloqueoAlerta, setBloqueoAlerta] = useState<{
     socio: Socio;
@@ -37,7 +36,7 @@ export default function ModalPrestamo({ open, onClose, libros, socios, prestamos
     if (open) {
       setLibroQ(''); setSocioQ('');
       setLibroSel(null); setSocioSel(null); setCopiaSel(null);
-      setShowLibros(false); setShowSocios(false); setDias(7); setError('');
+      setShowLibros(false); setShowSocios(false); setError('');
       setBloqueoAlerta(null);
     }
   }, [open]);
@@ -122,10 +121,7 @@ export default function ModalPrestamo({ open, onClose, libros, socios, prestamos
       return;
     }
 
-    // Validar días mínimos
-    if (dias < 1) { setError('El plazo de devolución debe ser al menos 1 día.'); return; }
-
-    onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id, dias);
+    onRegistrar(libroSel.id, copiaSel, `${socioSel.apellido}, ${socioSel.nombre}`, socioSel.id);
     onClose();
   };
 
@@ -218,29 +214,6 @@ export default function ModalPrestamo({ open, onClose, libros, socios, prestamos
               </li>
             </ul>
           )}
-        </div>
-
-        {/* Plazo de devolución */}
-        <div className={f.formGroup} style={{ marginBottom: '1rem' }}>
-          <label htmlFor="inputDiasPrestamo" className={f.label}>
-            Plazo de devolución (días) *
-          </label>
-          <input
-            id="inputDiasPrestamo"
-            type="number"
-            min={1}
-            max={365}
-            className={f.input}
-            value={dias}
-            onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
-              setDias(isNaN(value) ? 1 : Math.max(1, value));
-            }}
-            style={{ width: '120px' }}
-          />
-          <p style={{ margin: '0.3rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            El préstamo pasará a moroso al superar este plazo.
-          </p>
         </div>
 
         {error && <p className={f.errorMsg}>{error}</p>}

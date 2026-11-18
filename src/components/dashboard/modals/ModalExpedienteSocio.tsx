@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserShield,
@@ -11,11 +11,15 @@ import {
   faTriangleExclamation,
   faLeaf,
   faRepeat,
+  faChevronLeft,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Dano, Prestamo, Socio, SeveridadDano } from '@/types';
 import { formatFecha, formatFechaHora } from '@/lib/utils';
 import Modal from '@/components/ui/Modal';
 import styles from './ModalExpedienteSocio.module.css';
+
+const PAGINACION_POR_PAGINA = 20;
 
 interface ModalExpedienteSocioProps {
   open: boolean;
@@ -73,6 +77,18 @@ export default function ModalExpedienteSocio({
       .sort((a, b) => new Date(b.fechaPrestamo).getTime() - new Date(a.fechaPrestamo).getTime()),
     [prestamos, socioId]
   );
+
+  /* ── Paginación del historial de préstamos ── */
+  const [paginaActual, setPaginaActual] = useState(1);
+  const totalPaginas = Math.ceil(prestamosSocio.length / PAGINACION_POR_PAGINA);
+  const prestamosPagina = prestamosSocio.slice(
+    (paginaActual - 1) * PAGINACION_POR_PAGINA,
+    paginaActual * PAGINACION_POR_PAGINA
+  );
+
+  const irAPagina = (pagina: number) => {
+    setPaginaActual(Math.max(1, Math.min(pagina, totalPaginas)));
+  };
 
   /* Estadísticas de daños */
   const totalDanos    = danosSocio.length;
@@ -261,7 +277,7 @@ export default function ModalExpedienteSocio({
                       </td>
                     </tr>
                   ) : (
-                    prestamosSocio.map((p) => (
+                    prestamosPagina.map((p) => (
                       <tr key={p.id} className={p.estado === 'moroso' ? styles.rowMoroso : ''}>
                         <td className={styles.cellMono}>{p.id}</td>
                         <td className={styles.cellMono}>{formatFecha(p.fechaPrestamo)}</td>
@@ -281,6 +297,33 @@ export default function ModalExpedienteSocio({
                 </tbody>
               </table>
             </div>
+
+            {/* ── Controles de paginación ── */}
+            {totalPaginas > 1 && (
+              <div className={styles.paginaContainer}>
+                <span className={styles.paginaInfo}>
+                  Página {paginaActual} de {totalPaginas}
+                </span>
+                <div className={styles.paginaControls}>
+                  <button
+                    type="button"
+                    className={styles.paginaBtn}
+                    onClick={() => irAPagina(paginaActual - 1)}
+                    disabled={paginaActual === 1}
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.paginaBtn}
+                    onClick={() => irAPagina(paginaActual + 1)}
+                    disabled={paginaActual === totalPaginas}
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Acciones ── */}

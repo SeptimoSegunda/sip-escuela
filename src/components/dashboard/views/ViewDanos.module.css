@@ -52,6 +52,42 @@
   transform: translateY(-1px);
 }
 
+/* ── Selector de período de daños ── */
+.danoPeriodoSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-base);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 20px;
+  padding: 0.35rem 0.75rem;
+}
+
+.danoPeriodoSelector .svg-icon {
+  color: var(--text-muted);
+}
+
+.danoPeriodoSelect {
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--bg-base);
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  background-clip: padding-box;
+}
+
+.danoPeriodoSelect:focus {
+  border-color: var(--accent-brown);
+}
+
+.danoPeriodoSelect option {
+  background: var(--bg-surface);
+}
+
 /* ── Grid de métricas ── */
 .metricsGrid {
   display: grid;
@@ -150,7 +186,7 @@
 .dataTable td {
   padding: 0.8rem 1rem;
   border-bottom: 1px solid var(--beige-anchor);
-  font-size: 0.9rem;
+  vertical-align: top;
 }
 
 .dataTable th {
@@ -194,22 +230,20 @@
 }
 
 .desglose {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 0.6rem;
-  align-items: center;
-  padding: 0.25rem 0;
+  align-items: flex-start;
 }
 
 .desgloseItem {
   font-size: 0.78rem;
   font-weight: 600;
   background: var(--beige-anchor);
-  padding: 0.12rem 0.4rem;
+  padding: 0.35rem 0.5rem;
   border-radius: 10px;
   color: var(--text-muted);
   white-space: nowrap;
-  line-height: 1.2;
 }
 
 .desgloseRed {

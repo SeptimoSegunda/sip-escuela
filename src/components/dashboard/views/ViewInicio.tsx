@@ -11,6 +11,8 @@ import {
   faCalendarDays,
   faUserClock,
   faFire,
+  faChevronLeft,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Libro, Prestamo, Dano, AuditLog } from '@/types';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
@@ -26,15 +28,24 @@ interface ViewInicioProps {
   auditLogs: AuditLog[];
 }
 
-/* ── Períodos disponibles ── */
-const PERIODOS = [
-  { value: 'all',     label: 'Todos los períodos' },
-  { value: '10-2026', label: 'Octubre 2026' },
-  { value: '09-2026', label: 'Septiembre 2026' },
-  { value: '08-2026', label: 'Agosto 2026' },
-  { value: '07-2026', label: 'Julio 2026' },
-  { value: '06-2026', label: 'Junio 2026' },
+/* ── Meses y años validos ── */
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
+
+// Generar años desde 2020 hasta el año actual
+const ANIOS = (() => {
+  const year = new Date().getFullYear();
+  const years = [];
+  for (let i = 2020; i <= year; i++) years.push(i);
+  return years;
+})();
+
+function formatPeriodo(mes: number, anio: number): string {
+  const mm = mes.toString().padStart(2, '0');
+  return `${mm}-${anio}`;
+}
 
 function matchPeriodo(isoDate: string, periodo: string): boolean {
   if (periodo === 'all') return true;
@@ -47,9 +58,13 @@ function matchPeriodo(isoDate: string, periodo: string): boolean {
 }
 
 export default function ViewInicio({ libros, prestamos, danos, auditLogs }: ViewInicioProps) {
-  const [periodo, setPeriodo] = useState('09-2026');
+  const [mesSeleccionado, setMesSeleccionado] = useState(9); // Septiembre como default
+  const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear());
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
-  /* ── Datos filtrados por período ── */
+  // Convertir a string para matchPeriodo
+  const periodo = formatPeriodo(mesSeleccionado, anioSeleccionado);
+
   const prestamosPeriodo = useMemo(
     () => prestamos.filter((p) => matchPeriodo(p.fechaPrestamo, periodo)),
     [prestamos, periodo]
@@ -105,19 +120,45 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
           </p>
         </div>
         <div className={styles.periodoSelector}>
-          <label htmlFor="selectReportMonth" className={styles.periodoLabel}>
+          <label className={styles.periodoLabel}>
             <FontAwesomeIcon icon={faCalendarDays} /> Período:
           </label>
-          <select
-            id="selectReportMonth"
-            className={styles.periodoSelect}
-            value={periodo}
-            onChange={(e) => setPeriodo(e.target.value)}
-          >
-            {PERIODOS.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
+          <div className={styles.calendarpicker}>
+            <button
+              type="button"
+              className={styles.calNavBtn}
+              onClick={() => setAnioSeleccionado((a) => Math.max(2020, a - 1))}
+              aria-label="Año anterior"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <select
+              className={styles.calSelect}
+              value={anioSeleccionado}
+              onChange={(e) => setAnioSeleccionado(parseInt(e.target.value))}
+            >
+              {ANIOS.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+            <select
+              className={styles.calSelect}
+              value={mesSeleccionado}
+              onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i + 1}>{MESES[i]}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className={styles.calNavBtn}
+              onClick={() => setAnioSeleccionado((a) => Math.min(new Date().getFullYear(), a + 1))}
+              aria-label="Año siguiente"
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
         </div>
       </section>
 

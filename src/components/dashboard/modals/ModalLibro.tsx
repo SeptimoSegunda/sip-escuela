@@ -35,6 +35,7 @@ const empty: FormState = {
   notaGeneral: '', notaContenido: '',
   autores: [{ nombre: '', rol: 'principal' }],
   copias: [],
+  autor: '',  // Mantener para compatibilidad hacia atrás; se usa autores[0].nombre
 };
 
 function libroToForm(l: Libro, editoriales?: Editorial[]): FormState {
@@ -45,7 +46,7 @@ function libroToForm(l: Libro, editoriales?: Editorial[]): FormState {
     isbn:                   l.isbn,
     titulo:                 l.titulo,
     subtitulo:              l.subtitulo ?? '',
-    autor:                  l.autor,
+    autor:                  l.autores?.[0]?.nombre ?? l.autor ?? '',
     categoria:              l.categoria,
     ubicacion:              l.ubicacion,
     portadaUrl:             l.portadaUrl ?? '',
@@ -71,7 +72,7 @@ function libroToForm(l: Libro, editoriales?: Editorial[]): FormState {
     notaContenido:          l.notaContenido ?? '',
     autores:                l.autores && l.autores.length > 0
       ? l.autores
-      : [{ nombre: l.autor, rol: 'principal' }],
+      : [{ nombre: l.autor ?? '', rol: 'principal' }],
     copias:                 l.copias ?? [],
   };
 }
@@ -197,6 +198,7 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
       coleccionInstitucional: form.coleccionInstitucional?.trim() || undefined,
       notaGeneral:            form.notaGeneral?.trim() || undefined,
       notaContenido:          form.notaContenido?.trim() || undefined,
+      copias:                 form.copias ?? [],
     });
     onClose();
   };
@@ -246,35 +248,11 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
             <input id="inputSubtituloLibro" className={f.input} value={form.subtitulo} onChange={(e) => set('subtitulo', e.target.value)} />
           </div>
 
-          {/* ── Autor Principal (select si hay autores disponibles) ── */}
+          {/* ── Autores (primero el principal) ── */}
           {autoresDisponibles && autoresDisponibles.length > 0 ? (
-            <div className={f.formGroup}>
-              <label htmlFor="inputAutorLibro" className={f.label}>Autor Principal *</label>
-              <select
-                id="inputAutorLibro"
-                className={f.select}
-                required
-                value={form.autores[0]?.nombre ?? ''}
-                onChange={(e) => updateAutor(0, 'nombre', e.target.value)}
-              >
-                <option value="">Seleccionar autor principal</option>
-                {autoresDisponibles.map(autor => (
-                  <option key={autor.id} value={autor.nombre}>{autor.nombre}</option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className={f.formGroup}>
-              <label htmlFor="inputAutorLibro" className={f.label}>Autor Principal *</label>
-              <input id="inputAutorLibro" className={f.input} required value={form.autor} onChange={(e) => set('autor', e.target.value)} />
-            </div>
-          )}
-
-          {/* ── Autores secundarios (select si hay autores disponibles) ── */}
-          {autoresDisponibles && autoresDisponibles.length > 0 && (
             <div className={f.formGroupFull}>
               <div className={styles.autoresWrapper}>
-                <span className={styles.autoresTitle}>Autores Adicionales</span>
+                <span className={styles.autoresTitle}>Autores</span>
                 <div className={styles.autoresList}>
                   {form.autores.map((a, i) => (
                     <div key={i} className={styles.autorRow}>
@@ -297,10 +275,13 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
                     </div>
                   ))}
                 </div>
-                <button type="button" className={styles.btnAutores} onClick={addAutor}><FontAwesomeIcon icon={faPlus} /> Agregar autor</button>
+                {/* Ocultar "Agregar autor" al editar si ya hay autor principal asignado */}
+                {!isEdit && (
+                  <button type="button" className={styles.btnAutores} onClick={addAutor}><FontAwesomeIcon icon={faPlus} /> Agregar autor</button>
+                )}
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* ── Autores manuales (solo si no hay autores disponibles) ── */}
           {!autoresDisponibles || autoresDisponibles.length === 0 ? (
@@ -310,7 +291,13 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
                 <div className={styles.autoresList}>
                   {form.autores.map((a, i) => (
                     <div key={i} className={styles.autorRow}>
-                      <input className={f.input} placeholder="Nombre del autor" value={a.nombre} onChange={(e) => updateAutor(i, 'nombre', e.target.value)} />
+                      <input
+                        className={f.input}
+                        placeholder="Nombre del autor"
+                        value={a.nombre}
+                        onChange={(e) => updateAutor(i, 'nombre', e.target.value)}
+                        required={i === 0}
+                      />
                       <select className={`${f.select} ${styles.autorRolSelect}`} value={a.rol} onChange={(e) => updateAutor(i, 'rol', e.target.value as RolAutor)}>
                         <option value="principal">Principal</option>
                         <option value="secundario">Secundario</option>
@@ -350,6 +337,18 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
             <input id="inputIsbn" className={f.input} required value={form.isbn} onChange={(e) => set('isbn', e.target.value)} />
           </div>
 
+          {/* ══ Control de ejemplares ── */}
+          <div className={f.formGroup}>
+            <label className={styles.copiesLabel}>
+              <FontAwesomeIcon icon={faCopy} /> Ejemplares registrados
+            </label>
+            <div className={styles.copiesRow}>
+              <button type="button" className={styles.btnCopiaMinus} onClick={handleDisminuir} disabled={totalCopias <= 1}>−</button>
+              <span className={styles.copiesNum}>{totalCopias}</span>
+              <button type="button" className={styles.btnCopiaPlus} onClick={handleIncrementar}>＋</button>
+            </div>
+          </div>
+
           <div className={f.formGroup}>
             <label htmlFor="inputMencion" className={f.labelOptional}>Mención de Responsabilidad</label>
             <input id="inputMencion" className={f.input} value={form.mencionResponsabilidad} onChange={(e) => set('mencionResponsabilidad', e.target.value)} />
@@ -358,26 +357,6 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
           <div className={f.formGroup}>
             <label htmlFor="inputIdioma" className={f.labelOptional}>Idioma</label>
             <input id="inputIdioma" className={f.input} value={form.idioma} onChange={(e) => set('idioma', e.target.value)} />
-          </div>
-
-          {/* ══ Sección 2: Control de ejemplares ══ */}
-          <div className={f.sectionTitle}>Control de ejemplares</div>
-
-          <div className={styles.copiesBox}>
-            <div className={styles.copiesLeft}>
-              <div className={styles.copiesIcon}><FontAwesomeIcon icon={faCopy} /></div>
-              <div>
-                <p className={styles.copiesLabel}>Ejemplares Registrados</p>
-                <div className={styles.copiesCountRow}>
-                  <span className={styles.copiesTotalBadge}><strong>{totalCopias}</strong> ejemplar(s)</span>
-                  <span className={styles.copiesAvailable}>{disponibles} disponible{disponibles !== 1 ? 's' : ''}</span>
-                </div>
-              </div>
-            </div>
-            <div className={styles.copiesActions}>
-              <button type="button" className={styles.btnIncrementar} onClick={handleIncrementar}><FontAwesomeIcon icon={faCirclePlus} /> Aumentar</button>
-              <button type="button" className={styles.btnDisminuir} onClick={handleDisminuir} disabled={totalCopias <= 1}><FontAwesomeIcon icon={faCircleMinus} /> Disminuir</button>
-            </div>
           </div>
 
           <div className={f.formGroup}>
@@ -436,33 +415,27 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
             <input id="inputFechaPublicacion" className={f.input} value={form.fechaPublicacion} onChange={(e) => set('fechaPublicacion', e.target.value)} />
           </div>
 
-          {/* ── Editorial (select si hay editoriales disponibles) ── */}
-          {editorialesDisponibles && editorialesDisponibles.length > 0 ? (
-            <div className={f.formGroup}>
-              <label htmlFor="inputEditorial" className={f.labelOptional}>Editorial</label>
-              <select
-                id="inputEditorial"
-                className={f.select}
-                value={form.editorialId ?? ''}
-                onChange={(e) => {
-                  const selectedId = e.target.value;
-                  const selectedEditorial = editorialesDisponibles.find(e => e.id === selectedId);
-                  set('editorialId', selectedId);
-                  set('editorial', selectedEditorial?.nombre ?? '');
-                }}
-              >
-                <option value="">Seleccionar editorial</option>
-                {editorialesDisponibles.map(edit => (
-                  <option key={edit.id} value={edit.id}>{edit.nombre}</option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className={f.formGroup}>
-              <label htmlFor="inputEditorial" className={f.labelOptional}>Editorial</label>
-              <input id="inputEditorial" className={f.input} value={form.editorial} onChange={(e) => set('editorial', e.target.value)} />
-            </div>
-          )}
+          {/* ── Editorial (select con búsqueda) ── */}
+          <div className={f.formGroup}>
+            <label htmlFor="inputEditorial" className={f.labelOptional}>Editorial *</label>
+            <select
+              id="inputEditorial"
+              className={f.select}
+              value={form.editorialId ?? ''}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                const selectedEditorial = editorialesDisponibles?.find(ed => ed.id === selectedId);
+                set('editorialId', selectedId);
+                set('editorial', selectedEditorial?.nombre ?? '');
+              }}
+              required
+            >
+              <option value="">Seleccionar editorial...</option>
+              {editorialesDisponibles?.map(edit => (
+                <option key={edit.id} value={edit.id}>{edit.nombre}</option>
+              )) ?? []}
+            </select>
+          </div>
 
           {/* ══ Sección 4: Descripción y Contenido ══ */}
           <div className={f.sectionTitle}>Descripción y Contenido</div>

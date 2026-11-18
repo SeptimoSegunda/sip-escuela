@@ -133,3 +133,50 @@
   border-radius: 10px;
   white-space: nowrap;
 }
+
+/* ── Paginación del DataTable ── */
+.paginaContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--beige-anchor);
+}
+
+.paginaInfo {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.paginaControls {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.paginaBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--beige-dark);
+  background: var(--bg-base);
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.paginaBtn:hover:not(:disabled) {
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+  background: var(--beige-anchor);
+}
+
+.paginaBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
