@@ -39,6 +39,8 @@ interface ViewDanosProps {
 /* ── Tipos derivados para la tabla de antecedentes ── */
 interface AntecedentePersona {
   responsable: string;
+  /** IDs de los daños asociados a este responsable */
+  danosIds: string[];
   /** ID del socio registrado, si se encuentra en la lista de socios */
   socioId?: string;
   totalIncidencias: number;
@@ -78,6 +80,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
 
         map.set(d.responsable, {
           responsable: d.responsable,
+          danosIds: [],
           socioId: socioMatch?.id,
           totalIncidencias: 0,
           severidadMax: 'leve',
@@ -87,6 +90,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
       }
 
       const entry = map.get(d.responsable)!;
+      entry.danosIds.push(d.id);
       entry.totalIncidencias++;
       entry.desglose[d.severidad]++;
       if (ordenSeveridad(d.severidad) > ordenSeveridad(entry.severidadMax)) {
@@ -123,22 +127,28 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
     return lista;
   }, [danos, filtro, busqueda]);
 
-  /* ── Selección grupal ── */
-  const toggleSeleccion = (id: string) => {
+  /* ── Borrado grupal ── */
+  const toggleSeleccion = (ids: string[]) => {
     setSeleccionados((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
+      const todosEstan = ids.every((id) => next.has(id));
+      if (todosEstan) {
+        ids.forEach((id) => next.delete(id));
       } else {
-        next.add(id);
+        ids.forEach((id) => next.add(id));
       }
       return next;
     });
   };
 
+  const todosDanosIds = useMemo(
+    () => antecedentesFiltrados.flatMap((a) => a.danosIds),
+    [antecedentesFiltrados]
+  );
+
   const toggleTodos = (checked: boolean) => {
     if (checked) {
-      setSeleccionados(new Set(danosFiltrados.map((d) => d.id)));
+      setSeleccionados(new Set(todosDanosIds));
     } else {
       setSeleccionados(new Set());
     }
@@ -151,12 +161,17 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
 
   const handleEliminar = () => {
     if (seleccionados.size === 0) return;
+    const cantidad = seleccionados.size;
+    const confirmar = window.confirm(
+      `¿Estás seguro de que deseas eliminar ${cantidad} registro${cantidad !== 1 ? 's' : ''} de daño${cantidad !== 1 ? 's' : ''}? Esta acción no se puede deshacer.`
+    );
+    if (!confirmar) return;
     onEliminar(Array.from(seleccionados));
     handleCancelar();
   };
 
   const getTodosSeleccionados = () =>
-    danosFiltrados.length > 0 && seleccionados.size === danosFiltrados.length;
+    todosDanosIds.length > 0 && todosDanosIds.every((id) => seleccionados.has(id));
 
   return (
     <div className={styles.viewWrapper}>
@@ -258,7 +273,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
             onClick={() => { setModoBorrado((v) => !v); setSeleccionados(new Set()); }}
             type="button"
           >
-            <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
+            <FontAwesomeIcon icon={faTrash} /> Borrado grupal
           </button>
 
           {modoBorrado && seleccionados.size > 0 && (
@@ -286,13 +301,12 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
           )}
         </div>
 
-        {/* Tabla */}
+        {/* Tabla fija de antecedentes con columna opcional de borrado */}
         <div className={styles.tableWrapper}>
-          {modoBorrado ? (
-            /* Vista de registros individuales con checkboxes */
-            <table className={styles.dataTable}>
-              <thead>
-                <tr>
+          <table className={styles.dataTable}>
+            <thead>
+              <tr>
+                {modoBorrado && (
                   <th className={styles.thCheck}>
                     <input
                       type="checkbox"
@@ -301,81 +315,40 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
                       onChange={(e) => toggleTodos(e.target.checked)}
                     />
                   </th>
-                  <th>ID</th>
-                  <th>Libro</th>
-                  <th>Responsable</th>
-                  <th>Severidad</th>
-                  <th>Descripción</th>
-                  <th>Fecha</th>
-                  <th>Ver</th>
-                </tr>
-              </thead>
-              <tbody id="danosIndividualTableBody">
-                {danosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className={styles.emptyState}>
-                      No hay registros de daños para mostrar.
-                    </td>
-                  </tr>
-                ) : (
-                  danosFiltrados.map((d) => (
-                    <tr key={d.id} className={seleccionados.has(d.id) ? styles.rowSeleccionada : undefined}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={seleccionados.has(d.id)}
-                          onChange={() => toggleSeleccion(d.id)}
-                          aria-label={`Seleccionar daño ${d.id}`}
-                        />
-                      </td>
-                      <td className={styles.cellMono}>{d.id}</td>
-                      <td>{d.libroTitulo}</td>
-                      <td>{d.responsable}</td>
-                      <td>
-                        <Badge variant={severidadToBadge(d.severidad)}>
-                          {severidadLabel(d.severidad)}
-                        </Badge>
-                      </td>
-                      <td className={styles.descripcionCell}>{d.descripcion}</td>
-                      <td className={styles.cellMono}>{formatFecha(d.fecha)}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className={styles.btnVerDetalle}
-                          onClick={() => setDanoSeleccionado(d)}
-                          title="Ver detalle del daño"
-                        >
-                          <FontAwesomeIcon icon={faEye} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
                 )}
-              </tbody>
-            </table>
-          ) : (
-            /* Vista agrupada por responsable (vista normal) */
-            <table className={styles.dataTable}>
-              <thead>
+                <th>Responsable</th>
+                <th>Total Incidencias</th>
+                <th>Severidad Máxima</th>
+                <th>Desglose</th>
+                <th>Estado Disciplinario</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="antecedentesTableBody">
+              {antecedentesFiltrados.length === 0 ? (
                 <tr>
-                  <th>Responsable</th>
-                  <th>Total Incidencias</th>
-                  <th>Severidad Máxima</th>
-                  <th>Desglose</th>
-                  <th>Estado Disciplinario</th>
-                  <th>Acciones</th>
+                  <td colSpan={modoBorrado ? 7 : 6} className={styles.emptyState}>
+                    No hay registros de daños para mostrar.
+                  </td>
                 </tr>
-              </thead>
-              <tbody id="antecedentesTableBody">
-                {antecedentesFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className={styles.emptyState}>
-                      No hay registros de daños para mostrar.
-                    </td>
-                  </tr>
-                ) : (
-                  antecedentesFiltrados.map((a) => (
-                    <tr key={a.responsable}>
+              ) : (
+                antecedentesFiltrados.map((a) => {
+                  const estaSeleccionado = a.danosIds.length > 0 && a.danosIds.every((id) => seleccionados.has(id));
+                  return (
+                    <tr
+                      key={a.responsable}
+                      className={modoBorrado && estaSeleccionado ? styles.rowSeleccionada : undefined}
+                    >
+                      {modoBorrado && (
+                        <td className={styles.thCheck}>
+                          <input
+                            type="checkbox"
+                            checked={estaSeleccionado}
+                            onChange={() => toggleSeleccion(a.danosIds)}
+                            aria-label={`Seleccionar registros de ${a.responsable}`}
+                          />
+                        </td>
+                      )}
                       <td>{a.responsable}</td>
                       <td className={styles.incidenciasNum}>{a.totalIncidencias}</td>
                       <td>
@@ -406,11 +379,11 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
 

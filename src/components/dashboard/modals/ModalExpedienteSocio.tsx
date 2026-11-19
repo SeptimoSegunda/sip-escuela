@@ -15,6 +15,7 @@ import {
   faChevronRight,
   faPaintBrush,
   faCheck,
+  faEye,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Dano, Prestamo, Socio, SeveridadDano, EstadoCopia, Libro } from '@/types';
 import { formatFecha, formatFechaHora } from '@/lib/utils';
@@ -117,6 +118,7 @@ export default function ModalExpedienteSocio({
   }, [libros]);
 
   const [copiasRestauradas, setCopiasRestauradas] = useState<Set<string>>(new Set());
+  const [danoDetalle, setDanoDetalle] = useState<typeof danosSocio[0] | null>(null);
 
   const handleRestaurarCopia = (d: Dano) => {
     onCambiarEstadoCopia(d.libroId, d.copiaId, 'disponible');
@@ -185,19 +187,20 @@ export default function ModalExpedienteSocio({
               <table className={styles.dataTable}>
                 <thead>
                   <tr>
-                    <th>ID Danio</th>
+                    <th>ID Daño</th>
                     <th>Fecha y Hora</th>
                     <th>Libro Afectado</th>
-                    <th>Nivel de Danio</th>
-                    <th>Descripcion</th>
+                    <th>Nivel de Daño</th>
+                    <th>Descripción</th>
                     <th>Registrado Por</th>
-                    <th>Estado</th>
+                    <th className={styles.thCenter}>Estado</th>
+                    <th className={styles.thCenter}>Ver</th>
                   </tr>
                 </thead>
                 <tbody id="expedienteHistorialTableBody">
                   {danosSocio.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className={styles.emptyState} id="expedienteEmptyState">
+                      <td colSpan={8} className={styles.emptyState} id="expedienteEmptyState">
                         <FontAwesomeIcon icon={faCircleCheck} className={styles.emptyIcon} />
                         <p className={styles.emptyTitle}>Sin antecedentes de danos ni incidencias.</p>
                         <span className={styles.emptySubtitle}>Legajo en estado optimo y sin penalizaciones activas.</span>
@@ -215,15 +218,26 @@ export default function ModalExpedienteSocio({
                           <td><span className={styles.sevBadge + ' ' + styles['sev_' + d.severidad]}>{sevLabelModal(d.severidad)}</span></td>
                           <td className={styles.cellDesc}>{d.descripcion}</td>
                           <td>{d.turnoAdmin}</td>
-                          <td style={{ display: copiasRestauradas.has(d.id) ? 'none' : 'block' }}>
+                          <td className={styles.tdCenter}>
+                            {!copiasRestauradas.has(d.id) && (
+                              <button
+                                type="button"
+                                className={styles.btnEstadoPequeño}
+                                title="Restaurar copia"
+                                onClick={() => handleRestaurarCopia(d)}
+                              >
+                                <FontAwesomeIcon icon={faCheck} />
+                              </button>
+                            )}
+                          </td>
+                          <td className={styles.tdCenter}>
                             <button
                               type="button"
-                              className={styles.btnEstadoPequeño}
-                              title="Restaurar"
-                              onClick={() => handleRestaurarCopia(d)}
-                              style={{ cursor: 'pointer' }}
+                              className={styles.btnVerDetalle}
+                              title="Ver detalle del daño"
+                              onClick={() => setDanoDetalle(d)}
                             >
-                              <FontAwesomeIcon icon={faCheck} />
+                              <FontAwesomeIcon icon={faEye} />
                             </button>
                           </td>
                         </tr>
@@ -301,6 +315,54 @@ export default function ModalExpedienteSocio({
           </div>
         </>
       )}
+
+      {/* ── Modal de detalle del daño ── */}
+      <Modal
+        open={!!danoDetalle}
+        onClose={() => setDanoDetalle(null)}
+        title="Detalle del Incidente de Daño"
+        id="modalDetalleDanoExpediente"
+      >
+        {danoDetalle && (
+          <div className={styles.detalleWrapper}>
+            {/* Libro y copia */}
+            <div className={styles.detalleGroup}>
+              <span className={styles.detalleLabel}>Libro afectado</span>
+              <p className={styles.detalleValue}>{danoDetalle.libroTitulo}</p>
+            </div>
+            <div className={styles.detalleGroup}>
+              <span className={styles.detalleLabel}>ID de copia dañada</span>
+              <p className={`${styles.detalleValue} ${styles.cellMono}`}>{danoDetalle.copiaId}</p>
+            </div>
+            <div className={styles.detalleGroup}>
+              <span className={styles.detalleLabel}>Responsable</span>
+              <p className={styles.detalleValue}>{danoDetalle.responsable}</p>
+            </div>
+            {/* Fila de metadatos */}
+            <div className={styles.detalleRow}>
+              <div className={styles.detalleGroup}>
+                <span className={styles.detalleLabel}>Fecha y Hora</span>
+                <p className={`${styles.detalleValue} ${styles.cellMono}`}>{formatFechaHora(danoDetalle.fecha)}</p>
+              </div>
+              <div className={styles.detalleGroup}>
+                <span className={styles.detalleLabel}>Severidad</span>
+                <span className={`${styles.sevBadge} ${styles['sev_' + danoDetalle.severidad]}`}>
+                  {sevLabelModal(danoDetalle.severidad)}
+                </span>
+              </div>
+              <div className={styles.detalleGroup}>
+                <span className={styles.detalleLabel}>Registrado por</span>
+                <p className={styles.detalleValue}>{danoDetalle.turnoAdmin}</p>
+              </div>
+            </div>
+            {/* Descripción completa */}
+            <div className={styles.detalleGroup}>
+              <span className={styles.detalleLabel}>Descripción completa</span>
+              <div className={styles.detalleDescBox}>{danoDetalle.descripcion}</div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </Modal>
   );
 }
