@@ -8,6 +8,7 @@ import {
   faMagnifyingGlass,
   faTrashCan,
   faTrash,
+  faFolder,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Prestamo, EstadoPrestamo } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
@@ -224,7 +225,7 @@ export default function ViewPrestamos({
                 onClick={() => { setModoBorrado((v) => !v); setSeleccionados(new Set()); }}
                 type="button"
               >
-                <FontAwesomeIcon icon={faTrashCan} /> Modo Borrado Grupal
+                <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
               </button>
 
               {modoBorrado && seleccionados.size > 0 && (

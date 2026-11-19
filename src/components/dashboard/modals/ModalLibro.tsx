@@ -22,10 +22,10 @@ interface ModalLibroProps {
   onDuplicar?: (libro: Libro) => void;
 }
 
-type FormState = Omit<NuevoLibroData, 'autores' | 'copias'> & { copias?: Copia[], autores: AutorEntry[], editorialId?: string };
+type FormState = Omit<NuevoLibroData, 'autores' | 'copias'> & { autor?: string, copias?: Copia[], autores: AutorEntry[], editorialId?: string };
 
 const empty: FormState = {
-  isbn: '', titulo: '', subtitulo: '', autor: '', categoria: '',
+  isbn: '', titulo: '', subtitulo: '', categoria: '',
   ubicacion: '', portadaUrl: '',
   edicion: '', extension: '', inventario: '', clasificacion: '',
   libristica: '', tomo: '', mencionResponsabilidad: '', colaboradores: '',
@@ -33,9 +33,9 @@ const empty: FormState = {
   lugarPublicacion: '', temas: '', terminoMateria: '',
   coleccionPersonal: '', coleccionInstitucional: '',
   notaGeneral: '', notaContenido: '',
+  autor: '',
   autores: [{ nombre: '', rol: 'principal' }],
   copias: [],
-  autor: '',  // Mantener para compatibilidad hacia atrás; se usa autores[0].nombre
 };
 
 function libroToForm(l: Libro, editoriales?: Editorial[]): FormState {
@@ -174,7 +174,7 @@ export default function ModalLibro({ open, onClose, libroEditar, libroDuplicar, 
       isbn:                   form.isbn.trim(),
       titulo:                 form.titulo.trim(),
       subtitulo:              form.subtitulo?.trim() || undefined,
-      autor:                  form.autores[0]?.nombre.trim() || form.autor.trim(),
+      autor:                  form.autores[0]?.nombre.trim() || (form.autor ?? '').trim(),
       autores:                form.autores,
       categoria:              form.categoria.trim(),
       ubicacion:              form.ubicacion.trim(),

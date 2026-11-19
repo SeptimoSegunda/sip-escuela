@@ -14,6 +14,7 @@ import {
   faUser,
   faBuilding,
   faChevronDown,
+  faFolder,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Libro, Editorial, Autor } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
@@ -344,7 +345,7 @@ export default function ViewCatalogo({
               onClick={() => setModoBorradoGrupal((v) => !v)}
               type="button"
             >
-              <FontAwesomeIcon icon={faTrashCan} /> Modo Borrado Grupal
+              <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
             </button>
 
             {modoBorradoGrupal && seleccionados.size > 0 && (

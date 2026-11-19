@@ -355,3 +355,41 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── Botón pequeño para estado de copia ── */
+.btnEstadoPequeño {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--bg-base);
+  border: 1px solid var(--beige-dark);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnEstadoPequeño:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Select inline para cambio de estado de copia ── */
+.selectInline {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--beige-dark);
+  background: var(--bg-base);
+  color: var(--text-main);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.selectInline:focus {
+  outline: none;
+  border-color: var(--accent);
+}

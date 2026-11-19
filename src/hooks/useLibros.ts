@@ -229,6 +229,14 @@ export function useLibros(
       setLibros((prev) => {
         const actualizado = prev.map((l) => {
           if (l.id !== libroId) return l;
+          const nuevaCopia = l.copias.find((c) => c.id === copiaId);
+          if (!nuevaCopia || nuevaCopia.estado === estado) return l;
+          registrarAccion(
+            'Libros',
+            'Estado de Copia Modificado',
+            `Copia ${nuevaCopia.inventarioNum} de "${l.titulo}" pasó de "${nuevaCopia.estado}" a "${estado}".`,
+            turnoAdmin
+          );
           return {
             ...l,
             copias: l.copias.map((c) =>
@@ -240,7 +248,7 @@ export function useLibros(
         return actualizado;
       });
     },
-    []
+    [registrarAccion, turnoAdmin]
   );
 
   return { libros, crearLibro, editarLibro, eliminarLibros, agregarCopia, disminuirCopia, cambiarEstadoCopia };

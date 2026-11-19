@@ -13,12 +13,12 @@ import {
   faTrashCan,
   faTrash,
   faFolderOpen,
+  faFolder,
   faChevronLeft,
   faChevronRight,
-  faCalendarDays,
   faEye,
 } from '@fortawesome/free-solid-svg-icons';
-import type { Dano, Socio, SeveridadDano } from '@/types';
+import type { Dano, Socio, SeveridadDano, Libro, EstadoCopia } from '@/types';
 import Modal from '@/components/ui/Modal';
 import MetricCard from '@/components/dashboard/ui/MetricCard';
 import Badge from '@/components/dashboard/ui/Badge';
@@ -28,9 +28,11 @@ import styles from './ViewDanos.module.css';
 interface ViewDanosProps {
   danos: Dano[];
   socios: Socio[];
+  libros?: Libro[];
   onRegistrarDano: () => void;
   onEliminar: (ids: string[]) => void;
   onVerDetalle: (socioId: string) => void;
+  onCambiarEstadoCopia?: (libroId: string, copiaId: string, estado: EstadoCopia) => void;
   onBusquedaAsistida?: () => void;
 }
 
@@ -47,60 +49,27 @@ interface AntecedentePersona {
 
 type FiltroAntecedente = 'all' | 'criticos';
 
-/* ── Período de daños ── */
-type PeriodoDano = 'all' | `${string}-${string}`;
-
-const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-const anios = (() => {
-  const year = new Date().getFullYear();
-  const years = [];
-  for (let i = 2020; i <= year; i++) years.push(i);
-  return years;
-})();
-
-function formatPeriodo(mes: number, anio: number): PeriodoDano {
-  return `${(mes + 1).toString().padStart(2, '0')}-${anio}`;
-}
-
 export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, onVerDetalle }: ViewDanosProps) {
   const [filtro, setFiltro] = useState<FiltroAntecedente>('all');
   const [busqueda, setBusqueda] = useState('');
   const [modoBorrado, setModoBorrado] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
-  const [periodoDano, setPeriodoDano] = useState<PeriodoDano>(() => {
-    const hoy = new Date();
-    return formatPeriodo(hoy.getMonth(), hoy.getFullYear());
-  });
 
   /* ── Modal de detalle del daño ── */
   const [danoSeleccionado, setDanoSeleccionado] = useState<Dano | null>(null);
   const abiertoModalDetalle = !!danoSeleccionado;
 
-  /* ── Datos filtrados por período ── */
-  const danosFiltradosPorPeriodo = useMemo(() => {
-    if (periodoDano === 'all') return danos;
-    const [mm, yyyy] = periodoDano.split('-');
-    const mes = parseInt(mm) - 1;
-    const anio = parseInt(yyyy);
-    return danos.filter((d) => {
-      const fecha = new Date(d.fecha);
-      return fecha.getMonth() === mes && fecha.getFullYear() === anio;
-    });
-  }, [danos, periodoDano]);
-
-  /* ── Métricas (filtradas por período) ── */
-  const totalDanos = danosFiltradosPorPeriodo.length;
-  const danosLeves = danosFiltradosPorPeriodo.filter((d) => d.severidad === 'leve').length;
-  const danosModerados = danosFiltradosPorPeriodo.filter((d) => d.severidad === 'moderado').length;
-  const danosCat = danosFiltradosPorPeriodo.filter((d) => d.severidad === 'catastrofico').length;
+  /* ── Datos ── */
+  const totalDanos = danos.length;
+  const danosLeves = danos.filter((d) => d.severidad === 'leve').length;
+  const danosModerados = danos.filter((d) => d.severidad === 'moderado').length;
+  const danosCat = danos.filter((d) => d.severidad === 'catastrofico').length;
 
   /* ── Antecedentes agrupados por responsable (filtrados por período) ── */
   const antecedentes = useMemo<AntecedentePersona[]>(() => {
     const map = new Map<string, AntecedentePersona>();
 
-    danosFiltradosPorPeriodo.forEach((d) => {
+    danos.forEach((d) => {
       if (!map.has(d.responsable)) {
         // Buscar si el responsable corresponde a un socio registrado
         const socioMatch = d.socioId
@@ -129,7 +98,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
     return Array.from(map.values()).sort(
       (a, b) => ordenSeveridad(b.severidadMax) - ordenSeveridad(a.severidadMax)
     );
-  }, [danosFiltradosPorPeriodo, socios]);
+  }, [danos, socios]);
 
   const personasConAntecedentes = antecedentes.length;
 
@@ -145,14 +114,14 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
 
   /* ── Filtrado vista individual (modo borrado) ── */
   const danosFiltrados = useMemo(() => {
-    let lista = danosFiltradosPorPeriodo;
+    let lista = danos;
     if (filtro === 'criticos') lista = lista.filter((d) => d.severidad === 'catastrofico');
     const q = busqueda.toLowerCase();
     if (q) lista = lista.filter((d) =>
       `${d.responsable} ${d.libroTitulo} ${d.id}`.toLowerCase().includes(q)
     );
     return lista;
-  }, [danosFiltradosPorPeriodo, filtro, busqueda]);
+  }, [danos, filtro, busqueda]);
 
   /* ── Selección grupal ── */
   const toggleSeleccion = (id: string) => {
@@ -200,23 +169,6 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
           <p className={styles.viewSubtitle}>
             Seguimiento de ejemplares deteriorados e historial de incidencias por responsable.
           </p>
-        </div>
-        <div className={styles.danoPeriodoSelector}>
-          <FontAwesomeIcon icon={faCalendarDays} />
-          <select
-            className={styles.danoPeriodoSelect}
-            value={periodoDano}
-            onChange={(e) => setPeriodoDano(e.target.value as PeriodoDano)}
-          >
-            <option value="all">Todo el historial</option>
-            {anios.flatMap((anio) =>
-              meses.map((mes, i) => (
-                <option key={`${i}-${anio}`} value={formatPeriodo(i, anio)}>
-                  {mes} {anio}
-                </option>
-              ))
-            )}
-          </select>
         </div>
         <button
           id="btnAbrirModalNuevoDano"
@@ -306,7 +258,7 @@ export default function ViewDanos({ danos, socios, onRegistrarDano, onEliminar, 
             onClick={() => { setModoBorrado((v) => !v); setSeleccionados(new Set()); }}
             type="button"
           >
-            <FontAwesomeIcon icon={faTrashCan} /> Modo Borrado Grupal
+            <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
           </button>
 
           {modoBorrado && seleccionados.size > 0 && (

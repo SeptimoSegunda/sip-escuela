@@ -215,8 +215,8 @@ export default function ModalDano({ open, onClose, libros, socios, onRegistrar }
             value={estadoPosterior}
             onChange={(e) => setEstadoPosterior(e.target.value as EstadoPosterior)}
           >
-            <option value="mantenimiento">Pasar a &quot;En Mantenimiento&quot;</option>
-            <option value="disponible">Mantener como &quot;Disponible&quot;</option>
+            <option value="disponible">Mantener Disponible (Apto para lectura)</option>
+            <option value="mantenimiento">Pasar a "En Mantenimiento" (Requiere restauración)</option>
           </select>
         </div>
 

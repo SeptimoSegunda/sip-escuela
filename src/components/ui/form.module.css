@@ -124,6 +124,14 @@
   background: linear-gradient(135deg, #b91c1c, #dc2626);
 }
 
+.btnSubmitSuccess {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.btnSubmitWarning {
+  background: linear-gradient(135deg, #ca8a04, #eab308);
+}
+
 /* ── Autocomplete ── */
 .autocompleteWrapper {
   position: relative;

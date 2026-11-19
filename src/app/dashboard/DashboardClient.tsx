@@ -117,9 +117,11 @@ export default function DashboardPage() {
           <ViewDanos
             danos={dash.danos}
             socios={dash.socios}
+            libros={dash.libros}
             onRegistrarDano={() => setModal({ type: 'nuevoDano' })}
             onEliminar={(ids) => dash.eliminarDanos(ids)}
             onVerDetalle={(socioId) => setModal({ type: 'expedienteSocio', socioId })}
+            onCambiarEstadoCopia={(libroId, copiaId, estado) => dash.cambiarEstadoCopia(libroId, copiaId, estado)}
           />
         );
       case 'viewSocios':
@@ -250,6 +252,7 @@ export default function DashboardPage() {
         socios={dash.socios}
         danos={dash.danos}
         prestamos={dash.prestamos}
+        onCambiarEstadoCopia={(libroId, copiaId, estado) => dash.cambiarEstadoCopia(libroId, copiaId, estado)}
       />
 
       {/* Modales de creación múltiple */}
