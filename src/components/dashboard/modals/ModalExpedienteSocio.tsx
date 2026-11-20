@@ -43,7 +43,7 @@ function sevLabelModal(s: SeveridadDano): string {
   switch (s) {
     case 'leve': return 'Leve';
     case 'moderado': return 'Moderado';
-    case 'catastrofico': return 'Catastrofico';
+    case 'catastrofico': return 'Catastrófico';
     default: return 'Desconocido';
   }
 }
@@ -63,7 +63,7 @@ const ESTADO_PRESTAMO_CLASS: Record<string, string> = {
 const ESTADOS_COPIA: { value: EstadoCopia; label: string }[] = [
   { value: 'disponible', label: 'Disponible' },
   { value: 'prestado',   label: 'Prestado' },
-  { value: 'dañado',     label: 'Danado' },
+  { value: 'dañado',     label: 'Dañado' },
   { value: 'perdido',    label: 'Perdido' },
 ];
 
@@ -141,7 +141,7 @@ export default function ModalExpedienteSocio({
                 <span className={styles.socioPill}>{socio.tipo.charAt(0).toUpperCase() + socio.tipo.slice(1)}</span>
                 {socio.dni && <span className={styles.socioPill}>DNI {socio.dni}</span>}
                 <span className={styles.socioPill + (esCritico ? ' ' + styles.socioPillCritico : ' ' + styles.socioPillNormal)}>
-                  {esCritico ? 'Caso Critico' : totalDanos > 0 ? 'Con Antecedentes' : 'Sin Antecendentes'}
+                  {esCritico ? 'Caso Crítico' : totalDanos > 0 ? 'Con Antecedentes' : 'Sin Antecedentes'}
                 </span>
               </div>
             </div>
@@ -151,12 +151,12 @@ export default function ModalExpedienteSocio({
             <div className={styles.statCard}>
               <FontAwesomeIcon icon={faTriangleExclamation} className={styles.statIcon} />
               <span className={styles.statNum}>{totalDanos}</span>
-              <span className={styles.statLabel}>Total Danos</span>
+              <span className={styles.statLabel}>Total Daños</span>
             </div>
             <div className={styles.statCard + ' ' + styles.statCardLeve}>
               <FontAwesomeIcon icon={faLeaf} className={styles.statIcon} />
               <span className={styles.statNum}>{leves}</span>
-              <span className={styles.statLabel}>Danos Leves</span>
+              <span className={styles.statLabel}>Daños Leves</span>
             </div>
             <div className={styles.statCard + ' ' + styles.statCardModerado}>
               <FontAwesomeIcon icon={faTriangleExclamation} className={styles.statIcon} />
@@ -166,20 +166,20 @@ export default function ModalExpedienteSocio({
             <div className={styles.statCard + ' ' + styles.statCardCatastrofico}>
               <FontAwesomeIcon icon={faSkullCrossbones} className={styles.statIcon} />
               <span className={styles.statNum}>{catastroficos}</span>
-              <span className={styles.statLabel}>CATATROFICO</span>
+              <span className={styles.statLabel}>CATASTRÓFICO</span>
             </div>
           </div>
 
           {severidadMax && (
             <div className={styles.severidadMaxRow}>
-              <span className={styles.severidadMaxLabel}>Severidad maxima registrada:</span>
+              <span className={styles.severidadMaxLabel}>Severidad máxima registrada:</span>
               <span className={styles.severidadMaxValue}>{sevLabelModal(severidadMax)}</span>
             </div>
           )}
 
           <div className={styles.historialSection}>
             <div className={styles.historialHeader}>
-              <h3 className={styles.historialTitle}><FontAwesomeIcon icon={faClockRotateLeft} /> Historial de Incidentes de Danio</h3>
+              <h3 className={styles.historialTitle}><FontAwesomeIcon icon={faClockRotateLeft} /> Historial de Incidentes de Daño</h3>
               <span className={styles.historialCount} id="expedienteTotalBadges">{totalDanos} registro{totalDanos !== 1 ? 's' : ''}</span>
             </div>
 
@@ -202,8 +202,8 @@ export default function ModalExpedienteSocio({
                     <tr>
                       <td colSpan={8} className={styles.emptyState} id="expedienteEmptyState">
                         <FontAwesomeIcon icon={faCircleCheck} className={styles.emptyIcon} />
-                        <p className={styles.emptyTitle}>Sin antecedentes de danos ni incidencias.</p>
-                        <span className={styles.emptySubtitle}>Legajo en estado optimo y sin penalizaciones activas.</span>
+                        <p className={styles.emptyTitle}>Sin antecedentes de daños ni incidencias.</p>
+                        <span className={styles.emptySubtitle}>Legajo en estado óptimo y sin penalizaciones activas.</span>
                       </td>
                     </tr>
                   ) : (

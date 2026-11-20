@@ -225,8 +225,7 @@ export default function ViewPrestamos({
                 onClick={() => { setModoBorrado((v) => !v); setSeleccionados(new Set()); }}
                 type="button"
               >
-                <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
-              </button>
+                <FontAwesomeIcon icon={faFolder} /> Borrado grupal </button>
 
               {modoBorrado && seleccionados.size > 0 && (
                 <div className={styles.groupDeleteBar} id="prestamosGroupDeleteBar">
@@ -239,8 +238,7 @@ export default function ViewPrestamos({
                     onClick={handleEliminar}
                     type="button"
                   >
-                    <FontAwesomeIcon icon={faTrash} /> Eliminar Seleccionados
-                  </button>
+                    <FontAwesomeIcon icon={faTrash} />Eliminar seleccionados</button>
                   <button
                     id="btnCancelarBorradoPrestamos"
                     className={styles.btnSecondarySmall}

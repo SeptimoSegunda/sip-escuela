@@ -235,7 +235,7 @@ export default function ViewCatalogo({
               <button
                 type="button"
                 className={styles.btnSecondarySmall}
-                style={{ width: '100%', justifyContent: 'flex-start' }}
+                style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '0.4rem' }}
                 onClick={() => { document.getElementById('dropdownMenu')!.style.display = 'none'; onNuevoLibro(); }}
               >
                 <FontAwesomeIcon icon={faBook} style={{ marginRight: '0.5rem' }} /> Libro
@@ -243,7 +243,7 @@ export default function ViewCatalogo({
               <button
                 type="button"
                 className={styles.btnSecondarySmall}
-                style={{ width: '100%', justifyContent: 'flex-start' }}
+                style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '0.4rem' }}
                 onClick={() => { document.getElementById('dropdownMenu')!.style.display = 'none'; onNuevoAutor(); }}
               >
                 <FontAwesomeIcon icon={faUser} style={{ marginRight: '0.5rem' }} /> Autor
@@ -322,7 +322,7 @@ export default function ViewCatalogo({
         <div className={styles.sectionHeader}>
           <div>
             <h2 className={styles.sectionTitle}>
-              {vistaActiva === 'libros' && 'Listado del Fondo Editorial'}
+              {vistaActiva === 'libros' && 'Listado de libros'}
               {vistaActiva === 'editoriales' && 'Editoriales Registradas'}
               {vistaActiva === 'autores' && 'Autores Registrados'}
             </h2>

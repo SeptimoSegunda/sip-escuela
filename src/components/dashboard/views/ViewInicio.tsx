@@ -58,7 +58,7 @@ function matchPeriodo(isoDate: string, periodo: string): boolean {
 }
 
 export default function ViewInicio({ libros, prestamos, danos, auditLogs }: ViewInicioProps) {
-  const [mesSeleccionado, setMesSeleccionado] = useState(9); // Septiembre como default
+ const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth() + 1); // Septiembre como default
   const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear());
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
@@ -73,6 +73,11 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
     () => auditLogs.filter((l) => matchPeriodo(l.fecha, periodo)),
     [auditLogs, periodo]
   );
+  // ✅ FIX: las incidencias (daños) ahora también se filtran por período
+  const danosPeriodo = useMemo(
+    () => danos.filter((d) => matchPeriodo(d.fecha, periodo)),
+    [danos, periodo]
+  );
 
   /* ── Métricas globales (sin filtro de período) ── */
   const librosEnEstanteria = useMemo(
@@ -80,9 +85,9 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
     [libros]
   );
   const prestamosActivos = prestamos.filter((p) => p.estado === 'prestado' || p.estado === 'moroso').length;
-  const totalIncidencias = danos.length;
 
   /* ── Métricas de período ── */
+  const totalIncidencias   = danosPeriodo.length;
   const totalPrestamosMes  = prestamosPeriodo.length;
   const prestadosPeriodo   = prestamosPeriodo.filter((p) => p.estado !== 'devuelto').length;
   const devueltosPeriodo   = prestamosPeriodo.filter((p) => p.estado === 'devuelto').length;
@@ -188,7 +193,7 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
         <MetricCard
           icon={faTriangleExclamation}
           value={totalIncidencias}
-          label="Total Incidencias"
+          label="Incidencias en Período"
           variant="terracotta"
           id="statTotalIncidencias"
         />
@@ -204,9 +209,9 @@ export default function ViewInicio({ libros, prestamos, danos, auditLogs }: View
           <DonutChart
             label="ejemplares"
             slices={[
-              { label: 'Prestados / Morosos', value: prestadosPeriodo, color: 'var(--navy)' },
-              { label: 'Devueltos',           value: devueltosPeriodo, color: 'var(--accent-salvia)' },
-              { label: 'Incidencias (daños)', value: danos.length,     color: '#e07b54' },
+              { label: 'Prestados / Morosos', value: prestadosPeriodo,    color: 'var(--navy)' },
+              { label: 'Devueltos',           value: devueltosPeriodo,    color: 'var(--accent-salvia)' },
+              { label: 'Incidencias (daños)', value: danosPeriodo.length, color: '#e07b54' },
             ]}
           />
         </ReportCard>
