@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEdit, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import type { Autor, NuevoAutorData } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
+import styles from './ModalSocio.module.css';
 
 interface ModalAutorProps {
   open: boolean;
@@ -72,12 +73,20 @@ export default function ModalAutor({ open, onClose, autorEditar, onGuardar }: Mo
 
         {/* ── Fechas de auditoría (solo lectura) ── */}
         {isEdit && autorEditar && (
-          <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: '8px' }}>
-            <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Fecha de registro: </strong>
-            <span style={{ color: 'var(--text-main)' }}>{formatFecha(autorEditar.fechaRegistro)}</span>
-            {autorEditar.fechaUltimaActualizacion && (
-              <span style={{ marginLeft: '0.5rem' }}>• Última actualización: {formatFecha(autorEditar.fechaUltimaActualizacion)}</span>
-            )}
+          <div className={styles.auditSection}>
+            <h4 className={styles.auditTitle}>
+              <FontAwesomeIcon icon={faCalendarDay} /> Fechas de Auditoría
+            </h4>
+            <div className={styles.auditItem}>
+              <label>Fecha de registro:</label>
+              <span className={styles.auditValue}>{formatFecha(autorEditar.fechaRegistro)}</span>
+            </div>
+            <div className={styles.auditItem}>
+              <label>Última actualización:</label>
+              <span className={styles.auditValue}>
+                {autorEditar.fechaUltimaActualizacion ? formatFecha(autorEditar.fechaUltimaActualizacion) : '—'}
+              </span>
+            </div>
           </div>
         )}
 

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faBuilding, faEdit, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import type { Editorial, NuevoEditorialData } from '@/types';
 import Modal from '@/components/ui/Modal';
 import f from '@/components/ui/form.module.css';
+import styles from './ModalSocio.module.css';
 
 interface ModalEditorialProps {
   open: boolean;
@@ -62,12 +63,20 @@ export default function ModalEditorial({ open, onClose, editorialEditar, onGuard
 
         {/* ── Fechas de auditoría (solo lectura) ── */}
         {isEdit && editorialEditar && (
-          <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: '8px' }}>
-            <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Fecha de registro: </strong>
-            <span style={{ color: 'var(--text-main)' }}>{formatFecha(editorialEditar.fechaRegistro)}</span>
-            {editorialEditar.fechaUltimaActualizacion && (
-              <span style={{ marginLeft: '0.5rem' }}>• Última actualización: {formatFecha(editorialEditar.fechaUltimaActualizacion)}</span>
-            )}
+          <div className={styles.auditSection}>
+            <h4 className={styles.auditTitle}>
+              <FontAwesomeIcon icon={faCalendarDay} /> Fechas de Auditoría
+            </h4>
+            <div className={styles.auditItem}>
+              <label>Fecha de registro:</label>
+              <span className={styles.auditValue}>{formatFecha(editorialEditar.fechaRegistro)}</span>
+            </div>
+            <div className={styles.auditItem}>
+              <label>Última actualización:</label>
+              <span className={styles.auditValue}>
+                {editorialEditar.fechaUltimaActualizacion ? formatFecha(editorialEditar.fechaUltimaActualizacion) : '—'}
+              </span>
+            </div>
           </div>
         )}
 

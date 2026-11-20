@@ -97,6 +97,8 @@ export default function DashboardPage() {
             onEliminar={(ids) => { dash.eliminarLibros(ids); setCatalogFilter(null); }}
             onEliminarAutor={(id) => dash.eliminarAutor(id)}
             onEliminarEditorial={(id) => dash.eliminarEditorial(id)}
+            onEditarAutor={(a) => setModal({ type: 'editarAutor', autor: a })}
+            onEditarEditorial={(e) => setModal({ type: 'editarEditorial', editorial: e })}
             onBusquedaAsistida={() => setModal({ type: 'busquedaAsistida' })}
             filtroActivo={catalogFilter !== null}
             onLimpiarFiltro={() => setCatalogFilter(null)}

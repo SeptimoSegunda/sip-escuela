@@ -9,7 +9,7 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  size?: 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   id?: string;
 }
@@ -31,6 +31,8 @@ export default function Modal({ open, onClose, title, size = 'lg', children, id 
 
   if (!open) return null;
 
+  const sizeClass = size === 'lg' ? styles.cardLg : size === 'md' ? styles.cardMd : styles.cardSm;
+
   return (
     <div
       className={styles.overlay}
@@ -40,7 +42,7 @@ export default function Modal({ open, onClose, title, size = 'lg', children, id 
       aria-labelledby={`${id}-title`}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className={`${styles.card} ${size === 'lg' ? styles.cardLg : styles.cardMd}`}>
+      <div className={`${styles.card} ${sizeClass}`}>
         <div className={styles.header}>
           <h2 id={`${id}-title`} className={styles.title}>{title}</h2>
           <button

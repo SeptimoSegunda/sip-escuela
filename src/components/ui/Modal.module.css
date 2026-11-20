@@ -36,6 +36,7 @@
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+.cardSm { max-width: 400px; }
 .cardMd { max-width: 520px; }
 .cardLg { max-width: 860px; }
 

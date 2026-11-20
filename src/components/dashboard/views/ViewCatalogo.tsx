@@ -6,7 +6,6 @@ import {
   faPlus,
   faMagnifyingGlass,
   faSearch,
-  faTrashCan,
   faTrash,
   faPen,
   faEye,
@@ -14,11 +13,12 @@ import {
   faUser,
   faBuilding,
   faChevronDown,
-  faFolder,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Libro, Editorial, Autor } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import { formatFecha } from '@/lib/utils';
+import Modal from '@/components/ui/Modal';
 import styles from './ViewCatalogo.module.css';
 
 interface ViewCatalogoProps {
@@ -33,6 +33,8 @@ interface ViewCatalogoProps {
   onEliminar: (libroIds: string[]) => void;
   onEliminarAutor: (autorId: string) => void;
   onEliminarEditorial: (editorialId: string) => void;
+  onEditarAutor?: (autor: Autor) => void;
+  onEditarEditorial?: (editorial: Editorial) => void;
   onBusquedaAsistida?: () => void;
   filtroActivo?: boolean;
   onLimpiarFiltro?: () => void;
@@ -40,6 +42,13 @@ interface ViewCatalogoProps {
 }
 
 type VistaCatalogo = 'libros' | 'editoriales' | 'autores';
+
+interface ConfirmState {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 
 function estadoDisponibilidad(libro: Libro): { label: string; variant: BadgeVariant } {
   const total = libro.copias.length;
@@ -62,6 +71,8 @@ export default function ViewCatalogo({
   onEliminar,
   onEliminarAutor,
   onEliminarEditorial,
+  onEditarAutor,
+  onEditarEditorial,
   onBusquedaAsistida,
   filtroActivo = false,
   onLimpiarFiltro,
@@ -71,6 +82,12 @@ export default function ViewCatalogo({
   const [modoBorradoGrupal, setModoBorradoGrupal] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
   const [vistaActiva, setVistaActiva] = useState<VistaCatalogo>('libros');
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   /* ── Filtrado ── */
   const librosFiltrados = useMemo(() => {
@@ -123,16 +140,39 @@ export default function ViewCatalogo({
     setSeleccionados(new Set());
   };
 
+  const handleEliminarLibro = (libroId: string) => {
+    onEliminar([libroId]);
+    handleCancelarGrupal();
+  };
+
+  const handleEliminarAutor = (autorId: string) => {
+    onEliminarAutor(autorId);
+    handleCancelarGrupal();
+  };
+
+  const handleEliminarEditorial = (editorialId: string) => {
+    onEliminarEditorial(editorialId);
+    handleCancelarGrupal();
+  };
+
   const handleEliminarGrupal = () => {
     if (seleccionados.size === 0) return;
-    if (vistaActiva === 'autores') {
-      onEliminarAutor(Array.from(seleccionados)[0]);
-    } else if (vistaActiva === 'editoriales') {
-      onEliminarEditorial(Array.from(seleccionados)[0]);
-    } else {
-      onEliminar(Array.from(seleccionados));
-    }
-    handleCancelarGrupal();
+    const ids = Array.from(seleccionados);
+    setConfirmModal({
+      open: true,
+      title: 'Confirmar Borrado Grupal',
+      message: `¿Estás seguro de que deseas eliminar permanentemente ${ids.length} registros seleccionados? Esta acción no se puede deshacer.`,
+      onConfirm: () => {
+        if (vistaActiva === 'autores') {
+          ids.forEach((id) => onEliminarAutor(id));
+        } else if (vistaActiva === 'editoriales') {
+          ids.forEach((id) => onEliminarEditorial(id));
+        } else {
+          onEliminar(ids);
+        }
+        handleCancelarGrupal();
+      },
+    });
   };
 
   const getTotalItems = () => {
@@ -225,7 +265,7 @@ export default function ViewCatalogo({
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         <button
           type="button"
-          onClick={() => setVistaActiva('libros')}
+          onClick={() => { setVistaActiva('libros'); handleCancelarGrupal(); }}
           style={{
             padding: '0.5rem 1rem',
             borderRadius: '8px',
@@ -242,7 +282,7 @@ export default function ViewCatalogo({
         </button>
         <button
           type="button"
-          onClick={() => setVistaActiva('editoriales')}
+          onClick={() => { setVistaActiva('editoriales'); handleCancelarGrupal(); }}
           style={{
             padding: '0.5rem 1rem',
             borderRadius: '8px',
@@ -259,7 +299,7 @@ export default function ViewCatalogo({
         </button>
         <button
           type="button"
-          onClick={() => setVistaActiva('autores')}
+          onClick={() => { setVistaActiva('autores'); handleCancelarGrupal(); }}
           style={{
             padding: '0.5rem 1rem',
             borderRadius: '8px',
@@ -345,7 +385,7 @@ export default function ViewCatalogo({
               onClick={() => setModoBorradoGrupal((v) => !v)}
               type="button"
             >
-              <FontAwesomeIcon icon={faFolder} /> Seleccion grupal
+              <FontAwesomeIcon icon={faTrash} /> Borrado grupal
             </button>
 
             {modoBorradoGrupal && seleccionados.size > 0 && (
@@ -450,14 +490,31 @@ export default function ViewCatalogo({
                         <td>
                           <div className={styles.actionBtns}>
                             {!readOnly && (
-                              <button
-                                className={styles.btnEdit}
-                                onClick={() => onEditar(libro)}
-                                title="Editar libro"
-                                aria-label={`Editar ${libro.titulo}`}
-                              >
-                                <FontAwesomeIcon icon={faPen} />
-                              </button>
+                              <>
+                                <button
+                                  className={styles.btnEdit}
+                                  onClick={() => onEditar(libro)}
+                                  title="Editar libro"
+                                  aria-label={`Editar ${libro.titulo}`}
+                                >
+                                  <FontAwesomeIcon icon={faPen} />
+                                </button>
+                                <button
+                                  className={styles.btnDelete}
+                                  onClick={() => {
+                                    setConfirmModal({
+                                      open: true,
+                                      title: 'Eliminar Libro',
+                                      message: `¿Estás seguro de que deseas eliminar permanentemente "${libro.titulo}"? Esta acción no se puede deshacer.`,
+                                      onConfirm: () => handleEliminarLibro(libro.id),
+                                    });
+                                  }}
+                                  title="Eliminar libro"
+                                  aria-label={`Eliminar ${libro.titulo}`}
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -476,6 +533,16 @@ export default function ViewCatalogo({
             <table className={styles.dataTable}>
               <thead>
                 <tr>
+                  {modoBorradoGrupal && (
+                    <th className={styles.thCheck}>
+                      <input
+                        type="checkbox"
+                        title="Seleccionar todos los autores"
+                        checked={getTodosSeleccionados()}
+                        onChange={(e) => toggleTodos(e.target.checked)}
+                      />
+                    </th>
+                  )}
                   <th>Nombre</th>
                   <th>Apellido</th>
                   <th>Fecha de Registro</th>
@@ -486,13 +553,23 @@ export default function ViewCatalogo({
               <tbody id="catalogTableBody">
                 {autoresFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={!readOnly ? 5 : 4} className={styles.emptyState}>
+                    <td colSpan={modoBorradoGrupal && !readOnly ? 6 : !readOnly ? 5 : 4} className={styles.emptyState}>
                       No hay autores que coincidan con la búsqueda.
                     </td>
                   </tr>
                 ) : (
                   autoresFiltrados.map((autor) => (
                     <tr key={autor.id}>
+                      {modoBorradoGrupal && (
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={seleccionados.has(autor.id)}
+                            onChange={() => toggleSeleccion(autor.id)}
+                            aria-label={`Seleccionar ${autor.nombre} ${autor.apellido}`}
+                          />
+                        </td>
+                      )}
                       <td>{autor.nombre}</td>
                       <td>{autor.apellido}</td>
                       <td className={styles.cellMono}>{formatFecha(autor.fechaRegistro)}</td>
@@ -504,11 +581,7 @@ export default function ViewCatalogo({
                           <div className={styles.actionBtns}>
                             <button
                               className={styles.btnEdit}
-                              onClick={() => {
-                                if (confirm(`¿Editar a ${autor.nombre} ${autor.apellido}?`)) {
-                                  // TODO: abrir modal de edición
-                                }
-                              }}
+                              onClick={() => onEditarAutor && onEditarAutor(autor)}
                               title="Editar autor"
                               aria-label={`Editar ${autor.nombre} ${autor.apellido}`}
                             >
@@ -517,9 +590,12 @@ export default function ViewCatalogo({
                             <button
                               className={styles.btnDelete}
                               onClick={() => {
-                                if (confirm(`¿Eliminar a ${autor.nombre} ${autor.apellido}?`)) {
-                                  onEliminarAutor(autor.id);
-                                }
+                                setConfirmModal({
+                                  open: true,
+                                  title: 'Eliminar Autor',
+                                  message: `¿Estás seguro de que deseas eliminar permanentemente al autor ${autor.nombre} ${autor.apellido}? Esta acción no se puede deshacer.`,
+                                  onConfirm: () => handleEliminarAutor(autor.id),
+                                });
                               }}
                               title="Eliminar autor"
                               aria-label={`Eliminar ${autor.nombre} ${autor.apellido}`}
@@ -543,6 +619,16 @@ export default function ViewCatalogo({
             <table className={styles.dataTable}>
               <thead>
                 <tr>
+                  {modoBorradoGrupal && (
+                    <th className={styles.thCheck}>
+                      <input
+                        type="checkbox"
+                        title="Seleccionar todas las editoriales"
+                        checked={getTodosSeleccionados()}
+                        onChange={(e) => toggleTodos(e.target.checked)}
+                      />
+                    </th>
+                  )}
                   <th>Nombre</th>
                   <th>Fecha de Registro</th>
                   {!readOnly && <th>Acciones</th>}
@@ -551,13 +637,23 @@ export default function ViewCatalogo({
               <tbody id="catalogTableBody">
                 {editorialesFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={!readOnly ? 3 : 2} className={styles.emptyState}>
+                    <td colSpan={modoBorradoGrupal && !readOnly ? 4 : !readOnly ? 3 : 2} className={styles.emptyState}>
                       No hay editoriales que coincidan con la búsqueda.
                     </td>
                   </tr>
                 ) : (
                   editorialesFiltrados.map((editorial) => (
                     <tr key={editorial.id}>
+                      {modoBorradoGrupal && (
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={seleccionados.has(editorial.id)}
+                            onChange={() => toggleSeleccion(editorial.id)}
+                            aria-label={`Seleccionar ${editorial.nombre}`}
+                          />
+                        </td>
+                      )}
                       <td>{editorial.nombre}</td>
                       <td className={styles.cellMono}>{formatFecha(editorial.fechaRegistro)}</td>
                       {!readOnly && (
@@ -565,11 +661,7 @@ export default function ViewCatalogo({
                           <div className={styles.actionBtns}>
                             <button
                               className={styles.btnEdit}
-                              onClick={() => {
-                                if (confirm(`¿Editar a ${editorial.nombre}?`)) {
-                                  // TODO: abrir modal de edición
-                                }
-                              }}
+                              onClick={() => onEditarEditorial && onEditarEditorial(editorial)}
                               title="Editar editorial"
                               aria-label={`Editar ${editorial.nombre}`}
                             >
@@ -578,9 +670,12 @@ export default function ViewCatalogo({
                             <button
                               className={styles.btnDelete}
                               onClick={() => {
-                                if (confirm(`¿Eliminar a ${editorial.nombre}?`)) {
-                                  onEliminarEditorial(editorial.id);
-                                }
+                                setConfirmModal({
+                                  open: true,
+                                  title: 'Eliminar Editorial',
+                                  message: `¿Estás seguro de que deseas eliminar permanentemente la editorial ${editorial.nombre}? Esta acción no se puede deshacer.`,
+                                  onConfirm: () => handleEliminarEditorial(editorial.id),
+                                });
                               }}
                               title="Eliminar editorial"
                               aria-label={`Eliminar ${editorial.nombre}`}
@@ -598,6 +693,55 @@ export default function ViewCatalogo({
           </div>
         )}
       </section>
+
+      {/* Modal de Confirmación */}
+      <Modal
+        open={confirmModal.open}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+        title={confirmModal.title}
+        size="md"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', padding: '0.5rem 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              background: '#fee2e2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              flexShrink: 0
+            }}>
+              <FontAwesomeIcon icon={faTriangleExclamation} />
+            </div>
+            <p style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              {confirmModal.message}
+            </p>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              className={styles.btnSecondarySmall}
+              onClick={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.btnDanger}
+              onClick={() => {
+                confirmModal.onConfirm();
+                setConfirmModal((prev) => ({ ...prev, open: false }));
+              }}
+            >
+              <FontAwesomeIcon icon={faTrash} style={{ marginRight: '0.4rem' }} /> Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
