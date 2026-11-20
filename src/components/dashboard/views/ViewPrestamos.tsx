@@ -9,10 +9,12 @@ import {
   faTrashCan,
   faTrash,
   faFolder,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Prestamo, EstadoPrestamo } from '@/types';
 import Badge, { type BadgeVariant } from '@/components/dashboard/ui/Badge';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
+import Modal from '@/components/ui/Modal';
 import { formatFecha } from '@/lib/utils';
 import styles from './ViewPrestamos.module.css';
 
@@ -48,6 +50,13 @@ const FILTROS: { value: FiltroEstado; label: string }[] = [
   { value: 'devuelto', label: 'Devueltos' },
 ];
 
+interface ConfirmState {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
+
 export default function ViewPrestamos({
   prestamos,
   onNuevoPrestamo,
@@ -58,6 +67,12 @@ export default function ViewPrestamos({
   const [busqueda, setBusqueda] = useState('');
   const [modoBorrado, setModoBorrado] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   /* ── Filtrado ── */
   const prestamosFiltrados = useMemo(() => {
@@ -93,8 +108,16 @@ export default function ViewPrestamos({
 
   const handleEliminar = () => {
     if (seleccionados.size === 0) return;
-    onEliminar(Array.from(seleccionados));
-    handleCancelar();
+    const cantidad = seleccionados.size;
+    setConfirmModal({
+      open: true,
+      title: 'Confirmar Borrado de Préstamos',
+      message: `¿Estás seguro de que deseas eliminar permanentemente ${cantidad} registro${cantidad !== 1 ? 's' : ''} de préstamo${cantidad !== 1 ? 's' : ''}? Esta acción no se puede deshacer.`,
+      onConfirm: () => {
+        onEliminar(Array.from(seleccionados));
+        handleCancelar();
+      },
+    });
   };
 
   const todosSeleccionados =
@@ -253,6 +276,55 @@ export default function ViewPrestamos({
           </div>
         }
       />
+
+      {/* Modal de Confirmación */}
+      <Modal
+        open={confirmModal.open}
+        onClose={() => setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }))}
+        title={confirmModal.title}
+        size="md"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', padding: '0.5rem 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              background: '#fee2e2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              flexShrink: 0
+            }}>
+              <FontAwesomeIcon icon={faTriangleExclamation} />
+            </div>
+            <p style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              {confirmModal.message}
+            </p>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              className={styles.btnSecondarySmall}
+              onClick={() => setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }))}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.btnDanger}
+              onClick={() => {
+                confirmModal.onConfirm();
+                setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }));
+              }}
+            >
+              <FontAwesomeIcon icon={faTrash} style={{ marginRight: '0.4rem' }} /> Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

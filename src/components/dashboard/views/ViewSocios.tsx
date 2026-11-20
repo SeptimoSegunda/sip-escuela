@@ -6,13 +6,22 @@ import {
   faUserPlus,
   faPen,
   faTrash,
+  faTriangleExclamation,
   faFolderOpen,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Socio, Prestamo } from '@/types';
 import DataTable, { type Column } from '@/components/dashboard/ui/DataTable';
 import Badge from '@/components/dashboard/ui/Badge';
+import Modal from '@/components/ui/Modal';
 import { estadoSocioToBadge, estadoSocioLabel } from '@/lib/utils';
 import styles from './ViewSocios.module.css';
+
+interface ConfirmState {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 
 interface ViewSociosProps {
   socios: Socio[];
@@ -32,6 +41,12 @@ export default function ViewSocios({
   onVerDetalle,
 }: ViewSociosProps) {
   const [busqueda, setBusqueda] = useState('');
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   /* ── Mapa socioId → préstamos activos (calculado desde préstamos reales) ── */
   const prestamosActivosPorSocio = useMemo(() => {
@@ -132,7 +147,14 @@ export default function ViewSocios({
           <button
             className={styles.btnDelete}
             title="Eliminar socio"
-            onClick={() => onEliminar(row.id)}
+            onClick={() => {
+              setConfirmModal({
+                open: true,
+                title: 'Eliminar Socio',
+                message: `¿Estás seguro de que deseas eliminar permanentemente a ${row.apellido}, ${row.nombre}? Esta acción no se puede deshacer.`,
+                onConfirm: () => onEliminar(row.id),
+              });
+            }}
             aria-label={`Eliminar ${row.apellido}`}
           >
             <FontAwesomeIcon icon={faTrash} />
@@ -186,6 +208,55 @@ export default function ViewSocios({
           </div>
         }
       />
+
+      {/* Modal de Confirmación */}
+      <Modal
+        open={confirmModal.open}
+        onClose={() => setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }))}
+        title={confirmModal.title}
+        size="md"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', padding: '0.5rem 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              background: '#fee2e2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              flexShrink: 0
+            }}>
+              <FontAwesomeIcon icon={faTriangleExclamation} />
+            </div>
+            <p style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              {confirmModal.message}
+            </p>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              className={styles.btnSecondarySmall}
+              onClick={() => setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }))}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.btnDanger}
+              onClick={() => {
+                confirmModal.onConfirm();
+                setConfirmModal((prev: ConfirmState) => ({ ...prev, open: false }));
+              }}
+            >
+              <FontAwesomeIcon icon={faTrash} style={{ marginRight: '0.4rem' }} /> Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

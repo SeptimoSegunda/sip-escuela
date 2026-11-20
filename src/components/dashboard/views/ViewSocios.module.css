@@ -147,3 +147,46 @@
 .btnDelete:hover {
   background-color: #fee2e2;
 }
+
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.85rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.btnDanger:hover {
+  background: #b91c1c;
+}
+
+.btnSecondarySmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--bg-base);
+  color: var(--accent-brown);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 20px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btnSecondarySmall:hover {
+  background: var(--beige-anchor);
+  border-color: var(--accent-brown);
+  color: var(--accent-brown);
+}
